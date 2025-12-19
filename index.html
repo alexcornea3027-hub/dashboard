@@ -1,157 +1,95 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Stock Team VCB — Dashboard</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-<style>
-body{margin:0;font-family:Poppins,system-ui;background:#0b1020;color:#eaf6ff}
-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
-h1{margin:0;font-size:20px}
-small{color:#9aa4b2}
-main{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:16px}
-.panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px}
-ul{list-style:none;padding:0;margin:0}
-li{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.done{color:#7dd3fc}
-.todo{color:#ff7a7a}
-canvas{width:100%!important;height:260px!important}
-button{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:700}
-</style>
+  <meta charset="UTF-8" />
+  <title>VCB Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; background:#0f172a; color:#e5e7eb; margin:0; padding:20px }
+    h1,h2 { margin-top:30px }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px }
+    .card { background:#111827; padding:12px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.4) }
+    .done { color:#22c55e }
+    .todo { color:#ef4444 }
+    table { width:100%; border-collapse:collapse; font-size:13px }
+    th,td { border-bottom:1px solid #1f2933; padding:6px; text-align:left }
+    th { color:#93c5fd }
+  </style>
 </head>
-
 <body>
 
-<header>
-  <h1>Stock Team VCB</h1>
-  <small id="meta">loading…</small>
-</header>
+<h1>📊 Stock Team VCB Dashboard</h1>
 
-<main>
-  <div class="panel">
-    <h3>Daily Tasks</h3>
-    <ul id="dailyList"></ul>
-  </div>
+<h2>🗓 Daily Tasks</h2>
+<div id="daily" class="grid"></div>
 
-  <div class="panel">
-    <h3>Weekly Tasks</h3>
-    <ul id="weeklyList"></ul>
-  </div>
+<h2>📆 Weekly Tasks</h2>
+<div id="weekly" class="grid"></div>
 
-  <div class="panel">
-    <h3>Progress</h3>
-    <canvas id="dailyChart"></canvas>
-    <canvas id="weeklyChart"></canvas>
-  </div>
-</main>
-
-<div style="padding:16px">
-  <button onclick="refresh()">Refresh</button>
+<h2>📦 PI – Daily by Area</h2>
+<div class="card">
+  <table id="piTable">
+    <thead>
+      <tr>
+        <th>Area</th>
+        <th>Total</th>
+        <th>Counted</th>
+        <th>Behind %</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <script>
-let dailyChart, weeklyChart;
+fetch('./data/dashboard.json?_=' + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    renderDaily(data.dailyTask || [])
+    renderWeekly(data.weeklyTask || [])
+    renderPI(data.piData || [])
+  })
+  .catch(err => {
+    document.body.innerHTML += '<pre style="color:red">' + err + '</pre>'
+  })
 
-function refresh(){
-  fetch('./data/dashboard.json?_=' + Date.now())
-    .then(r => {
-      if(!r.ok) throw new Error('fetch failed');
-      return r.json();
-    })
-    .then(data => render(data))
-    .catch(err => {
-      console.warn('Using demo data', err);
-      render(demoData);
-    });
+function renderDaily(list) {
+  const el = document.getElementById('daily')
+  list.forEach(t => {
+    const done = String(t.Status).toLowerCase() === 'completed'
+    el.innerHTML += `
+      <div class="card">
+        <b>${t["Task "]}</b><br>
+        <span class="${done ? 'done':'todo'}">${t.Status}</span>
+      </div>`
+  })
 }
 
-function render(data){
-  document.getElementById('meta').innerText =
-    'Updated: ' + (data.meta?.today || '');
-
-  fillList('dailyList', data.daily?.list || []);
-  fillList('weeklyList', data.weekly?.list || []);
-
-  drawCharts(data);
+function renderWeekly(list) {
+  const el = document.getElementById('weekly')
+  list.forEach(t => {
+    const done = String(t.Status).toLowerCase() === 'completed'
+    el.innerHTML += `
+      <div class="card">
+        <b>${t.Task}</b><br>
+        <span class="${done ? 'done':'todo'}">${t.Status}</span>
+      </div>`
+  })
 }
 
-function fillList(id, items){
-  const el = document.getElementById(id);
-  el.innerHTML = '';
-  items.forEach(t => {
-    const li = document.createElement('li');
-    li.className = t.done ? 'done' : 'todo';
-    li.innerText = (t.done ? '✔ ' : '⏳ ') + t.task;
-    el.appendChild(li);
-  });
+function renderPI(list) {
+  const tb = document.querySelector('#piTable tbody')
+  list.forEach(r => {
+    if (r["Area "] === 'Total:') return
+    tb.innerHTML += `
+      <tr>
+        <td>${r["Area "]}</td>
+        <td>${r["Total locations"]}</td>
+        <td>${r["Counted "]}</td>
+        <td>${(Number(r["Behind %"]) * 100).toFixed(2)}%</td>
+      </tr>`
+  })
 }
-
-function drawCharts(data){
-  if(dailyChart) dailyChart.destroy();
-  if(weeklyChart) weeklyChart.destroy();
-
-  dailyChart = new Chart(
-    document.getElementById('dailyChart'),
-    {
-      type:'doughnut',
-      data:{
-        labels:['Done','Remaining'],
-        datasets:[{
-          data:[
-            data.daily.done,
-            data.daily.scheduled - data.daily.done
-          ],
-          backgroundColor:['#7dd3fc','#1e293b']
-        }]
-      },
-      options:{plugins:{legend:{display:false}}}
-    }
-  );
-
-  weeklyChart = new Chart(
-    document.getElementById('weeklyChart'),
-    {
-      type:'doughnut',
-      data:{
-        labels:['Done','Remaining'],
-        datasets:[{
-          data:[
-            data.weekly.done,
-            data.weekly.scheduled - data.weekly.done
-          ],
-          backgroundColor:['#8b5cf6','#1e293b']
-        }]
-      },
-      options:{plugins:{legend:{display:false}}}
-    }
-  );
-}
-
-const demoData = {
-  daily:{
-    scheduled:5,
-    done:2,
-    list:[
-      {task:'Daily report',done:true},
-      {task:'Inventory check',done:false}
-    ]
-  },
-  weekly:{
-    scheduled:10,
-    done:4,
-    list:[
-      {task:'Weekly SLA',done:true},
-      {task:'Shrinkage review',done:false}
-    ]
-  },
-  meta:{today:new Date().toLocaleDateString()}
-};
-
-refresh();
 </script>
 
 </body>
