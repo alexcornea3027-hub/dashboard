@@ -31,7 +31,7 @@
   table{width:100%;border-collapse:collapse;color:#eaf6ff;font-size:13px}
   thead th{position:sticky;top:0;background:rgba(10,14,24,0.35);padding:8px;color:var(--muted);font-weight:700;text-align:left}
   td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}
-  #debug{margin-top:8px;background:#071427;color:#fff;padding:8px;border-radius:8px;font-size:13px;max-height:140px;overflow:auto}
+  #debug{margin-top:8px;background:#071427;color:#fff;padding:8px;border-radius:8px;font-size:13px;max-height:160px;overflow:auto}
   .small{font-size:12px;color:var(--muted)}
   .controls-row { display:flex; gap:8px; align-items:center; margin-top:8px; }
   body,html{overflow:hidden}
@@ -81,7 +81,7 @@
       <button id="showHistoryBtn">Show history (debug)</button>
     </div>
 
-    <div style="margin-top:12px" class="small">Notes: target saved to localStorage; history kept locally until reset.</div>
+    <div style="margin-top:12px" class="small">Notes: target saved locally; daily deltas stored locally and rolled into weekly accumulations.</div>
   </div>
 
   <!-- CENTER: charts -->
@@ -135,10 +135,13 @@
 <div id="debug" aria-live="polite"></div>
 
 <script>
-/* ---------- utilities ---------- */
+/* ---------- small helpers ---------- */
 function dbg(msg){
   const el = document.getElementById('debug');
-  const d = document.createElement('div'); d.textContent = msg; el.appendChild(d); el.scrollTop = el.scrollHeight;
+  const d = document.createElement('div');
+  d.textContent = msg;
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
   console.log(msg);
 }
 function safeNum(v){
@@ -168,7 +171,7 @@ function escapeHtml(s){ return String(s || '').replace(/&/g,'&amp;').replace(/</
 function formatNumber(n){ n = Number(n) || 0; if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1)+'M'; if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1)+'K'; return n.toLocaleString(); }
 function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
 
-/* ---------- Chart small plugins for 3D look ---------- */
+/* ---------- chart plugins (3D-like) ---------- */
 const donut3D = {
   id: 'donut3D',
   beforeDraw(chart, args, options){
@@ -224,33 +227,29 @@ const centerText = {
 };
 Chart.register(donut3D, centerText);
 
-/* ---------- state + storage keys ---------- */
-let payload = null;
-const STORAGE_KEYS = {
-  LAST_CUM: 'vcb_last_cumulative',        // area -> last cumulative number
-  DAILY_HISTORY: 'vcb_daily_history',     // date -> { area:delta }
-  WEEK_ACC_PREFIX: 'vcb_week_acc_',       // plus iso-week string appended
-  TARGET: 'vcb_target'                    // numeric target
+/* ---------- storage keys ---------- */
+const STORAGE = {
+  LAST_CUM: 'vcb_last_cumulative',
+  DAILY_HISTORY: 'vcb_daily_history',
+  WEEK_ACC_PREFIX: 'vcb_week_acc_',
+  TARGET: 'vcb_target'
 };
 
-/* ---------- default target ---------- */
-function getSavedTarget(){ const s = localStorage.getItem(STORAGE_KEYS.TARGET); const n = safeNum(s); return n > 0 ? n : 1193; }
-function saveTarget(v){ localStorage.setItem(STORAGE_KEYS.TARGET, String(Number(v))); }
+function getSavedTarget(){ const s = localStorage.getItem(STORAGE.TARGET); const n = safeNum(s); return n > 0 ? n : 1193; }
+function saveTarget(v){ localStorage.setItem(STORAGE.TARGET, String(Number(v))); }
 
-/* ---------- iso week helper ---------- */
+/* ---------- date helpers ---------- */
+function todayISO(){ return new Date().toISOString().slice(0,10); }
 function getISOWeekKey(dateObj){
-  // returns YYYY-Www (e.g., 2025-W03)
   const date = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
-  // Thursday in current week decides the year
   date.setHours(0,0,0,0);
   date.setDate(date.getDate() + 4 - (date.getDay()||7));
   const yearStart = new Date(date.getFullYear(),0,1);
   const weekNo = Math.floor(((date - yearStart) / 86400000 + 1)/7) + 1;
   return date.getFullYear() + '-W' + String(weekNo).padStart(2,'0');
 }
-function todayISO(){ const d = new Date(); return d.toISOString().slice(0,10); }
 
-/* ---------- robust fetch attempts ---------- */
+/* ---------- robust fetch ---------- */
 const tryUrls = ['./data/dashboard.json','/data/dashboard.json','data/dashboard.json','./dashboard.json','/dashboard.json'];
 const FETCH_TIMEOUT = 6000;
 async function fetchJsonWithTimeout(url, timeout){
@@ -280,7 +279,7 @@ async function tryLoadJson(){
   return null;
 }
 
-/* ---------- DOM wiring ---------- */
+/* ---------- UI wiring ---------- */
 document.getElementById('refreshBtn').addEventListener('click', loadAndRender);
 document.getElementById('uploadBtn').addEventListener('click', onUpload);
 document.getElementById('pasteBtn').addEventListener('click', onPaste);
@@ -289,37 +288,37 @@ document.getElementById('exportPng').addEventListener('click', exportPNGs);
 document.getElementById('saveTargetBtn').addEventListener('click', ()=>{
   const v = Number(document.getElementById('targetInput').value || '');
   if (!isFinite(v) || v <= 0){ alert('Enter a valid positive number'); return; }
-  saveTarget(v); dbg('Target saved: ' + v); renderAll();
+  saveTarget(v);
+  dbg('Target saved: ' + v);
+  renderAll();
 });
 document.getElementById('resetWeekBtn').addEventListener('click', ()=>{
-  // clear weekly accum for current week key and daily history for today (optionally)
   const wkKey = getISOWeekKey(new Date());
-  localStorage.removeItem(STORAGE_KEYS.WEEK_ACC_PREFIX + wkKey);
-  // also clear daily history and last cumulative to start fresh
-  localStorage.removeItem(STORAGE_KEYS.DAILY_HISTORY);
-  localStorage.removeItem(STORAGE_KEYS.LAST_CUM);
+  localStorage.removeItem(STORAGE.WEEK_ACC_PREFIX + wkKey);
+  localStorage.removeItem(STORAGE.DAILY_HISTORY);
+  localStorage.removeItem(STORAGE.LAST_CUM);
   dbg('Week progress reset for ' + wkKey + ' and daily history/last cumulative cleared.');
   loadAndRender();
 });
 document.getElementById('showHistoryBtn').addEventListener('click', ()=>{
-  dbg('LAST_CUM: ' + localStorage.getItem(STORAGE_KEYS.LAST_CUM));
-  dbg('DAILY_HISTORY: ' + localStorage.getItem(STORAGE_KEYS.DAILY_HISTORY));
-  const wk = getISOWeekKey(new Date()); dbg('WEEK_ACC ('+wk+'): ' + localStorage.getItem(STORAGE_KEYS.WEEK_ACC_PREFIX + wk));
+  dbg('LAST_CUM: ' + localStorage.getItem(STORAGE.LAST_CUM));
+  dbg('DAILY_HISTORY: ' + localStorage.getItem(STORAGE.DAILY_HISTORY));
+  const wk = getISOWeekKey(new Date()); dbg('WEEK_ACC ('+wk+'): ' + localStorage.getItem(STORAGE.WEEK_ACC_PREFIX + wk));
 });
 
-/* ---------- main load & render ---------- */
+/* ---------- main ---------- */
+let payload = null;
+let charts = { piBar:null, weeklyLine:null, dailyDonut:null, weeklyDonut:null, gaugeMini:null };
+
 async function loadAndRender(){
   dbg('Loading JSON...');
   const j = await tryLoadJson();
   if (!j){ dbg('Using demo fallback'); payload = demoPayload(); }
   else payload = j;
   document.getElementById('liveDate').innerText = (payload.meta && payload.meta.today) ? payload.meta.today : new Date().toLocaleDateString();
-  // set target input
   document.getElementById('targetInput').value = String(getSavedTarget());
   renderAll();
 }
-
-/* ---------- demo ---------- */
 function demoPayload(){
   return {
     piData:[
@@ -334,17 +333,15 @@ function demoPayload(){
   };
 }
 
-/* ---------- storage helpers for cumulative/deltas/weekly accumulate ---------- */
-function loadLastCumulative(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEYS.LAST_CUM) || '{}'); }catch(e){ return {}; } }
-function saveLastCumulative(obj){ localStorage.setItem(STORAGE_KEYS.LAST_CUM, JSON.stringify(obj)); }
-function loadDailyHistory(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEYS.DAILY_HISTORY) || '{}'); }catch(e){ return {}; } }
-function saveDailyHistory(obj){ localStorage.setItem(STORAGE_KEYS.DAILY_HISTORY, JSON.stringify(obj)); }
-function loadWeekAcc(weekKey){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEYS.WEEK_ACC_PREFIX + weekKey) || '{}'); }catch(e){ return {}; } }
-function saveWeekAcc(weekKey, obj){ localStorage.setItem(STORAGE_KEYS.WEEK_ACC_PREFIX + weekKey, JSON.stringify(obj)); }
+/* ---------- storage helpers ---------- */
+function loadLastCumulative(){ try{ return JSON.parse(localStorage.getItem(STORAGE.LAST_CUM) || '{}'); }catch(e){ return {}; } }
+function saveLastCumulative(obj){ localStorage.setItem(STORAGE.LAST_CUM, JSON.stringify(obj)); }
+function loadDailyHistory(){ try{ return JSON.parse(localStorage.getItem(STORAGE.DAILY_HISTORY) || '{}'); }catch(e){ return {}; } }
+function saveDailyHistory(obj){ localStorage.setItem(STORAGE.DAILY_HISTORY, JSON.stringify(obj)); }
+function loadWeekAcc(weekKey){ try{ return JSON.parse(localStorage.getItem(STORAGE.WEEK_ACC_PREFIX + weekKey) || '{}'); }catch(e){ return {}; } }
+function saveWeekAcc(weekKey, obj){ localStorage.setItem(STORAGE.WEEK_ACC_PREFIX + weekKey, JSON.stringify(obj)); }
 
 /* ---------- render pipeline ---------- */
-let charts = { piBar:null, weeklyLine:null, dailyDonut:null, weeklyDonut:null, gaugeMini:null };
-
 function renderAll(){
   renderTasks(payload.dailyTask || [], 'dailyList');
   renderTasks(payload.weeklyTask || [], 'weeklyList');
@@ -364,7 +361,9 @@ function renderTasks(list, containerId){
     const sb = String(b.Status || b['Status '] || '').toLowerCase();
     const da = sa.includes('complete') || sa.includes('done');
     const db = sb.includes('complete') || sb.includes('done');
-    if (da && !db) return 1; if (db && !da) return -1; return 0;
+    if (da && !db) return 1;
+    if (db && !da) return -1;
+    return 0;
   });
   for (const t of list){
     const nameKey = findKey(t, ['Task ','Task','task']);
@@ -377,10 +376,8 @@ function renderTasks(list, containerId){
   }
 }
 
-/* ---------- process PI cumulative -> todays delta + persist/weekly accumulate ---------- */
+/* ---------- process PI: compute deltas and persist ---------- */
 function processPIAndRender(piList){
-  // piList contains cumulative values (problem: present JSON contains cumulative for entire year)
-  // We'll compute today's delta comparing with last saved cumulative per area stored in localStorage.
   const lastCum = loadLastCumulative();
   const dailyHistory = loadDailyHistory();
   const today = todayISO();
@@ -388,46 +385,38 @@ function processPIAndRender(piList){
   const weekAcc = loadWeekAcc(weekKey);
   const target = getSavedTarget();
 
-  // determine keys
   const sample = Array.isArray(piList) && piList.length ? piList[0] : {};
   const areaK = findKey(sample, ['Area','Area ']);
   const totalK = findKey(sample, ['Total locations','Total locations ','Total']);
   const countedK = findKey(sample, ['Counted','Counted ']);
-  const rows = Array.isArray(piList) ? piList.slice() : [];
 
-  // compute per-area deltas
+  const rows = Array.isArray(piList) ? piList.slice() : [];
   const data = [];
+
   for (const r of rows){
     const area = String(r[areaK] || r['Area'] || r['Area '] || '').trim();
     if (!area) continue;
-    if (/total/i.test(area)) continue; // skip total row
-    const cum = safeNum(r[countedK] || r['Counted '] || 0); // cumulative value from feed
+    if (/total/i.test(area)) continue;
+    const cum = safeNum(r[countedK] || r['Counted '] || 0);
     const prev = safeNum(lastCum[area] || 0);
     let delta = cum - prev;
-    // if prev is 0 and cum large, we still accept it as first measurement (delta=cum)
     if (prev === 0 && cum > 0 && !lastCum.hasOwnProperty(area)) delta = cum;
-    // negative delta => probably reset or different cycle: treat delta = cum (start fresh)
     if (delta < 0) delta = cum;
     data.push({ area, total: safeNum(r[totalK] || r['Total locations'] || 0), cum, delta: Math.round(delta) });
   }
 
-  // Prevent double-counting multiple loads in same day:
   const todaysEntry = dailyHistory[today] || {};
   let addedToday = false;
   for (const d of data){
     if (!todaysEntry.hasOwnProperty(d.area)){
-      // add delta to today's history and to week accum
       todaysEntry[d.area] = d.delta;
       weekAcc[d.area] = safeNum(weekAcc[d.area] || 0) + d.delta;
       addedToday = true;
     } else {
-      // already recorded today — use recorded value instead of computed delta (avoid double)
       d.delta = safeNum(todaysEntry[d.area] || 0);
     }
-    // update last cumulative to current cumulative for next run (persist)
     lastCum[d.area] = d.cum;
   }
-  // save if we added today's values
   if (addedToday){
     dailyHistory[today] = todaysEntry;
     saveDailyHistory(dailyHistory);
@@ -435,11 +424,9 @@ function processPIAndRender(piList){
     saveLastCumulative(lastCum);
     dbg('Saved daily deltas for ' + today + ' and updated weekly accum (' + weekKey + ')');
   } else {
-    // still update last cumulative in case there are new areas
     saveLastCumulative(lastCum);
   }
 
-  // render table
   const tbody = document.querySelector('#piTable tbody'); tbody.innerHTML = '';
   for (const d of data){
     const remaining = Math.max(0, target - d.delta);
@@ -452,18 +439,15 @@ function processPIAndRender(piList){
     );
   }
 
-  // summary + bar chart (top areas by total locations)
   const totalSum = data.reduce((s,d)=>s+d.total,0);
   const countedSum = data.reduce((s,d)=>s+d.delta,0);
   document.getElementById('countHint').innerText = 'Total locations: ' + formatNumber(totalSum) + ' • Counted today: ' + formatNumber(countedSum) + ' • Target: ' + formatNumber(target);
 
-  // prepare bar: countedToday and remaining (per area, remaining=target-delta but not less than 0)
   const sorted = data.sort((a,b)=>b.total - a.total).slice(0,12);
   const labels = sorted.map(d => d.area);
   const countedArr = sorted.map(d => d.delta);
   const remainingArr = sorted.map(d => Math.max(0, target - d.delta));
 
-  // scale mode
   const mode = document.getElementById('scaleMode').value || 'auto';
   let displayCounted = countedArr.slice();
   let displayRemaining = remainingArr.slice();
@@ -476,7 +460,6 @@ function processPIAndRender(piList){
     displayRemaining = displayRemaining.map(v => Number((v*factor).toFixed(3)));
   }
 
-  // draw bar chart
   try{ if (charts.piBar) charts.piBar.destroy(); } catch(e){ charts.piBar = null; }
   const ctx = document.getElementById('piBar').getContext('2d');
   charts.piBar = new Chart(ctx, {
@@ -487,10 +470,9 @@ function processPIAndRender(piList){
     ]},
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{ x:{ticks:{color:'#cfeeff'}}, y:{ticks:{color:'#cfeeff',callback:v=>formatNumber(v)}} }
   });
-
 }
 
-/* ---------- weekly PI render ---------- */
+/* ---------- weekly PI ---------- */
 function renderWeeklyPI(list){
   const tbody = document.querySelector('#weeklyPiTable tbody'); tbody.innerHTML = '';
   if (!Array.isArray(list) || list.length === 0){ tbody.innerHTML = '<tr><td colspan="5">No weekly PI data</td></tr>'; if (charts.weeklyLine){ charts.weeklyLine.destroy(); charts.weeklyLine=null; } document.getElementById('weekHint').innerText='—'; return; }
@@ -537,19 +519,18 @@ function renderTaskDonuts(payload){
 /* ---------- gauge ---------- */
 function computeAndRenderGauge(payload){
   const target = getSavedTarget();
-  const piData = Array.isArray(payload.piData) ? payload.piData : [];
-  const countedTodayTotal = Object.values(loadDailyHistory()[todayISO()] || {}).reduce((s,v)=>s + safeNum(v), 0);
+  const dailyHistory = loadDailyHistory();
+  const countedTodayTotal = Object.values(dailyHistory[todayISO()] || {}).reduce((s,v)=>s + safeNum(v), 0);
   const progress = target ? clamp(countedTodayTotal / target, 0, 1) : 0;
   document.getElementById('gaugeCenterText').innerText = (progress*100).toFixed(2) + '% • ' + formatNumber(countedTodayTotal) + '/' + formatNumber(target);
   document.getElementById('gaugeBreakdown').innerText = 'Daily target: ' + formatNumber(target) + ' (saved)';
-  // mini gauge chart
   let mini = document.querySelector('#gaugeMini canvas');
   if (!mini){ mini = document.createElement('canvas'); mini.width = 260; mini.height = 120; document.getElementById('gaugeMini').appendChild(mini); }
   try{ if (charts.gaugeMini) charts.gaugeMini.destroy(); } catch(e){ charts.gaugeMini = null; }
   charts.gaugeMini = new Chart(mini.getContext('2d'), { type:'doughnut', data:{ labels:['progress','rest'], datasets:[{ data:[progress, Math.max(0,1-progress)], backgroundColor:['rgba(125,211,252,0.98)','rgba(255,255,255,0.06)'] }]}, options:{ responsive:false, maintainAspectRatio:false, cutout:'70%', rotation:-90*Math.PI/180, circumference:180*Math.PI/180, plugins:{legend:{display:false}, donut3D:{depth:10}} } });
 }
 
-/* ---------- gradients, shade ---------- */
+/* ---------- gradients + shade ---------- */
 function createGradient(ctx, c1, c2){ const g = ctx.createLinearGradient(0,0,0,ctx.canvas.height || 400); g.addColorStop(0,c1); g.addColorStop(1,c2); return g; }
 function shadeColor(css, percent){
   try {
@@ -558,16 +539,12 @@ function shadeColor(css, percent){
       const r = Math.round(nums[0]*(1+percent)); const g = Math.round(nums[1]*(1+percent)); const b = Math.round(nums[2]*(1+percent));
       const a = nums.length>3?nums[3]:1; return 'rgba(' + clamp(r,0,255) + ',' + clamp(g,0,255) + ',' + clamp(b,0,255) + ',' + a + ')';
     }
-    if (css[0] === '#'){
-      let c = css.substring(1); if (c.length===3){ let tmp=''; for (let i=0;i<c.length;i++) tmp += c[i]+c[i]; c=tmp; }
-      const num = parseInt(c,16); const rr = (num>>16)+Math.round(255*percent); const gg = ((num>>8)&0x00FF)+Math.round(255*percent); const bb=(num & 0x0000FF)+Math.round(255*percent);
-      return 'rgba(' + clamp(rr,0,255) + ',' + clamp(gg,0,255) + ',' + clamp(bb,0,255) + ',1)';
-    }
+    if (css[0] === '#'){ let c = css.substring(1); if (c.length===3){ let tmp=''; for (let i=0;i<c.length;i++) tmp += c[i]+c[i]; c=tmp; } const num = parseInt(c,16); const rr = (num>>16)+Math.round(255*percent); const gg = ((num>>8)&0x00FF)+Math.round(255*percent); const bb=(num & 0x0000FF)+Math.round(255*percent); return 'rgba(' + clamp(rr,0,255) + ',' + clamp(gg,0,255) + ',' + clamp(bb,0,255) + ',1)'; }
   } catch(e){}
   return css;
 }
 
-/* ---------- CSV / PNG export ---------- */
+/* ---------- CSV/PNG export ---------- */
 function downloadCsv(){
   const rows=[['Area','Total','CountedToday','Target','Remaining']];
   document.querySelectorAll('#piTable tbody tr').forEach(tr=>{
