@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Stock Team VCB</title>
+<title>Stock Team VCB — Updated</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -13,6 +13,10 @@
     --muted:#98a8bd;
     --accentA:#7dd3fc;
     --accentB:#8b5cf6;
+    --green:#12b76a;
+    --orange:#f97316;
+    --red:#ef4444;
+    --glass: rgba(255,255,255,0.02);
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial;background:linear-gradient(180deg,#021026,#05122a);color:#eaf6ff}
@@ -24,13 +28,18 @@
   .layout{display:grid;grid-template-columns:320px 1fr 420px;gap:12px;height:calc(100vh - 72px);padding:12px}
   .panel{background:var(--panel);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 18px 40px rgba(2,6,23,0.45);display:flex;flex-direction:column;min-height:0;overflow:hidden}
   .taskList{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:6px}
-  .taskCard{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(0,0,0,0.05));border:1px solid rgba(255,255,255,0.02)}
-  .badge{padding:6px 12px;border-radius:999px;color:#fff;font-weight:800}
-  .done{background:linear-gradient(90deg,#12b76a,#065f46)}
-  .todo{background:linear-gradient(90deg,#f97316,#b91c1c)}
+  .taskCard{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.04));border:1px solid rgba(255,255,255,0.02)}
+  .taskInfo{max-width:70%}
+  .taskTitle{font-weight:700;font-size:13px;margin-bottom:4px}
+  .taskMeta{font-size:12px;color:var(--muted)}
+  .badge{padding:6px 12px;border-radius:999px;color:#fff;font-weight:700;display:inline-flex;align-items:center;gap:8px}
+  .badge svg{width:14px;height:14px}
+  .done{background:linear-gradient(90deg,var(--green),#065f46)}
+  .inprogress{background:linear-gradient(90deg,#f59e0b,#b45309)}
+  .notstarted{background:linear-gradient(90deg,#64748b,#334155)}
   .charts{display:grid;grid-template-rows:1fr 1fr;gap:12px;min-height:0}
   .chartRow{display:flex;gap:12px;min-height:0}
-  .chartCard{flex:1;display:flex;flex-direction:column;border-radius:10px;padding:8px;background:rgba(255,255,255,0.02);min-height:0}
+  .chartCard{flex:1;display:flex;flex-direction:column;border-radius:10px;padding:8px;background:var(--glass);min-height:0}
   .chartTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
   .canvasWrap{flex:1;min-height:0}
   canvas{width:100% !important;height:100% !important;display:block}
@@ -41,6 +50,11 @@
   .small{font-size:12px;color:var(--muted)}
   body,html{overflow:hidden}
   @media(max-width:1100px){ .layout{grid-template-columns:1fr;grid-auto-rows:auto;height:calc(100vh - 72px)} body,html{overflow:auto} }
+
+  /* table small numeric */
+  .num{font-variant-numeric: tabular-nums; text-align:right}
+  .muted{color:var(--muted)}
+  .targetPill{display:inline-block;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:700}
 </style>
 </head>
 <body>
@@ -110,9 +124,9 @@
       </div>
     </div>
 
-    <h3 style="margin-top:6px">PI — Daily by area</h3>
+    <h3 style="margin-top:6px">PI — Daily by area <span class="targetPill" id="globalTargetPill">Target: 1193</span></h3>
     <div style="flex:1;overflow:auto;margin-bottom:8px">
-      <table id="piTable"><thead><tr><th>Area</th><th style="text-align:right">Total</th><th style="text-align:right">Counted</th><th style="text-align:right">Behind %</th></tr></thead><tbody></tbody></table>
+      <table id="piTable"><thead><tr><th>Area</th><th style="text-align:right">Total</th><th style="text-align:right">Counted (today)</th><th style="text-align:right">Accumulated</th><th style="text-align:right">Remaining</th><th style="text-align:right">Target</th></tr></thead><tbody></tbody></table>
     </div>
 
     <h3 style="margin-top:6px">Weekly details</h3>
@@ -125,7 +139,9 @@
 <div id="debug" aria-live="polite"></div>
 
 <script>
-/* ---------- helpers ---------- */
+/* ---------- constants & helpers ---------- */
+const TARGET = 1193; // fixed global target as requested
+
 function dbg(msg){
   const el = document.getElementById('debug');
   const d = document.createElement('div');
@@ -157,18 +173,11 @@ function findKey(obj, candidates){
   }
   return undefined;
 }
-function escapeHtml(s){
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-function formatNumber(n){
-  n = Number(n) || 0;
-  if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M';
-  if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1) + 'K';
-  return n.toLocaleString();
-}
+function escapeHtml(s){ return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function formatNumber(n){ n = Number(n) || 0; if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M'; if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1) + 'K'; return n.toLocaleString(); }
 function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
 
-/* ---------- Chart plugins (3D-ish) ---------- */
+/* ---------- Chart plugins (kept) ---------- */
 const donut3D = {
   id: 'donut3D',
   beforeDraw(chart, args, options){
@@ -246,10 +255,7 @@ const tryUrls = [
   '/dashboard.json'
 ];
 const FETCH_TIMEOUT = 6000;
-
-function timeoutPromise(ms){
-  return new Promise((res) => setTimeout(res, ms));
-}
+function timeoutPromise(ms){ return new Promise((res) => setTimeout(res, ms)); }
 
 async function fetchJsonWithTimeout(url, timeout){
   const controller = new AbortController();
@@ -288,7 +294,38 @@ document.getElementById('exportCsv').addEventListener('click', downloadCsv);
 document.getElementById('exportPng').addEventListener('click', exportPNGs);
 document.getElementById('scaleMode').addEventListener('change', ()=>{ if (payload) renderAll(); });
 
-/* ---------- load and render ---------- */
+/* ---------- storage helpers (per-week accumulators) ---------- */
+function toISO(d){ const yyyy = d.getFullYear(); const mm = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0'); return `${yyyy}-${mm}-${dd}`; }
+function getWeekStartISO(dateOrIso){ // Monday as week start
+  const d = dateOrIso ? new Date(dateOrIso) : new Date();
+  const day = d.getDay(); // 0 Sun .. 6 Sat
+  const diff = (day === 0 ? -6 : 1) - day; // shift to Monday
+  const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + diff);
+  return toISO(monday);
+}
+function getAccumKey(weekStart, area){ return `pi_accum:${weekStart}:${area}`; }
+function getAccumIndexKey(weekStart){ return `pi_accum_keys:${weekStart}`; }
+function loadAccum(area, weekStart){ try { const k = getAccumKey(weekStart, area); return safeNum(localStorage.getItem(k)); } catch(e){ return 0; } }
+function saveAccum(area, weekStart, value){
+  try {
+    const k = getAccumKey(weekStart, area);
+    localStorage.setItem(k, String(Math.round(value)));
+    // record key in index
+    const idxKey = getAccumIndexKey(weekStart);
+    const idx = JSON.parse(localStorage.getItem(idxKey) || '[]');
+    if (!idx.includes(k)) { idx.push(k); localStorage.setItem(idxKey, JSON.stringify(idx)); }
+  } catch(e){ dbg('Failed saving accum: ' + e.message); }
+}
+function clearAccumForWeek(weekStart){
+  try {
+    const idxKey = getAccumIndexKey(weekStart);
+    const idx = JSON.parse(localStorage.getItem(idxKey) || '[]');
+    for (const k of idx) localStorage.removeItem(k);
+    localStorage.removeItem(idxKey);
+  } catch(e){ dbg('Clear accum error: ' + e.message); }
+}
+
+/* ---------- load & render ---------- */
 async function loadAndRender(){
   dbg('Loading JSON...');
   const j = await tryLoadJson();
@@ -298,25 +335,46 @@ async function loadAndRender(){
   } else {
     payload = j;
   }
+  // Live date canonicalization
+  const todayIso = (payload.meta && payload.meta.today) ? (new Date(payload.meta.today)).toISOString().slice(0,10) : new Date().toISOString().slice(0,10);
+  const weekStart = getWeekStartISO(todayIso);
+  // Weekly reset logic: if we don't have currentWeek recorded or is different -> old week detected
+  const storedCurrentWeek = localStorage.getItem('pi_week_current');
+  if (storedCurrentWeek && storedCurrentWeek !== weekStart){
+    dbg('Week change detected. Clearing previous week accumulators (' + storedCurrentWeek + ' → ' + weekStart + ').');
+    // Clear previous week's accumulators (safety: only clear index tracked keys)
+    try {
+      const idxKey = getAccumIndexKey(storedCurrentWeek);
+      const idx = JSON.parse(localStorage.getItem(idxKey) || '[]');
+      for (const k of idx) localStorage.removeItem(k);
+      localStorage.removeItem(idxKey);
+    } catch(e){ dbg('Error clearing old week accumulators: ' + e.message); }
+  }
+  localStorage.setItem('pi_week_current', weekStart);
+
   document.getElementById('liveDate').innerText = (payload.meta && payload.meta.today) ? payload.meta.today : new Date().toLocaleDateString();
+  // make target visible
+  document.getElementById('globalTargetPill').innerText = 'Target: ' + TARGET;
+  // attach weekStart to payload for render functions (used for persistence)
+  payload._weekStart = weekStart;
   renderAll();
 }
 
 function demoPayload(){
   return {
     piData:[
-      {"Date ":46010,"Area ":"MPR","Total locations":14622,"Counted ":3936,"Behind targe":0,"Above target":222.47,"Behind %":0},
-      {"Date ":46010,"Area ":"PB1","Total locations":4329,"Counted ":1189,"Behind targe":0,"Above target":89.57,"Behind %":0},
-      {"Date ":46010,"Area ":"Total:","Total locations":137369,"Counted ":37994,"Behind targe":237.71,"Above target":3245.80,"Behind %":0.00173}
+      {"Date ":46010,"Area ":"MPR","Total locations":14622,"Counted ":50,"Behind targe":0,"Above target":222.47,"Behind %":0},
+      {"Date ":46010,"Area ":"PB1","Total locations":4329,"Counted ":30,"Behind targe":0,"Above target":89.57,"Behind %":0},
+      {"Date ":46010,"Area ":"ZoneX","Total locations":2000,"Counted ":10,"Behind targe":0,"Above target":0,"Behind %":0}
     ],
-    dailyTask:[{"Task ":"Aged stock report 7AM","Status":"Completed"},{"Task ":"PI Master file update","Status":"Not started"}],
+    dailyTask:[{"Task ":"Aged stock report 7AM","Status":"Completed"},{"Task ":"PI Master file update","Status":"Not started"},{"Task ":"Field check","Status":"In progress"}],
     weeklyTask:[{"Task":"(Weekly) SLA","Status":"Completed"},{"Task":"(Weekly) SIS report","Status":"Not started"}],
     weeklyPiData:[{"Date ":46010,"Area ":"MPR","Daily Qty":127,"Week No":27," Weekly Qty":5103," Weekly %":0.85549}],
-    meta:{today:new Date().toLocaleDateString(), rows: 42}
+    meta:{today:new Date().toISOString().slice(0,10), rows: 42}
   };
 }
 
-/* ---------- render pipeline ---------- */
+/* ---------- main render pipeline ---------- */
 function renderAll(){
   renderTasks(payload.dailyTask || [], 'dailyList');
   renderTasks(payload.weeklyTask || [], 'weeklyList');
@@ -326,7 +384,7 @@ function renderAll(){
   computeAndRenderGauge(payload);
 }
 
-/* ---------- tasks ---------- */
+/* ---------- tasks (render improved badges) ---------- */
 function renderTasks(list, containerId){
   const el = document.getElementById(containerId);
   el.innerHTML = '';
@@ -334,34 +392,44 @@ function renderTasks(list, containerId){
     el.innerHTML = '<div class="small">No tasks</div>';
     return;
   }
+  // Map status to canonical
+  function canonicalStatus(s){
+    if (!s) return 'not started';
+    const xs = String(s).toLowerCase();
+    if (xs.includes('complete') || xs.includes('done')) return 'completed';
+    if (xs.includes('in progress') || xs.includes('progress') || xs.includes('started') || xs.includes('ongoing')) return 'in progress';
+    return 'not started';
+  }
   list.sort((a,b)=>{
-    const sa = String(a.Status || a['Status '] || '').toLowerCase();
-    const sb = String(b.Status || b['Status '] || '').toLowerCase();
-    const da = sa.includes('complete') || sa.includes('done');
-    const db = sb.includes('complete') || sb.includes('done');
-    if (da && !db) return 1;
-    if (db && !da) return -1;
-    return 0;
+    const sa = canonicalStatus(a.Status || a['Status '] || a.status || '');
+    const sb = canonicalStatus(b.Status || b['Status '] || b.status || '');
+    const ranks = { 'in progress': 0, 'not started': 1, 'completed': 2 };
+    return (ranks[sa]||9) - (ranks[sb]||9);
   });
   for (const t of list){
     const nameKey = findKey(t, ['Task ','Task','task']);
     const name = nameKey ? t[nameKey] : JSON.stringify(t).slice(0,60);
-    const status = t.Status || t['Status '] || t.status || '';
-    const done = String(status).toLowerCase().includes('complete') || String(status).toLowerCase().includes('done');
+    const rawStatus = t.Status || t['Status '] || t.status || '';
+    const state = canonicalStatus(rawStatus);
+    const badgeClass = state === 'completed' ? 'done' : (state === 'in progress' ? 'inprogress' : 'notstarted');
+    const badgeText = state === 'completed' ? 'Completed' : (state === 'in progress' ? 'In progress' : 'Not started');
+    const svg = state === 'completed' ? '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 8.2L6.2 12L14 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+              : (state === 'in progress' ? '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2v6l4 2" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+              : '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2h12v12H2z" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
     const div = document.createElement('div');
     div.className = 'taskCard';
-    div.innerHTML = '<div style="max-width:70%"><div style="font-weight:800;font-size:13px">' + escapeHtml(name) + '</div><div class="small">' + escapeHtml(status) + '</div></div><div><div class="badge ' + (done ? 'done' : 'todo') + '">' + (done ? 'Completed' : 'Not started') + '</div></div>';
+    div.innerHTML = '<div class="taskInfo"><div class="taskTitle">' + escapeHtml(name) + '</div><div class="taskMeta">' + escapeHtml(String(rawStatus || '')) + '</div></div><div><div class="badge ' + badgeClass + '">' + svg + '<span>' + badgeText + '</span></div></div>';
     el.appendChild(div);
   }
 }
 
-/* ---------- PI table + bar ---------- */
+/* ---------- PI table + bar (uses persisted accumulators & TARGET) ---------- */
 function renderPI(piList){
   const tbody = document.querySelector('#piTable tbody');
   tbody.innerHTML = '';
   const rows = Array.isArray(piList) ? piList.slice() : [];
   if (!rows.length){
-    tbody.innerHTML = '<tr><td colspan="4">No PI data</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6">No PI data</td></tr>';
     if (charts.piBar){ charts.piBar.destroy(); charts.piBar = null; }
     return;
   }
@@ -369,38 +437,52 @@ function renderPI(piList){
   const areaKey = findKey(sample, ['Area','Area ']);
   const totalKey = findKey(sample, ['Total locations','Total locations ','Total']);
   const countedKey = findKey(sample, ['Counted','Counted ']);
-  const behindKey = findKey(sample, ['Behind %','Behind % ','Behind targe','Behind target']);
   const data = [];
+  const weekStart = payload._weekStart || getWeekStartISO();
   for (const r of rows){
     const area = String(r[areaKey] || r['Area'] || r['Area '] || '').trim();
     if (!area) continue;
-    if (/total/i.test(area)) continue;
+    if (/total/i.test(area)) continue; // skip aggregate totals
     const total = safeNum(r[totalKey] || r['Total locations'] || 0);
-    const counted = Math.min(safeNum(r[countedKey] || r['Counted '] || 0), total);
-    let behindRaw = safeNum(r[behindKey] || r['Behind targe'] || r['Behind target'] || r['Behind %'] || 0);
-    let behindPct = behindRaw;
-    if (behindRaw > 0 && behindRaw <= 1) behindPct = behindRaw * 100;
-    data.push({ area, total, counted, behindPct });
-    tbody.insertAdjacentHTML('beforeend', '<tr><td>' + escapeHtml(area) + '</td><td style="text-align:right">' + formatNumber(total) + '</td><td style="text-align:right">' + formatNumber(counted) + '</td><td style="text-align:right">' + Number(behindPct || 0).toFixed(2) + '%</td></tr>');
+    const countedTodayRaw = safeNum(r[countedKey] || r['Counted '] || 0);
+    // Load previous accumulated for this area/week
+    const prevAccum = loadAccum(area, weekStart);
+    let accumulated = prevAccum;
+    // Heuristic: if countedTodayRaw is larger than total (likely cumulative), use it as accumulated (overwrite)
+    if (countedTodayRaw > total && countedTodayRaw >= prevAccum){
+      accumulated = countedTodayRaw;
+      dbg(`Heuristic: treating Counted ${countedTodayRaw} for area "${area}" as cumulative → set accumulated=${accumulated}`);
+    } else {
+      // Otherwise add today's counted to previous accumulated
+      accumulated = prevAccum + countedTodayRaw;
+    }
+    // Save back
+    saveAccum(area, weekStart, accumulated);
+    const remaining = Math.max(0, TARGET - accumulated);
+    data.push({ area, total, countedToday: countedTodayRaw, accumulated, remaining });
+    tbody.insertAdjacentHTML('beforeend', '<tr><td>' + escapeHtml(area) + '</td><td class="num">' + formatNumber(total) + '</td><td class="num">' + formatNumber(countedTodayRaw) + '</td><td class="num">' + formatNumber(accumulated) + '</td><td class="num">' + formatNumber(remaining) + '</td><td class="num">' + formatNumber(TARGET) + '</td></tr>');
   }
+  // summary
   const totalSum = data.reduce((s,d) => s + d.total, 0);
-  const countedSum = data.reduce((s,d) => s + d.counted, 0);
-  document.getElementById('countHint').innerText = 'Locations: ' + totalSum.toLocaleString() + ' • Counted: ' + countedSum.toLocaleString() + ' • Coverage: ' + ((countedSum / Math.max(1,totalSum))*100).toFixed(2) + '%';
+  const countedSum = data.reduce((s,d) => s + d.accumulated, 0);
+  const remainingSum = Math.max(0, (TARGET * data.length) - countedSum); // note: if you want global target across all areas change logic
+  document.getElementById('countHint').innerText = 'Areas: ' + data.length + ' • Accumulated: ' + countedSum.toLocaleString() + ' • Average coverage vs target: ' + ((countedSum / Math.max(1, TARGET * data.length))*100).toFixed(2) + '%';
+  // sort top by total size for chart
   const sorted = data.sort((a,b) => b.total - a.total).slice(0,12);
   const labels = sorted.map(d => d.area);
-  const countedArr = sorted.map(d => d.counted);
-  const remainingArr = sorted.map(d => Math.max(0, d.total - d.counted));
+  const accumulatedArr = sorted.map(d => Math.min(d.accumulated, d.total)); // never show more than total
+  const remainingArr = sorted.map(d => Math.max(0, TARGET - d.accumulated));
   const mode = document.getElementById('scaleMode').value || 'auto';
-  let displayCounted = countedArr.slice();
+  let displayAccum = accumulatedArr.slice();
   let displayRemaining = remainingArr.slice();
   if (mode === 'log'){
-    displayCounted = displayCounted.map(v => Math.log10(Math.max(1,v)));
+    displayAccum = displayAccum.map(v => Math.log10(Math.max(1,v)));
     displayRemaining = displayRemaining.map(v => Math.log10(Math.max(1,v)));
   } else if (mode === 'auto'){
-    const maxVal = Math.max(...displayCounted.concat(displayRemaining), 1);
+    const maxVal = Math.max(...displayAccum.concat(displayRemaining), 1);
     let factor = 1;
     if (maxVal > 100000) factor = 0.001; else if (maxVal > 20000) factor = 0.01; else if (maxVal > 5000) factor = 0.1;
-    displayCounted = displayCounted.map(v => Number((v*factor).toFixed(3)));
+    displayAccum = displayAccum.map(v => Number((v*factor).toFixed(3)));
     displayRemaining = displayRemaining.map(v => Number((v*factor).toFixed(3)));
   }
   try { if (charts.piBar) charts.piBar.destroy(); } catch(e){ charts.piBar = null; }
@@ -410,8 +492,8 @@ function renderPI(piList){
     data: {
       labels: labels,
       datasets: [
-        { label: 'Counted', data: displayCounted, backgroundColor: createGradient(ctx, '#7dd3fc', '#0479a6') },
-        { label: 'Remaining', data: displayRemaining, backgroundColor: createGradient(ctx, '#8b5cf6', '#4a2a7a') }
+        { label: 'Accumulated (towards target)', data: displayAccum, backgroundColor: createGradient(ctx, '#7dd3fc', '#0479a6') },
+        { label: 'Remaining (to ' + TARGET + ')', data: displayRemaining, backgroundColor: createGradient(ctx, '#8b5cf6', '#4a2a7a') }
       ]
     },
     options: {
@@ -443,7 +525,7 @@ function renderWeeklyPI(list){
     const weeklyQty = safeNum(r[wqK] || r[' Weekly Qty'] || r['Weekly Qty'] || 0);
     const dailyQty = safeNum(r[dailyK] || 0);
     const area = r[areaK] || '';
-    tbody.insertAdjacentHTML('beforeend', '<tr><td>' + escapeHtml(String(wk)) + '</td><td>' + escapeHtml(area) + '</td><td style="text-align:right">' + formatNumber(dailyQty) + '</td><td style="text-align:right">' + formatNumber(weeklyQty) + '</td><td style="text-align:right">' + (safeNum(r[' Weekly %']||r['Weekly %']||0)*100).toFixed(3) + '%</td></tr>');
+    tbody.insertAdjacentHTML('beforeend', '<tr><td>' + escapeHtml(String(wk)) + '</td><td>' + escapeHtml(area) + '</td><td class="num">' + formatNumber(dailyQty) + '</td><td class="num">' + formatNumber(weeklyQty) + '</td><td class="num">' + (safeNum(r[' Weekly %']||r['Weekly %']||0)*100).toFixed(3) + '%</td></tr>');
     agg[String(wk)] = (agg[String(wk)] || 0) + weeklyQty;
   }
   const weeks = Object.keys(agg).map(k => isFinite(Number(k)) ? Number(k) : k).sort((a,b) => a - b);
@@ -489,6 +571,7 @@ function renderTaskDonuts(payload){
 function computeAndRenderGauge(payload){
   const weeklyPi = Array.isArray(payload.weeklyPiData) ? payload.weeklyPiData : [];
   const piData = Array.isArray(payload.piData) ? payload.piData : [];
+  // compute daily target fallback: average weekly /7 OR default to TARGET*0.1
   let dailyTarget = 0;
   if (weeklyPi.length){
     weeklyPi.forEach(w => { dailyTarget += safeNum(w[' Weekly Qty'] || w['Weekly Qty'] || 0) / 7; });
@@ -496,10 +579,21 @@ function computeAndRenderGauge(payload){
     const totalSum = piData.reduce((s,r)=>{ const tk = findKey(r, ['Total locations','Total locations ','Total']); return s + safeNum(r[tk] || r['Total locations'] || 0); }, 0);
     dailyTarget = totalSum * 0.10;
   }
-  const counted = piData.reduce((s,r)=> s + safeNum(r[findKey(r,['Counted','Counted '])] || r['Counted '] || 0), 0);
-  const progress = dailyTarget ? clamp(counted / dailyTarget, 0, 1) : 0;
-  document.getElementById('gaugeCenterText').innerText = (progress*100).toFixed(2) + '% • ' + counted.toLocaleString() + '/' + Math.round(dailyTarget).toLocaleString();
-  document.getElementById('gaugeBreakdown').innerText = 'Daily target (from weekly averages): ' + Math.round(dailyTarget).toLocaleString();
+  // For gauge progress use accumulated total across areas vs (TARGET * number_of_areas) as a meaningful progress measure
+  const weekStart = payload._weekStart || getWeekStartISO();
+  let accumulatedTotal = 0;
+  const sample = piData[0] || {};
+  const areaKey = findKey(sample, ['Area','Area ']);
+  for (const r of piData){
+    const area = String(r[areaKey] || r['Area'] || r['Area '] || '').trim();
+    if (!area || /total/i.test(area)) continue;
+    accumulatedTotal += loadAccum(area, weekStart);
+  }
+  const areasCount = piData.filter(r => { const a = String(r[areaKey] || r['Area'] || r['Area '] || '').trim(); return a && !/total/i.test(a); }).length || 1;
+  // compare accumulatedTotal to (TARGET * areasCount)
+  const progress = clamp(accumulatedTotal / (TARGET * areasCount), 0, 1);
+  document.getElementById('gaugeCenterText').innerText = (progress*100).toFixed(2) + '% • ' + accumulatedTotal.toLocaleString() + '/' + (TARGET*areasCount).toLocaleString();
+  document.getElementById('gaugeBreakdown').innerText = 'Progress vs combined target (' + TARGET + ' per area)';
   // mini gauge
   let mini = document.querySelector('#gaugeMini canvas');
   if (!mini){ mini = document.createElement('canvas'); mini.width = 260; mini.height = 120; document.getElementById('gaugeMini').appendChild(mini); }
@@ -511,7 +605,7 @@ function computeAndRenderGauge(payload){
   });
 }
 
-/* ---------- utilities: gradients, export ---------- */
+/* ---------- utilities: gradients, shade, export ---------- */
 function createGradient(ctx, c1, c2){
   const g = ctx.createLinearGradient(0,0,0,ctx.canvas.height || 400);
   g.addColorStop(0, c1);
@@ -547,11 +641,11 @@ function shadeColor(css, percent){
 
 /* ---------- CSV / PNG export ---------- */
 function downloadCsv(){
-  const rows = [['Area','Total','Counted','Behind %']];
+  const rows = [['Area','Total','Counted (today)','Accumulated','Remaining','Target']];
   document.querySelectorAll('#piTable tbody tr').forEach(tr=>{
     const tds = tr.querySelectorAll('td');
     if (!tds.length) return;
-    rows.push([tds[0].innerText, tds[1].innerText, tds[2].innerText, tds[3].innerText]);
+    rows.push([tds[0].innerText, tds[1].innerText, tds[2].innerText, tds[3].innerText, tds[4].innerText, tds[5].innerText]);
   });
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
@@ -590,7 +684,7 @@ function onUpload(){
       try {
         payload = JSON.parse(ev.target.result);
         dbg('Uploaded JSON parsed');
-        renderAll();
+        loadAndRender(); // reload so week logic runs
       } catch(err){
         alert('Invalid JSON file');
         dbg('Upload parse error: ' + err.message);
@@ -606,7 +700,7 @@ function onPaste(){
   try {
     payload = JSON.parse(txt);
     dbg('Pasted JSON parsed');
-    renderAll();
+    loadAndRender();
   } catch(e){
     alert('Invalid JSON pasted');
     dbg('Paste parse error: ' + (e && e.message ? e.message : e));
