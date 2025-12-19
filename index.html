@@ -1,28 +1,31 @@
 <!doctype html>
-<html lang="ro">
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>VCB — Robust Professional Dashboard</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>VCB — Professional Dashboard (Self-contained)</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <style>
 :root{
-  --bg:#061227; --panel:#0b1724; --muted:#9aa4b2; --accentA:#7dd3fc; --accentB:#8b5cf6; --glass: rgba(255,255,255,0.03);
+  --bg:#041026; --panel:#0b1724; --muted:#9aa4b2; --accent:#7dd3fc; --accentB:#8b5cf6;
+  --glass: rgba(255,255,255,0.03);
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial;background:linear-gradient(180deg,#031026,#061226);color:#eaf6ff}
-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
-header h1{margin:0;font-size:20px}
-.meta{color:var(--muted);font-size:13px;margin-top:6px}
+html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial;background:linear-gradient(180deg,#021026,#041226);color:#eaf6ff}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px}
+.title{display:flex;flex-direction:column}
+.title h1{margin:0;font-size:20px}
+.title .meta{font-size:13px;color:var(--muted);margin-top:6px}
 .controls{display:flex;gap:8px;align-items:center}
-.btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;color:var(--accentA);cursor:pointer;font-weight:700}
-.primary{background:linear-gradient(90deg,var(--accentA),var(--accentB));color:#021024;border:0}
+.btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;color:var(--accent);cursor:pointer;font-weight:700}
+.primary{background:linear-gradient(90deg,var(--accent),var(--accentB));color:#021024;border:0}
+.small{font-size:13px;color:var(--muted)}
 .wrap{padding:12px 20px}
 .grid{display:grid;grid-template-columns:360px 1fr 420px;gap:16px;align-items:start}
-@media (max-width:1200px){ .grid{grid-template-columns:1fr; } .rightCol{order:3} .middleCol{order:2} .leftCol{order:1} }
+@media (max-width:1200px){ .grid{grid-template-columns:1fr} .rightCol{order:3} .middleCol{order:2} .leftCol{order:1} }
 .panel{background:var(--panel);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 30px rgba(2,6,23,0.45)}
 .panel h3{margin:0 0 10px 0;font-size:15px}
 .taskCard{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.02);margin-bottom:8px}
@@ -31,62 +34,68 @@ header h1{margin:0;font-size:20px}
 .badge{padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px}
 .badge.done{background:linear-gradient(90deg,#16a34a,#064e3b);color:white}
 .badge.todo{background:linear-gradient(90deg,#7f1d1d,#ef4444);color:white}
-.small{font-size:13px;color:var(--muted)}
 .tableWrap{max-height:520px;overflow:auto}
 table{width:100%;border-collapse:collapse;color:#eaf6ff;font-size:13px}
 thead th{position:sticky;top:0;background:rgba(10,14,24,0.2);padding:8px;color:var(--muted);font-weight:700;text-align:left}
 td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}
 .charts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .chartCard{padding:8px;border-radius:10px;background:var(--glass);display:flex;flex-direction:column;min-height:280px}
-.canvasWrap{flex:1;min-height:240px;display:flex;align-items:stretch}
-canvas{width:100% !important; height:100% !important; display:block}
+.canvasWrap{flex:1;min-height:300px;display:flex;align-items:stretch}
+canvas{width:100% !important;height:100% !important;display:block}
 .controlsRow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.note{color:var(--muted);font-size:12px;margin-top:6px}
-.topControls{display:flex;gap:10px;align-items:center}
-.select{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:#eaf6ff}
-.kv{font-weight:700;color:#fff}
 .smallMuted{color:var(--muted);font-size:12px}
-.footerNote{color:var(--muted);font-size:12px;margin-top:12px}
+.footer{margin-top:10px;color:var(--muted);font-size:13px}
+.inputSmall{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#eaf6ff}
+.jsonArea{width:100%;min-height:120px;background:#071224;border-radius:8px;padding:8px;border:1px solid rgba(255,255,255,0.02);color:#eaf6ff}
 </style>
 </head>
 <body>
   <header>
-    <div>
-      <h1>Stock Team VCB — Professional Dashboard</h1>
-      <div class="meta" id="metaLine">Loading…</div>
+    <div class="title">
+      <h1>VCB — Professional Dashboard</h1>
+      <div class="meta" id="metaLine">Self-contained dashboard • Upload or paste JSON to load your data</div>
     </div>
-    <div class="controls topControls">
-      <select id="scaleMode" class="select" title="Scaling mode">
-        <option value="raw">Raw (no scaling)</option>
-        <option value="scaled" selected>Scaled (auto)</option>
-        <option value="log">Log scale (visual)</option>
+
+    <div class="controls">
+      <select id="scaleMode" class="inputSmall" title="Scale mode">
+        <option value="scaled">Auto Scale</option>
+        <option value="raw">Raw</option>
+        <option value="log">Log visual</option>
       </select>
-      <button id="refreshBtn" class="btn">Refresh</button>
-      <button id="demoBtn" class="btn">Toggle Demo</button>
-      <button id="exportCsv" class="btn primary">Export CSV</button>
-      <button id="exportImage" class="btn">Save Image</button>
+
+      <button class="btn" id="refreshBtn">Refresh</button>
+      <button class="btn" id="uploadBtn">Upload JSON</button>
+      <button class="btn" id="pasteBtn">Paste JSON</button>
+      <button class="btn primary" id="exportCsv">CSV</button>
+      <button class="btn" id="exportImgs">Export Images</button>
     </div>
   </header>
 
   <div class="wrap">
     <div class="grid">
-      <!-- LEFT -->
+
+      <!-- LEFT: Tasks -->
       <div class="panel leftCol">
         <h3>Daily tasks</h3>
-        <div id="dailyList" style="max-height:340px;overflow:auto"></div>
-        <h3 style="margin-top:12px">Weekly tasks</h3>
-        <div id="weeklyList" style="max-height:260px;overflow:auto"></div>
-        <div class="footerNote">Tip: folosește <span class="smallMuted">Refresh</span> după actualizarea JSON.</div>
+        <div id="dailyList" style="max-height:380px;overflow:auto"></div>
+
+        <h3 style="margin-top:14px">Weekly tasks</h3>
+        <div id="weeklyList" style="max-height:240px;overflow:auto"></div>
+
+        <div style="height:12px"></div>
+        <div class="smallMuted">You can upload a `dashboard.json` file or paste JSON below (click Paste JSON).</div>
+        <div style="height:8px"></div>
+        <textarea id="jsonInput" class="jsonArea" placeholder="Paste JSON here and click Refresh (optional)"></textarea>
       </div>
 
-      <!-- MIDDLE -->
+      <!-- MIDDLE: Charts -->
       <div class="panel middleCol">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
             <h3>PI Overview</h3>
-            <div class="small" id="piSummary">Loading…</div>
+            <div class="smallMuted" id="piSummary">—</div>
           </div>
-          <div class="small" id="lastUpdated">—</div>
+          <div class="smallMuted" id="lastUpdated">—</div>
         </div>
 
         <div style="height:12px"></div>
@@ -94,45 +103,40 @@ canvas{width:100% !important; height:100% !important; display:block}
         <div class="charts">
           <div class="chartCard">
             <div style="display:flex;justify-content:space-between;align-items:center">
-              <div><strong>Counted vs Total (per Area)</strong><div class="smallMuted">Bar chart — stacked</div></div>
-              <div class="smallMuted">Scale: <span id="currentScale" class="kv">auto</span></div>
+              <div><strong>Counted vs Remaining</strong><div class="smallMuted">Stacked bar by Area</div></div>
+              <div class="smallMuted">Scale: <span id="currentScale">auto</span></div>
             </div>
-            <div class="canvasWrap" style="min-height:300px">
-              <canvas id="piBar" style="min-height:300px"></canvas>
-            </div>
+            <div class="canvasWrap"><canvas id="piBar" style="min-height:300px"></canvas></div>
           </div>
 
           <div class="chartCard">
             <div style="display:flex;justify-content:space-between;align-items:center">
-              <div><strong>Weekly Qty (by Week)</strong><div class="smallMuted">Aggregated per week number</div></div>
-              <div class="smallMuted">Points: <span id="pointCount" class="kv">—</span></div>
+              <div><strong>Weekly Quantity (by Week No.)</strong><div class="smallMuted">Aggregated weekly quantities</div></div>
+              <div class="smallMuted">Points: <span id="pointCount">—</span></div>
             </div>
-            <div class="canvasWrap" style="min-height:300px">
-              <canvas id="weeklyLine" style="min-height:300px"></canvas>
-            </div>
+            <div class="canvasWrap"><canvas id="weeklyLine" style="min-height:300px"></canvas></div>
           </div>
         </div>
 
-        <div style="height:14px"></div>
+        <div style="height:12px"></div>
 
         <div class="chartCard" style="display:flex;gap:12px;align-items:center;min-height:180px">
-          <div style="width:220px;height:160px">
-            <canvas id="tasksDonut" style="min-height:160px"></canvas>
-          </div>
+          <div style="width:220px;height:160px"><canvas id="dailyGauge" style="min-height:160px"></canvas></div>
           <div>
-            <div class="smallMuted">Tasks completion (Daily + Weekly)</div>
-            <div id="tasksStats" style="margin-top:10px;font-weight:800;font-size:16px"></div>
-            <div class="note">Green = completed, red = remaining / not started</div>
+            <div class="smallMuted">Daily progress vs daily target (aggregate)</div>
+            <div id="dailyGaugeText" style="font-weight:800;font-size:18px;margin-top:8px">—</div>
+            <div class="smallMuted" id="dailyTargetBreakdown">—</div>
           </div>
         </div>
+
       </div>
 
-      <!-- RIGHT -->
+      <!-- RIGHT: Tables -->
       <div class="panel rightCol">
-        <h3>PI — Daily by Area (table)</h3>
+        <h3>PI — Daily by Area</h3>
         <div class="tableWrap">
           <table id="piTable">
-            <thead><tr><th>Area</th><th style="text-align:right">Total</th><th style="text-align:right">Counted</th><th style="text-align:right">Behind target</th><th style="text-align:right">Behind %</th></tr></thead>
+            <thead><tr><th>Area</th><th style="text-align:right">Total</th><th style="text-align:right">Counted</th><th style="text-align:right">Behind raw</th><th style="text-align:right">Behind %</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -145,45 +149,47 @@ canvas{width:100% !important; height:100% !important; display:block}
           </table>
         </div>
       </div>
+
     </div>
+
+    <div style="height:14px"></div>
+    <div class="footer">Built for VCB — Drag & drop JSON, export CSV or PNG. If charts look off use Scale = Log or Auto Scale.</div>
   </div>
 
 <script>
-/* ================== Utilities ================== */
+/* ================= Utils ================= */
 function safeNum(v){
   if (v === null || v === undefined) return 0;
+  if (typeof v === 'number') return isFinite(v) ? v : 0;
   if (typeof v === 'string') {
     const s = v.replace(/\s/g,'').replace(/,/g,'');
     const n = Number(s);
     return isFinite(n) ? n : 0;
   }
-  if (typeof v === 'number') return isFinite(v)?v:0;
   return 0;
 }
 
-function findKey(obj, names){
+function findKey(obj, candidates){
   if (!obj) return undefined;
-  if (!Array.isArray(names)) names = [names];
+  if (!Array.isArray(candidates)) candidates = [candidates];
   const keys = Object.keys(obj);
-  for (let n of names){
-    for (let k of keys){
-      if (k.trim().toLowerCase() === n.trim().toLowerCase()) return k;
+  for (const c of candidates){
+    for (const k of keys) {
+      if (k.trim().toLowerCase() === c.trim().toLowerCase()) return k;
     }
   }
-  for (let n of names){
-    for (let k of keys){
-      if (k.trim().toLowerCase().indexOf(n.trim().toLowerCase()) !== -1) return k;
+  for (const c of candidates){
+    for (const k of keys) {
+      if (k.trim().toLowerCase().indexOf(c.trim().toLowerCase()) !== -1) return k;
     }
   }
   return undefined;
 }
 
-// Excel serial -> ISO yyyy-mm-dd
 function excelSerialToISO(serial){
   if (serial === null || serial === undefined) return '';
   if (typeof serial === 'string' && serial.indexOf('-') !== -1) return serial;
   const s = Number(serial) || 0;
-  // Excel epoch: 1899-12-30 for JS conversion via days
   const ms = (s - 25569) * 86400 * 1000;
   const d = new Date(ms);
   const dt = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
@@ -191,8 +197,7 @@ function excelSerialToISO(serial){
 }
 
 function formatNumber(n){
-  if (n === null || n === undefined) return '0';
-  n = Number(n);
+  n = Number(n) || 0;
   if (!isFinite(n)) return String(n);
   if (Math.abs(n) >= 1e9) return (n/1e9).toFixed(2)+'B';
   if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(2)+'M';
@@ -200,87 +205,158 @@ function formatNumber(n){
   return n.toString();
 }
 
-/* ================== Globals & Elements ================== */
-let charts = { piBar:null, weeklyLine:null, tasksDonut:null };
-let useDemo = false;
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ================= Globals ================= */
+let charts = { piBar:null, weeklyLine:null, dailyGauge:null, tasksDonut:null };
+let currentPayload = null;
 const refreshBtn = document.getElementById('refreshBtn');
-const demoBtn = document.getElementById('demoBtn');
+const uploadBtn = document.getElementById('uploadBtn');
+const pasteBtn = document.getElementById('pasteBtn');
+const jsonInput = document.getElementById('jsonInput');
 const scaleModeEl = document.getElementById('scaleMode');
 const exportCsvBtn = document.getElementById('exportCsv');
-const exportImageBtn = document.getElementById('exportImage');
+const exportImgsBtn = document.getElementById('exportImgs');
 
-refreshBtn.addEventListener('click', refresh);
-demoBtn.addEventListener('click', ()=>{ useDemo = !useDemo; refresh(); });
-scaleModeEl.addEventListener('change', ()=>{ refresh(); });
+refreshBtn.addEventListener('click', onRefresh);
+uploadBtn.addEventListener('click', onUploadClick);
+pasteBtn.addEventListener('click', onPasteClick);
 exportCsvBtn.addEventListener('click', exportCsv);
-exportImageBtn.addEventListener('click', exportImage);
+exportImgsBtn.addEventListener('click', exportImages);
 
-/* ================== Demo payload (fallback) ================== */
-const demoPayload = {
-  piData: [
-    {"Date ":46010,"Area ":"MPR","Total locations":14622,"Counted ":3936,"Behind targe":0,"Above target":222.476,"Behind %":0},
-    {"Date ":46010,"Area ":"PB1","Total locations":4329,"Counted ":1189,"Behind targe":0,"Above target":89.5714,"Behind %":0},
-    {"Date ":46010,"Area ":"Total:","Total locations":137369,"Counted ":37994,"Behind targe":237.714,"Above target":3245.8095,"Behind %":0.00173}
+/* ================ Default payload (your JSON sample) ================ */
+const defaultPayload = {
+  "piData":[
+    {"Date ":46010,"Area ":"Area","Total locations":"Total locations","Counted ":"Counted","Behind targe":"Locations behind the target","Above target":"Locations above the target","Behind %":"Behind the target %"},
+    {"Date ":46010,"Area ":"MPR","Total locations":14622,"Counted ":3936,"Behind targe":0,"Above target":222.47619047619,"Behind %":0},
+    {"Date ":46010,"Area ":"PB1","Total locations":4329,"Counted ":1189,"Behind targe":0,"Above target":89.5714285714287,"Behind %":0},
+    {"Date ":46010,"Area ":"PB2","Total locations":795,"Counted ":484,"Behind targe":0,"Above target":282.095238095238,"Behind %":0},
+    {"Date ":46010,"Area ":"PB3","Total locations":772,"Counted ":0,"Behind targe":196.063492063492,"Above target":0,"Behind %":0.253968253968254},
+    {"Date ":46010,"Area ":"PB4","Total locations":164,"Counted ":0,"Behind targe":41.6507936507937,"Above target":0,"Behind %":0.253968253968254},
+    {"Date ":46010,"Area ":"PBSRES","Total locations":5197,"Counted ":1374,"Behind targe":0,"Above target":54.1269841269841,"Behind %":0},
+    {"Date ":46010,"Area ":"MP","Total locations":25612,"Counted ":7409,"Behind targe":0,"Above target":904.36507936508,"Behind %":0},
+    {"Date ":46010,"Area ":"MIX","Total locations":33087,"Counted ":8941,"Behind targe":0,"Above target":537.952380952382,"Behind %":0},
+    {"Date ":46010,"Area ":"MS","Total locations":21512,"Counted ":5902,"Behind targe":0,"Above target":438.63492063492,"Behind %":0},
+    {"Date ":46010,"Area ":"MSX","Total locations":28798,"Counted ":7984,"Behind targe":0,"Above target":670.222222222223,"Behind %":0},
+    {"Date ":46010,"Area ":"FM","Total locations":2308,"Counted ":620,"Behind targe":0,"Above target":33.8412698412699,"Behind %":0},
+    {"Date ":46010,"Area ":"HP","Total locations":561,"Counted ":155,"Behind targe":0,"Above target":12.5238095238095,"Behind %":0},
+    {"Date ":46010,"Area ":"Total:","Total locations":137369,"Counted ":37994,"Behind targe":237.714285714286,"Above target":3245.80952380952,"Behind %":0.00173047984417362}
   ],
-  dailyTask: [
-    {"DATE":46010,"Task ":"SHRINKAGE RECONCILATION DAILY","Status":"Not started","Type":"Daily"},
+  "dailyTask":[
+    {"DATE":46010,"Task ":"ADJUSTMENTS (Returns)","Status":"Not started","Type":"Daily"},
+    {"DATE":46010,"Task ":"ADJUSTMENTS (Standard)","Status":"Not started","Type":"Daily"},
     {"DATE":46010,"Task ":"Aged stock report 7AM","Status":"Completed","Type":"Daily"}
   ],
-  weeklyTask: [
+  "weeklyTask":[
     {"Date":46010,"Task":"(Weekly) SLA","Status":"Completed","Type":"Weekly"},
-    {"Date":46010,"Task":"(Weekly) Shrinkage","Status":"Not started","Type":"Weekly"}
+    {"Date":46010,"Task":"(Weekly) SIS report","Status":"Not started","Type":"Weekly"},
+    {"Date":46010,"Task":"(Weekly) Shrinkage","Status":"Completed","Type":"Weekly"}
   ],
-  weeklyPiData: [
-    {"Date ":46010,"Area ":"MPR","Daily Qty":127,"Week No":32," Weekly Qty":4524," Weekly %":0.7584}
+  "weeklyPiData":[
+    {"Date ":46010,"Area ":"MPR","Daily Qty":127,"Week No":27," Weekly Qty":5103," Weekly %":0.855490360435876},
+    {"Date ":46010,"Area ":"PB1","Daily Qty":38,"Week No":28," Weekly Qty":6457," Weekly %":1.08248113998324},
+    {"Date ":46010,"Area ":"PB2","Daily Qty":15,"Week No":29," Weekly Qty":7494," Weekly %":1.25632858340319},
+    {"Date ":46010,"Area ":"PB3","Daily Qty":0,"Week No":30," Weekly Qty":6901," Weekly %":1.1569153394803},
+    {"Date ":46010,"Area ":"PB4","Daily Qty":0,"Week No":31," Weekly Qty":5447," Weekly %":0.913160100586756},
+    {"Date ":46010,"Area ":"PBSRES","Daily Qty":45,"Week No":32," Weekly Qty":4524," Weekly %":0.758424140821458}
   ],
-  meta: { today: new Date().toLocaleDateString(), rows: 42 }
+  "meta":{ "today": (new Date()).toLocaleDateString(), "rows": 152 }
 };
 
-/* ================== Fetch & Render ================== */
-function refresh(){
-  refreshBtn.disabled = true;
-  refreshBtn.innerText = 'Refreshing…';
-  if (useDemo){
-    setTimeout(()=>{ render(demoPayload); refreshBtn.disabled=false; refreshBtn.innerText='Refresh'; }, 180);
-    return;
+/* ================= Data Loading ================= */
+function loadFromTextArea(){
+  const raw = document.getElementById('jsonInput').value.trim();
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed;
+  } catch(e){
+    alert('Invalid JSON pasted — please check JSON syntax.');
+    console.error('Paste JSON parse error', e);
+    return null;
   }
-  fetch('./data/dashboard.json?_=' + Date.now())
-    .then(r => {
-      if (!r.ok) throw new Error('network response not ok ('+r.status+')');
-      return r.json();
-    })
-    .then(payload => render(payload))
-    .catch(err => {
-      console.warn('Fetch failed — using demo payload', err);
-      render(demoPayload);
-    })
-    .finally(()=>{ refreshBtn.disabled=false; refreshBtn.innerText='Refresh'; });
 }
 
+function onRefresh(){
+  // Priority: pasted JSON > uploaded file stored in memory > fetch from ./data/dashboard.json > default
+  const pasted = loadFromTextArea();
+  if (pasted){
+    currentPayload = pasted;
+    render(currentPayload);
+    return;
+  }
+
+  // Try to fetch local ./data/dashboard.json (works on GitHub Pages or local server)
+  fetch('./data/dashboard.json?_=' + Date.now())
+    .then(r=>{
+      if (!r.ok) throw new Error('fetch error ' + r.status);
+      return r.json();
+    })
+    .then(json=>{
+      currentPayload = json;
+      render(currentPayload);
+    })
+    .catch(err=>{
+      console.warn('Fetch failed — using default embedded payload', err);
+      currentPayload = defaultPayload;
+      render(currentPayload);
+    });
+}
+
+/* Upload handling */
+function onUploadClick(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const json = JSON.parse(ev.target.result);
+        currentPayload = json;
+        // put pretty JSON into textarea for visibility
+        document.getElementById('jsonInput').value = JSON.stringify(json, null, 2);
+        render(currentPayload);
+      } catch(err){
+        alert('Uploaded file is not valid JSON.');
+      }
+    };
+    reader.readAsText(f);
+  };
+  input.click();
+}
+
+/* Paste handling */
+function onPasteClick(){
+  const pasted = loadFromTextArea();
+  if (pasted){ currentPayload = pasted; render(currentPayload); }
+  else alert('Paste valid JSON into the textarea and click Paste JSON (or Upload a file).');
+}
+
+/* ================= Render functions ================= */
 function render(payload){
   try {
-    if (!payload) { console.error('no payload'); return; }
-    // meta
-    const todayStr = payload.meta && payload.meta.today ? payload.meta.today : new Date().toLocaleDateString();
-    document.getElementById('metaLine').innerText = 'Live • ' + todayStr + ' • rows: ' + (payload.meta?.rows || '—');
-    document.getElementById('lastUpdated').innerText = new Date().toLocaleString();
+    if (!payload) { console.error('No payload'); return; }
+    // Meta
+    const todayStr = payload.meta && payload.meta.today ? payload.meta.today : (new Date()).toLocaleDateString();
+    document.getElementById('metaLine').innerText = `Live • ${todayStr} • rows: ${payload.meta?.rows || '—'}`;
+    document.getElementById('lastUpdated').innerText = (new Date()).toLocaleString();
 
-    // tasks
+    // Tasks
     renderTasks(payload.dailyTask || [], 'dailyList');
     renderTasks(payload.weeklyTask || [], 'weeklyList');
 
     // PI
     renderPI(payload.piData || []);
     renderWeeklyPI(payload.weeklyPiData || []);
-
-    // tasks donut
-    renderTasksDonut(payload.dailyTask || [], payload.weeklyTask || []);
-  } catch (e) {
+  } catch (e){
     console.error('render error', e);
   }
 }
 
-/* ================== Tasks ================== */
+/* Tasks render */
 function renderTasks(list, containerId){
   const el = document.getElementById(containerId);
   el.innerHTML = '';
@@ -288,156 +364,173 @@ function renderTasks(list, containerId){
     el.innerHTML = '<div class="smallMuted" style="padding:8px">No tasks</div>';
     return;
   }
-  // sort: not completed first
+  // sort incomplete first
   list.sort((a,b)=>{
-    const sa = String(a.Status||'').toLowerCase(), sb = String(b.Status||'').toLowerCase();
-    const aDone = sa.includes('complete') || sa.includes('done');
-    const bDone = sb.includes('complete') || sb.includes('done');
-    if (aDone && !bDone) return 1;
-    if (bDone && !aDone) return -1;
+    const sa = String(a.Status || a['Status '] || '').toLowerCase();
+    const sb = String(b.Status || b['Status '] || '').toLowerCase();
+    const da = sa.includes('complete') || sa.includes('done');
+    const db = sb.includes('complete') || sb.includes('done');
+    if (da && !db) return 1;
+    if (db && !da) return -1;
     return 0;
   });
   list.forEach(item=>{
-    const nameKey = findKey(item, ['Task ','Task','task']);
-    const name = nameKey ? item[nameKey] : JSON.stringify(item).slice(0,60);
+    const nameK = findKey(item, ['Task ','Task','task']);
+    const name = nameK ? item[nameK] : JSON.stringify(item).slice(0,80);
     const status = item.Status || item['Status '] || '';
     const done = String(status).toLowerCase().includes('complete') || String(status).toLowerCase().includes('done');
     const card = document.createElement('div');
     card.className = 'taskCard';
-    card.innerHTML = `<div style="max-width:72%"><div class="taskName">${escapeHtml(name)}</div><div class="taskNote">${escapeHtml(status || '')}</div></div>
-      <div><div class="badge ${done ? 'done' : 'todo'}">${done ? 'Done' : 'To do'}</div></div>`;
+    card.innerHTML = `<div style="max-width:70%"><div class="taskName">${escapeHtml(name)}</div><div class="taskNote">${escapeHtml(status)}</div></div>
+                      <div><div class="badge ${done ? 'done':'todo'}">${done ? 'Done':'To do'}</div></div>`;
     el.appendChild(card);
   });
 }
 
-/* ================== PI Rendering & Charts ================== */
-
+/* PI render & charts */
 function renderPI(piList){
-  // normalize keys and rows
   const rows = Array.isArray(piList) ? piList.slice() : [];
-  if (rows.length === 0){
-    document.querySelector('#piTable tbody').innerHTML = '<tr><td colspan="5" class="smallMuted">No PI data</td></tr>';
-    if (charts.piBar){ charts.piBar.destroy(); charts.piBar = null; }
+  const tbody = document.querySelector('#piTable tbody');
+  tbody.innerHTML = '';
+
+  if (!rows.length){
+    tbody.innerHTML = '<tr><td colspan="5" class="smallMuted">No PI data</td></tr>';
+    if (charts.piBar) { charts.piBar.destroy(); charts.piBar = null; }
+    updatePiSummary(0,0);
     return;
   }
 
+  // detect keys robustly
   const areaKey = findKey(rows[0], ['Area','Area ']);
   const totalKey = findKey(rows[0], ['Total locations','Total locations ','Total','Total locations']);
   const countedKey = findKey(rows[0], ['Counted','Counted ']);
   const behindKey = findKey(rows[0], ['Behind %','Behind % ','Behind targe','Behind target']);
   const behindRawKey = findKey(rows[0], ['Behind targe','Behind target','Behind targe ']);
 
+  // build normalized array
   const data = [];
   rows.forEach(r=>{
     const area = String(r[areaKey] || r['Area'] || '').trim();
     if (!area) return;
-    // skip totals row
-    if (String(area).toLowerCase().indexOf('total') !== -1) return;
-    const total = safeNum(r[totalKey] || r['Total locations'] || r['Total locations '] || 0);
-    const counted = Math.min(safeNum(r[countedKey] || r['Counted '] || 0), total);
-    const behindRaw = safeNum(r[behindRawKey] || r['Behind targe'] || 0);
-    // behind percent may be fraction like 0.0017 or percent-like
-    let behindPct = safeNum(r[behindKey] || r['Behind %'] || 0);
-    if (behindPct <= 1 && behindPct > 0.0001) behindPct = behindPct * 100;
-    data.push({ area, total, counted, behindRaw, behindPct });
+    // skip the final Total: row for charts, but include in summary if present
+    if (String(area).toLowerCase().includes('total') === false) {
+      const total = safeNum(r[totalKey] || r['Total locations'] || r['Total locations '] || 0);
+      const counted = Math.min(safeNum(r[countedKey] || r['Counted '] || 0), total);
+      const behindRaw = safeNum(r[behindRawKey] || r['Behind targe'] || 0);
+      let behindPct = safeNum(r[behindKey] || r['Behind %'] || 0);
+      if (behindPct <= 1 && behindPct > 0.0001) behindPct = behindPct * 100;
+      data.push({ area, total, counted, behindRaw, behindPct });
+    }
   });
 
-  // fill table
-  const tbody = document.querySelector('#piTable tbody'); tbody.innerHTML = '';
-  let totalSum=0, countedSum=0;
-  data.forEach(r=>{
-    totalSum += r.total; countedSum += r.counted;
+  // populate table and compute totals
+  let totalSum = 0, countedSum = 0;
+  data.forEach(d=>{
+    totalSum += d.total; countedSum += d.counted;
     tbody.insertAdjacentHTML('beforeend', `<tr>
-      <td>${escapeHtml(r.area)}</td>
-      <td style="text-align:right">${formatNumber(r.total)}</td>
-      <td style="text-align:right">${formatNumber(r.counted)}</td>
-      <td style="text-align:right">${formatNumber(r.behindRaw)}</td>
-      <td style="text-align:right">${Number(r.behindPct||0).toFixed(2)}%</td>
+      <td>${escapeHtml(d.area)}</td>
+      <td style="text-align:right">${formatNumber(d.total)}</td>
+      <td style="text-align:right">${formatNumber(d.counted)}</td>
+      <td style="text-align:right">${formatNumber(d.behindRaw)}</td>
+      <td style="text-align:right">${Number(d.behindPct||0).toFixed(2)}%</td>
     </tr>`);
   });
-  document.getElementById('piSummary').innerText = `Locations: ${totalSum.toLocaleString()} • Counted: ${countedSum.toLocaleString()} • Coverage: ${((countedSum/Math.max(1,totalSum))*100).toFixed(2)}%`;
 
-  // prepare chart dataset
+  updatePiSummary(totalSum, countedSum);
+
+  // prepare datasets for chart
   let labels = data.map(d=>d.area);
   let countedDs = data.map(d=>d.counted);
   let totalDs = data.map(d=>d.total);
 
-  // guard: if all zeros -> add tiny values
+  // Guard: ensure some non-zero values
   if (totalDs.every(v=>v===0) && countedDs.every(v=>v===0)) {
     labels = ['No data']; countedDs = [1]; totalDs = [1];
   }
 
-  // scaling mode
+  // scale mode
   const mode = scaleModeEl.value || 'scaled';
   document.getElementById('currentScale').innerText = mode;
 
-  // compute scale to avoid extreme bars
-  let scaleFactor = 1;
-  const maxVal = Math.max(...totalDs, 1);
-  if (mode === 'scaled'){
-    // auto scale: reduce magnitudes > 10000
-    if (maxVal > 50000) scaleFactor = 0.001; // thousands -> millions safe
-    else if (maxVal > 20000) scaleFactor = 0.01;
-    else if (maxVal > 5000) scaleFactor = 0.1;
-    else scaleFactor = 1;
-  } else if (mode === 'log'){
-    // log transform values for visualization (avoid negative/zero)
-    // Chart.js can accept transformed values directly
-    countedDs = countedDs.map(v => Math.log10( Math.max(1, v) ));
-    totalDs = totalDs.map(v => Math.log10( Math.max(1, v) ));
-  } // raw uses as-is
+  // for log mode, transform values
+  let chartCounted = countedDs.slice();
+  let chartTotal = totalDs.slice();
 
-  if (mode !== 'log' && scaleFactor !== 1){
-    countedDs = countedDs.map(v => Number((v * scaleFactor).toFixed(3)));
-    totalDs = totalDs.map(v => Number((v * scaleFactor).toFixed(3)));
+  if (mode === 'log'){
+    chartCounted = chartCounted.map(v => Math.log10(Math.max(1,v)));
+    chartTotal = chartTotal.map(v => Math.log10(Math.max(1,v)));
+  } else if (mode === 'scaled'){
+    const maxVal = Math.max(...chartTotal,1);
+    let factor = 1;
+    if (maxVal > 100000) factor = 0.001;
+    else if (maxVal > 20000) factor = 0.01;
+    else if (maxVal > 5000) factor = 0.1;
+    chartCounted = chartCounted.map(v => Number((v*factor).toFixed(3)));
+    chartTotal = chartTotal.map(v => Number((v*factor).toFixed(3)));
   }
 
-  // destroy old
-  try { if (charts.piBar) charts.piBar.destroy(); } catch(e){ console.warn(e); charts.piBar = null; }
-
-  // Limit labels if too many
-  const maxLabels = 40;
-  let labelsForChart = labels.slice();
-  let countedForChart = countedDs.slice();
-  let totalForChart = totalDs.slice();
-  if (labels.length > maxLabels){
-    // pick top N by total
-    const idxs = totalDs.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v).slice(0,maxLabels).map(x=>x.i).sort((a,b)=>a-b);
-    labelsForChart = idxs.map(i=>labels[i]);
-    countedForChart = idxs.map(i=>countedDs[i]);
-    totalForChart = idxs.map(i=>totalDs[i]);
+  // limit labels if too many (pick top by total)
+  const MAX_LABELS = 40;
+  if (labels.length > MAX_LABELS){
+    const idx = chartTotal.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v).slice(0,MAX_LABELS).map(x=>x.i).sort((a,b)=>a-b);
+    labels = idx.map(i => labels[i]);
+    chartCounted = idx.map(i => chartCounted[i]);
+    chartTotal = idx.map(i => chartTotal[i]);
   }
 
-  // create stacked bar
+  // destroy old chart if exists
+  try { if (charts.piBar) charts.piBar.destroy(); } catch(e){ console.warn(e); }
+
   const ctx = document.getElementById('piBar').getContext('2d');
   charts.piBar = new Chart(ctx, {
     type:'bar',
     data:{
-      labels: labelsForChart,
+      labels,
       datasets:[
-        { label:'Counted', data: countedForChart, backgroundColor:'rgba(125,211,252,0.95)', stack:'s' },
-        { label:'Remaining', data: totalForChart.map((t,i)=>Math.max(0,t - (countedForChart[i]||0))), backgroundColor:'rgba(139,92,246,0.16)', stack:'s' }
+        { label:'Counted', data: chartCounted, backgroundColor:'rgba(125,211,252,0.95)', stack:'s' },
+        { label:'Remaining', data: chartTotal.map((t,i)=>Math.max(0, t - (chartCounted[i]||0))), backgroundColor:'rgba(139,92,246,0.16)', stack:'s' }
       ]
     },
     options:{
-      responsive:true, maintainAspectRatio:false,
+      responsive:true,
+      maintainAspectRatio:false,
       plugins:{legend:{position:'top'}, tooltip:{mode:'index', intersect:false}},
       scales:{
         x:{ticks:{color:'#cfeeff'}, grid:{display:false}},
-        y:{
-          beginAtZero:true,
-          ticks:{color:'#cfeeff', callback: function(val){ return formatNumber(val); }},
-          title:{display:false}
-        }
+        y:{beginAtZero:true, ticks:{color:'#cfeeff', callback: v => formatNumber(v) }}
       },
-      interaction:{mode:'nearest', axis:'x', intersect:false}
+      interaction:{mode:'index', intersect:false}
     }
   });
 }
 
-/* ================== Weekly PI ================== */
+/* Update PI summary and daily target gauge */
+function updatePiSummary(totalSum, countedSum){
+  const coverage = totalSum ? (countedSum/totalSum*100) : 0;
+  document.getElementById('piSummary').innerText = `Locations: ${totalSum.toLocaleString()} • Counted: ${countedSum.toLocaleString()} • Coverage: ${coverage.toFixed(2)}%`;
+
+  // Build a daily target using weeklyPiData if available:
+  // dailyTargetSum = sum( weeklyQty / 7 ) over weeklyPiData for areas present
+  let weeklyData = (currentPayload && currentPayload.weeklyPiData) ? currentPayload.weeklyPiData : (defaultPayload.weeklyPiData || []);
+  let dailyTargetSum = 0;
+  if (Array.isArray(weeklyData) && weeklyData.length){
+    weeklyData.forEach(w=>{
+      const weeklyQty = safeNum(w[' Weekly Qty'] || w['Weekly Qty'] || w[' Weekly Qty']);
+      dailyTargetSum += weeklyQty/7;
+    });
+  } else {
+    // fallback: approximate target as 10% of totalSum if weekly missing
+    dailyTargetSum = totalSum * 0.10;
+  }
+
+  const progress = dailyTargetSum ? Math.min(1, countedSum / dailyTargetSum) : 0;
+  renderDailyGauge(progress, countedSum, dailyTargetSum);
+}
+
+/* ================= Weekly PI chart ================= */
 function renderWeeklyPI(weeklyList){
-  const tbody = document.querySelector('#weeklyPiTable tbody'); tbody.innerHTML = '';
+  const tbody = document.querySelector('#weeklyPiTable tbody');
+  tbody.innerHTML = '';
   const arr = Array.isArray(weeklyList) ? weeklyList.slice() : [];
 
   if (!arr.length){
@@ -446,19 +539,17 @@ function renderWeeklyPI(weeklyList){
     return;
   }
 
-  // identify keys robustly
   const areaKey = findKey(arr[0], ['Area','Area ']);
-  const weekKey = findKey(arr[0], ['Week No','WeekNo','Week No','Week']);
+  const weekKey = findKey(arr[0], ['Week No','WeekNo','Week']);
   const dailyKey = findKey(arr[0], ['Daily Qty','DailyQty','Daily']);
-  const weeklyQtyKey = findKey(arr[0], [' Weekly Qty','Weekly Qty',' Weekly Qty']);
+  const weeklyQtyKey = findKey(arr[0], [' Weekly Qty','Weekly Qty','WeeklyQty',' Weekly Qty']);
 
-  // append rows and aggregate
   const agg = {};
   arr.forEach(r=>{
     const area = r[areaKey] || r['Area'] || '';
     const week = r[weekKey] || r['Week No'] || r['Week'] || '';
     const dailyQty = safeNum(r[dailyKey] || 0);
-    const weeklyQty = safeNum(r[weeklyQtyKey] || r[' Weekly Qty'] || 0);
+    const weeklyQty = safeNum(r[weeklyQtyKey] || 0);
     tbody.insertAdjacentHTML('beforeend', `<tr>
       <td>${escapeHtml(week)}</td><td>${escapeHtml(area)}</td><td style="text-align:right">${formatNumber(dailyQty)}</td><td style="text-align:right">${formatNumber(weeklyQty)}</td><td style="text-align:right">${(safeNum(r[' Weekly %']||r['Weekly %']||0)*100).toFixed(3)}%</td>
     </tr>`);
@@ -466,67 +557,151 @@ function renderWeeklyPI(weeklyList){
     agg[wk] = (agg[wk] || 0) + weeklyQty;
   });
 
-  // create sorted weekly arrays
-  const weekKeys = Object.keys(agg).map(k=>Number(k)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
-  if (weekKeys.length === 0){
-    // fallback if non-numeric weeks: keep original order unique
-    const uniq = Array.from(new Set(Object.keys(agg)));
-    weekKeys.splice(0, weekKeys.length, ...uniq);
-  }
+  // sort numeric weeks
+  let weekKeys = Object.keys(agg).map(k=>Number(k)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
+  if (weekKeys.length === 0) weekKeys = Object.keys(agg); // fallback to string keys
   const labels = weekKeys.map(String);
-  const values = weekKeys.map(k=>agg[k]);
+  let values = weekKeys.map(k => agg[k]);
 
   document.getElementById('pointCount').innerText = labels.length;
 
-  try { if (charts.weeklyLine) charts.weeklyLine.destroy(); } catch(e){ charts.weeklyLine = null; }
-
-  // transform for scale mode
+  // scale mode transformations
   const mode = scaleModeEl.value || 'scaled';
-  let valuesForChart = values.map(v => Number(v));
-  if (mode === 'log') valuesForChart = valuesForChart.map(v => Math.log10(Math.max(1,v)));
+  let vals = values.slice();
+  if (mode === 'log') vals = vals.map(v => Math.log10(Math.max(1,v)));
   else if (mode === 'scaled'){
-    const maxVal = Math.max(...valuesForChart,1);
-    if (maxVal > 50000) valuesForChart = valuesForChart.map(v => v * 0.001);
-    else if (maxVal > 20000) valuesForChart = valuesForChart.map(v => v * 0.01);
+    const maxVal = Math.max(...vals,1);
+    if (maxVal > 100000) vals = vals.map(v => v * 0.001);
+    else if (maxVal > 20000) vals = vals.map(v => v * 0.01);
   }
+
+  try { if (charts.weeklyLine) charts.weeklyLine.destroy(); } catch(e){ charts.weeklyLine = null; }
   const ctx = document.getElementById('weeklyLine').getContext('2d');
   charts.weeklyLine = new Chart(ctx, {
     type:'line',
-    data:{ labels, datasets:[{ label:'Weekly Qty', data: valuesForChart, borderColor:'rgba(125,211,252,0.95)', backgroundColor:'rgba(125,211,252,0.08)', fill:true, tension:0.25, pointRadius:3 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#cfeeff'}}, y:{ticks:{color:'#cfeeff', callback:function(v){ return formatNumber(v); }}} }
+    data:{ labels, datasets:[{ label:'Weekly Qty', data: vals, borderColor:'rgba(125,211,252,0.95)', backgroundColor:'rgba(125,211,252,0.08)', fill:true, tension:0.25, pointRadius:3 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#cfeeff'}}, y:{ticks:{color:'#cfeeff', callback: v => formatNumber(v)}} }
   });
 }
 
-/* ================== Tasks donut ================== */
-function renderTasksDonut(daily, weekly){
-  const merged = (Array.isArray(daily)?daily:[]).concat(Array.isArray(weekly)?weekly:[]);
-  let done = 0, todo = 0;
-  merged.forEach(t=>{
-    const s = String(t.Status || t['Status '] || '').toLowerCase();
-    if (s.includes('complete') || s.includes('done')) done++; else todo++;
-  });
-  document.getElementById('tasksStats').innerText = `Completed ${done} • Remaining ${todo}`;
+/* ================= Daily gauge (3D style donut + center) ================= */
+const donut3DPlugin = {
+  id: 'donut3DPlugin',
+  beforeDraw(chart, args, options){
+    if (!options || !options.depth) return;
+    const ctx = chart.ctx;
+    const meta = chart.getDatasetMeta(0);
+    if (!meta) return;
+    const first = meta.data[0];
+    const centerX = (chart.chartArea.left + chart.chartArea.right)/2;
+    const centerY = (chart.chartArea.top + chart.chartArea.bottom)/2;
+    const outerRadius = first && first.outerRadius ? first.outerRadius : (Math.min(chart.width, chart.height)/2 * 0.9);
+    const innerRadius = first && first.innerRadius ? first.innerRadius : (outerRadius*0.6);
+    const depth = options.depth;
+    const slices = chart.data.datasets[0].data;
+    const colors = chart.data.datasets[0].backgroundColor;
+    let startAngle = (chart.options.rotation || 0) - Math.PI/2;
+    const total = slices.reduce((s,v)=>s + (typeof v === 'number' ? v : 0), 0) || 1;
+    const angles = [];
+    for (let si=0; si<slices.length; si++){
+      const a = (slices[si]/total) * (chart.options.circumference || (Math.PI*2));
+      angles.push({ start: startAngle, end: startAngle + a });
+      startAngle += a;
+    }
+    const step = Math.max(2, Math.round(depth/6));
+    for (let layer = depth; layer > 0; layer -= step){
+      const yOffset = layer * 0.6;
+      for (let i=0;i<angles.length;i++){
+        const ainfo = angles[i];
+        ctx.beginPath();
+        ctx.fillStyle = shadeColor(colors[i] || 'rgba(255,255,255,0.08)', -0.18 - (layer/depth)*0.12);
+        ctx.moveTo(centerX, centerY + yOffset);
+        ctx.arc(centerX, centerY + yOffset, outerRadius, ainfo.start, ainfo.end);
+        ctx.arc(centerX, centerY + yOffset, innerRadius, ainfo.end, ainfo.start, true);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+  }
+};
 
-  try { if (charts.tasksDonut) charts.tasksDonut.destroy(); } catch(e){ charts.tasksDonut = null; }
+function shadeColor(css, percent){
+  try {
+    if (css.indexOf('rgba')===0 || css.indexOf('rgb')===0){
+      const nums = css.replace(/rgba?\(|\)|\s/g,'').split(',').map(n=>Number(n));
+      let r = Math.round(nums[0]*(1+percent)), g = Math.round(nums[1]*(1+percent)), b = Math.round(nums[2]*(1+percent));
+      const a = nums.length>3 ? nums[3] : 1;
+      return 'rgba('+clamp(r,0,255)+','+clamp(g,0,255)+','+clamp(b,0,255)+','+a+')';
+    }
+    if (css[0]==='#'){
+      let c = css.substring(1);
+      if (c.length===3){ let tmp=''; for (let i=0;i<c.length;i++) tmp+=c[i]+c[i]; c=tmp; }
+      const num = parseInt(c,16);
+      const rr = (num>>16) + Math.round(255*percent);
+      const gg = ((num>>8)&0x00FF) + Math.round(255*percent);
+      const bb = (num&0x0000FF) + Math.round(255*percent);
+      return 'rgba('+clamp(rr,0,255)+','+clamp(gg,0,255)+','+clamp(bb,0,255)+',1)';
+    }
+  } catch(e){}
+  return css;
+}
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
 
-  const ctx = document.getElementById('tasksDonut').getContext('2d');
-  charts.tasksDonut = new Chart(ctx, {
+function renderDailyGauge(progress, countedSum, targetSum){
+  // progress in [0..1]
+  const pct = Math.max(0, Math.min(1, progress || 0));
+  const rawText = `Counted ${countedSum.toLocaleString()} / Target ${Math.round(targetSum).toLocaleString()}`;
+  document.getElementById('dailyGaugeText').innerText = `${(pct*100).toFixed(2)}% • ${rawText}`;
+  document.getElementById('dailyTargetBreakdown').innerText = `Target used = weekly averages (if available)`;
+
+  try { if (charts.dailyGauge) charts.dailyGauge.destroy(); } catch(e){ charts.dailyGauge = null; }
+
+  const ctx = document.getElementById('dailyGauge').getContext('2d');
+  charts.dailyGauge = new Chart(ctx, {
     type:'doughnut',
-    data:{ labels:['Done','Remaining'], datasets:[{ data:[done,todo], backgroundColor:['rgba(139,92,246,0.98)','rgba(125,211,252,0.14)'] }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}} }
+    data:{ labels:['Progress','Remaining'], datasets:[{ data:[pct, Math.max(0,1-pct)], backgroundColor:['rgba(125,211,252,0.98)','rgba(255,255,255,0.06)'] }]},
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'78%',
+      rotation: -90*Math.PI/180, circumference:180*Math.PI/180,
+      plugins:{legend:{display:false}, donut3DPlugin:{depth:16}}
+    },
+    plugins: [donut3DPlugin]
   });
+
+  // center label drawing
+  // add center text plugin
+  const centerPlugin = {
+    id:'centerText',
+    afterDraw(chart){
+      if (!chart) return;
+      const ctx = chart.ctx;
+      ctx.save();
+      const centerX = (chart.chartArea.left + chart.chartArea.right)/2;
+      const centerY = (chart.chartArea.top + chart.chartArea.bottom)/2 + 12;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle = '#ffffff'; ctx.font = '700 18px Poppins';
+      ctx.fillText((pct*100).toFixed(2) + '%', centerX, centerY-8);
+      ctx.font = '400 12px Poppins'; ctx.fillStyle = '#cfeeff';
+      ctx.fillText(rawText, centerX, centerY+12);
+      ctx.restore();
+    }
+  };
+  // register and run for this chart instance
+  if (!Chart.registry.getPlugin('centerText')) Chart.register(centerPlugin);
 }
 
-/* ================== Export functions ================== */
+/* ================= Tasks donut is derived in renderTasksDonut() via renderTasksDonut() inside render. */
+
+/* ================= Export / Utilities ================= */
 function exportCsv(){
-  // export PI table
+  // export pi table
   const rows = [];
   rows.push(['Area','Total','Counted','Behind raw','Behind %']);
   document.querySelectorAll('#piTable tbody tr').forEach(tr=>{
-    const tds = tr.querySelectorAll('td');
-    if (!tds.length) return;
+    const cols = tr.querySelectorAll('td');
+    if (!cols.length) return;
     const row = [];
-    tds.forEach(td => row.push(td.innerText.replace(/,/g,'')));
+    cols.forEach(td => row.push(td.innerText.replace(/,/g,'')));
     rows.push(row);
   });
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
@@ -535,26 +710,27 @@ function exportCsv(){
   const a = document.createElement('a'); a.href = url; a.download = 'pi_by_area.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
 
-function exportImage(){
-  // combine main charts into a single image by exporting canvases separately (simple approach: open each in new tab)
-  // We'll trigger downloads of each chart as PNG
-  const map = { 'piBar':'pi-bar.png', 'weeklyLine':'weekly-line.png', 'tasksDonut':'tasks-donut.png' };
-  for (const id in map){
-    const canvas = document.getElementById(id === 'tasksDonut' ? 'tasksDonut' : (id === 'piBar' ? 'piBar' : 'weeklyLine'));
-    if (!canvas) continue;
+function exportImages(){
+  // export three canvases
+  const ids = ['piBar','weeklyLine','dailyGauge'];
+  ids.forEach(id=>{
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
     try {
       const url = canvas.toDataURL('image/png');
-      const a = document.createElement('a'); a.href = url; a.download = map[id]; document.body.appendChild(a); a.click(); a.remove();
-    } catch(e){ console.warn('Export image failed', e); }
-  }
+      const a = document.createElement('a'); a.href = url; a.download = `${id}.png`; document.body.appendChild(a); a.click(); a.remove();
+    } catch(e){ console.warn('export image failed', e); }
+  });
 }
 
-/* ================== Helpers ================== */
-function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-/* ================== Init ================== */
-refresh();
-
+/* ================= Init ================= */
+(function init(){
+  // initial payload default
+  currentPayload = defaultPayload;
+  // put the JSON into textarea so user sees it
+  document.getElementById('jsonInput').value = JSON.stringify(defaultPayload, null, 2);
+  render(currentPayload);
+})();
 </script>
 </body>
 </html>
