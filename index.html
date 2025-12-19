@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Stock Team VCB — Updated</title>
+<title>Stock Team VCB</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -13,10 +13,8 @@
     --muted:#98a8bd;
     --accentA:#7dd3fc;
     --accentB:#8b5cf6;
-    --green:#12b76a;
-    --orange:#f97316;
-    --red:#ef4444;
-    --glass: rgba(255,255,255,0.02);
+    --done:#12b76a;
+    --todo:#f97316;
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial;background:linear-gradient(180deg,#021026,#05122a);color:#eaf6ff}
@@ -28,19 +26,15 @@
   .layout{display:grid;grid-template-columns:320px 1fr 420px;gap:12px;height:calc(100vh - 72px);padding:12px}
   .panel{background:var(--panel);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 18px 40px rgba(2,6,23,0.45);display:flex;flex-direction:column;min-height:0;overflow:hidden}
   .taskList{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:6px}
-  .taskCard{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.04));border:1px solid rgba(255,255,255,0.02)}
-  .taskInfo{max-width:70%}
-  .taskTitle{font-weight:700;font-size:13px;margin-bottom:4px}
-  .taskMeta{font-size:12px;color:var(--muted)}
-  .badge{padding:6px 12px;border-radius:999px;color:#fff;font-weight:700;display:inline-flex;align-items:center;gap:8px}
-  .badge svg{width:14px;height:14px}
-  .done{background:linear-gradient(90deg,var(--green),#065f46)}
-  .inprogress{background:linear-gradient(90deg,#f59e0b,#b45309)}
-  .notstarted{background:linear-gradient(90deg,#64748b,#334155)}
+  .taskCard{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(0,0,0,0.05));border:1px solid rgba(255,255,255,0.02);transition:0.2s}
+  .taskCard:hover{background:rgba(255,255,255,0.03)}
+  .badge{padding:6px 14px;border-radius:999px;color:#fff;font-weight:700;font-size:12px;text-align:center;white-space:nowrap}
+  .done{background:linear-gradient(90deg,var(--done),#065f46);}
+  .todo{background:linear-gradient(90deg,var(--todo),#b91c1c);}
   .charts{display:grid;grid-template-rows:1fr 1fr;gap:12px;min-height:0}
   .chartRow{display:flex;gap:12px;min-height:0}
-  .chartCard{flex:1;display:flex;flex-direction:column;border-radius:10px;padding:8px;background:var(--glass);min-height:0}
-  .chartTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .chartCard{flex:1;display:flex;flex-direction:column;border-radius:10px;padding:8px;background:rgba(255,255,255,0.02);min-height:0}
+  .chartTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-weight:600;color:#cfeeff}
   .canvasWrap{flex:1;min-height:0}
   canvas{width:100% !important;height:100% !important;display:block}
   table{width:100%;border-collapse:collapse;color:#eaf6ff;font-size:13px}
@@ -50,11 +44,6 @@
   .small{font-size:12px;color:var(--muted)}
   body,html{overflow:hidden}
   @media(max-width:1100px){ .layout{grid-template-columns:1fr;grid-auto-rows:auto;height:calc(100vh - 72px)} body,html{overflow:auto} }
-
-  /* table small numeric */
-  .num{font-variant-numeric: tabular-nums; text-align:right}
-  .muted{color:var(--muted)}
-  .targetPill{display:inline-block;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:700}
 </style>
 </head>
 <body>
@@ -92,22 +81,22 @@
   <div class="panel charts">
     <div class="chartRow">
       <div class="chartCard">
-        <div class="chartTitle"><div style="font-weight:700">Counted vs Remaining (Top areas)</div><div class="small" id="countHint">—</div></div>
+        <div class="chartTitle"><div>Counted vs Remaining (Top areas)</div><div class="small" id="countHint">—</div></div>
         <div class="canvasWrap"><canvas id="piBar"></canvas></div>
       </div>
       <div class="chartCard">
-        <div class="chartTitle"><div style="font-weight:700">Weekly PI — Series</div><div class="small" id="weekHint">—</div></div>
+        <div class="chartTitle"><div>Weekly PI — Series</div><div class="small" id="weekHint">—</div></div>
         <div class="canvasWrap"><canvas id="weeklyLine"></canvas></div>
       </div>
     </div>
 
     <div class="chartRow">
       <div class="chartCard">
-        <div class="chartTitle"><div style="font-weight:700">Daily tasks</div><div class="small" id="dailyCountSmall">—</div></div>
+        <div class="chartTitle"><div>Daily tasks</div><div class="small" id="dailyCountSmall">—</div></div>
         <div class="canvasWrap"><canvas id="dailyDonut"></canvas></div>
       </div>
       <div class="chartCard">
-        <div class="chartTitle"><div style="font-weight:700">Weekly tasks</div><div class="small" id="weeklyCountSmall">—</div></div>
+        <div class="chartTitle"><div>Weekly tasks</div><div class="small" id="weeklyCountSmall">—</div></div>
         <div class="canvasWrap"><canvas id="weeklyDonut"></canvas></div>
       </div>
     </div>
@@ -124,9 +113,9 @@
       </div>
     </div>
 
-    <h3 style="margin-top:6px">PI — Daily by area <span class="targetPill" id="globalTargetPill">Target: 1193</span></h3>
+    <h3 style="margin-top:6px">PI — Daily by area</h3>
     <div style="flex:1;overflow:auto;margin-bottom:8px">
-      <table id="piTable"><thead><tr><th>Area</th><th style="text-align:right">Total</th><th style="text-align:right">Counted (today)</th><th style="text-align:right">Accumulated</th><th style="text-align:right">Remaining</th><th style="text-align:right">Target</th></tr></thead><tbody></tbody></table>
+      <table id="piTable"><thead><tr><th>Area</th><th style="text-align:right">Daily Count</th><th style="text-align:right">Remaining</th></tr></thead><tbody></tbody></table>
     </div>
 
     <h3 style="margin-top:6px">Weekly details</h3>
@@ -139,577 +128,192 @@
 <div id="debug" aria-live="polite"></div>
 
 <script>
-/* ---------- constants & helpers ---------- */
-const TARGET = 1193; // fixed global target as requested
+/* ---------- helpers ---------- */
+function dbg(msg){ const el = document.getElementById('debug'); const d = document.createElement('div'); d.textContent = msg; el.appendChild(d); el.scrollTop = el.scrollHeight; console.log(msg);}
+function safeNum(v){ if(v==null)return 0; if(typeof v==='number')return isFinite(v)?v:0; const n=Number(String(v).replace(/,/g,'')); return isFinite(n)?n:0;}
+function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function findKey(obj,candidates){if(!obj)return undefined;if(!Array.isArray(candidates))candidates=[candidates];const ks=Object.keys(obj);for(const c of candidates){for(const k of ks){if(k.trim().toLowerCase()===c.trim().toLowerCase())return k;}}for(const c of candidates){for(const k of ks){if(k.trim().toLowerCase().indexOf(c.trim().toLowerCase())!==-1)return k;}}return undefined;}
+function formatNumber(n){n=Number(n)||0;return n.toLocaleString();}
 
-function dbg(msg){
-  const el = document.getElementById('debug');
-  const d = document.createElement('div');
-  d.textContent = msg;
-  el.appendChild(d);
-  el.scrollTop = el.scrollHeight;
-  console.log(msg);
-}
-function safeNum(v){
-  if (v === null || v === undefined) return 0;
-  if (typeof v === 'number') return isFinite(v) ? v : 0;
-  const s = String(v).replace(/,/g, '').trim();
-  const n = Number(s);
-  return isFinite(n) ? n : 0;
-}
-function findKey(obj, candidates){
-  if (!obj) return undefined;
-  if (!Array.isArray(candidates)) candidates = [candidates];
-  const ks = Object.keys(obj);
-  for (const c of candidates) {
-    for (const k of ks) {
-      if (k.trim().toLowerCase() === c.trim().toLowerCase()) return k;
-    }
-  }
-  for (const c of candidates) {
-    for (const k of ks) {
-      if (k.trim().toLowerCase().indexOf(c.trim().toLowerCase()) !== -1) return k;
-    }
-  }
-  return undefined;
-}
-function escapeHtml(s){ return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function formatNumber(n){ n = Number(n) || 0; if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M'; if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1) + 'K'; return n.toLocaleString(); }
-function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-
-/* ---------- Chart plugins (kept) ---------- */
+/* ---------- Chart plugins ---------- */
 const donut3D = {
-  id: 'donut3D',
-  beforeDraw(chart, args, options){
-    if (!options || !options.depth) return;
-    const ctx = chart.ctx;
-    const meta = chart.getDatasetMeta(0);
-    if (!meta) return;
-    const first = meta.data[0];
-    if (!first) return;
-    const cx = (chart.chartArea.left + chart.chartArea.right) / 2;
-    const cy = (chart.chartArea.top + chart.chartArea.bottom) / 2;
-    const outerR = first.outerRadius || Math.min(chart.width, chart.height) / 2 * 0.9;
-    const innerR = first.innerRadius || outerR * 0.6;
-    const depth = options.depth;
-    const slices = chart.data.datasets[0].data;
-    const colors = chart.data.datasets[0].backgroundColor || [];
-    let startAngle = (chart.options.rotation || 0) - Math.PI/2;
-    const total = slices.reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0) || 1;
-    const angles = [];
-    for (let i = 0; i < slices.length; i++){
-      const a = (slices[i] / total) * (chart.options.circumference || (Math.PI * 2));
-      angles.push({ start: startAngle, end: startAngle + a });
-      startAngle += a;
-    }
-    const step = Math.max(2, Math.round(depth / 6));
-    for (let layer = depth; layer > 0; layer -= step){
-      const yOff = layer * 0.6;
-      for (let i = 0; i < angles.length; i++){
-        const ainfo = angles[i];
+  id:'donut3D',
+  beforeDraw(chart,args,options){
+    if(!options||!options.depth)return;
+    const ctx=chart.ctx;
+    const meta=chart.getDatasetMeta(0);
+    if(!meta)return;
+    const first=meta.data[0];if(!first)return;
+    const cx=(chart.chartArea.left+chart.chartArea.right)/2;
+    const cy=(chart.chartArea.top+chart.chartArea.bottom)/2;
+    const outerR=first.outerRadius||Math.min(chart.width,chart.height)/2*0.9;
+    const innerR=first.innerRadius||outerR*0.6;
+    const depth=options.depth;
+    const slices=chart.data.datasets[0].data;
+    const colors=chart.data.datasets[0].backgroundColor||[];
+    let startAngle=(chart.options.rotation||0)-Math.PI/2;
+    const total=slices.reduce((s,v)=>s+(typeof v==='number'?v:0),0)||1;
+    const angles=[];
+    for(let i=0;i<slices.length;i++){const a=(slices[i]/total)*(chart.options.circumference||2*Math.PI);angles.push({start:startAngle,end:startAngle+a});startAngle+=a;}
+    const step=Math.max(2,Math.round(depth/6));
+    for(let layer=depth;layer>0;layer-=step){
+      const yOff=layer*0.6;
+      for(let i=0;i<angles.length;i++){
+        const ainfo=angles[i];
         ctx.beginPath();
-        ctx.fillStyle = shadeColor(colors[i] || 'rgba(255,255,255,0.08)', -0.12 - (layer / depth) * 0.12);
-        ctx.moveTo(cx, cy + yOff);
-        ctx.arc(cx, cy + yOff, outerR, ainfo.start, ainfo.end);
-        ctx.arc(cx, cy + yOff, innerR, ainfo.end, ainfo.start, true);
-        ctx.closePath();
-        ctx.fill();
+        ctx.fillStyle=shadeColor(colors[i]||'rgba(255,255,255,0.08)',-0.12-(layer/depth)*0.12);
+        ctx.moveTo(cx,cy+yOff);
+        ctx.arc(cx,cy+yOff,outerR,ainfo.start,ainfo.end);
+        ctx.arc(cx,cy+yOff,innerR,ainfo.end,ainfo.start,true);
+        ctx.closePath();ctx.fill();
       }
     }
   }
 };
-const centerText = {
-  id: 'centerText',
-  afterDraw(chart){
-    const cfg = chart && chart.config && chart.config.options && chart.config.options.plugins && chart.config.options.plugins.centerText;
-    if (!cfg) return;
-    const ctx = chart.ctx;
-    ctx.save();
-    const x = (chart.chartArea.left + chart.chartArea.right) / 2;
-    const y = (chart.chartArea.top + chart.chartArea.bottom) / 2;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = cfg.color || '#fff';
-    ctx.font = cfg.font || '700 16px Poppins';
-    ctx.fillText(cfg.text || '', x, y - 8);
-    if (cfg.subtext){
-      ctx.font = cfg.subFont || '400 12px Poppins';
-      ctx.fillStyle = cfg.subColor || '#cfeeff';
-      ctx.fillText(cfg.subtext, x, y + 14);
-    }
-    ctx.restore();
-  }
-};
-Chart.register(donut3D, centerText);
+const centerText={id:'centerText',afterDraw(chart){const cfg=chart?.config?.options?.plugins?.centerText;if(!cfg)return;const ctx=chart.ctx;ctx.save();const x=(chart.chartArea.left+chart.chartArea.right)/2;const y=(chart.chartArea.top+chart.chartArea.bottom)/2;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=cfg.color||'#fff';ctx.font=cfg.font||'700 16px Poppins';ctx.fillText(cfg.text||'',x,y-8);if(cfg.subtext){ctx.font=cfg.subFont||'400 12px Poppins';ctx.fillStyle=cfg.subColor||'#cfeeff';ctx.fillText(cfg.subtext,x,y+14);}ctx.restore();}};
+Chart.register(donut3D,centerText);
 
 /* ---------- state ---------- */
-let payload = null;
-let charts = { piBar:null, weeklyLine:null, dailyDonut:null, weeklyDonut:null, gaugeMini:null };
+let payload=null;
+let charts={piBar:null,weeklyLine:null,dailyDonut:null,weeklyDonut:null,gaugeMini:null};
+const DAILY_TARGET=1193;
+const STORAGE_KEY='dailyProgress';
 
-/* ---------- fetch attempts (robust) ---------- */
-const tryUrls = [
-  './data/dashboard.json',
-  '/data/dashboard.json',
-  'data/dashboard.json',
-  './dashboard.json',
-  '/dashboard.json'
-];
-const FETCH_TIMEOUT = 6000;
-function timeoutPromise(ms){ return new Promise((res) => setTimeout(res, ms)); }
-
-async function fetchJsonWithTimeout(url, timeout){
-  const controller = new AbortController();
-  const id = setTimeout(()=>controller.abort(), timeout);
-  try {
-    dbg('Trying: ' + url);
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(id);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const j = await res.json();
-    dbg('Loaded: ' + url);
-    return { ok:true, json:j, url };
-  } catch (err){
-    clearTimeout(id);
-    dbg('Failed: ' + url + ' — ' + (err && err.message ? err.message : String(err)));
-    return { ok:false, err, url };
-  }
-}
-
-async function tryLoadJson(){
-  const debugArea = document.getElementById('debug');
-  debugArea.innerHTML = '';
-  for (const u of tryUrls){
-    const r = await fetchJsonWithTimeout(u, FETCH_TIMEOUT);
-    if (r.ok) return r.json;
-  }
-  dbg('All auto fetch attempts failed. Use Upload JSON, Paste JSON, or host data/dashboard.json on your server.');
-  return null;
-}
-
-/* ---------- UI wiring ---------- */
+/* ---------- load and render ---------- */
 document.getElementById('refreshBtn').addEventListener('click', loadAndRender);
 document.getElementById('uploadBtn').addEventListener('click', onUpload);
 document.getElementById('pasteBtn').addEventListener('click', onPaste);
 document.getElementById('exportCsv').addEventListener('click', downloadCsv);
 document.getElementById('exportPng').addEventListener('click', exportPNGs);
-document.getElementById('scaleMode').addEventListener('change', ()=>{ if (payload) renderAll(); });
+document.getElementById('scaleMode').addEventListener('change',()=>{if(payload)renderAll();});
 
-/* ---------- storage helpers (per-week accumulators) ---------- */
-function toISO(d){ const yyyy = d.getFullYear(); const mm = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0'); return `${yyyy}-${mm}-${dd}`; }
-function getWeekStartISO(dateOrIso){ // Monday as week start
-  const d = dateOrIso ? new Date(dateOrIso) : new Date();
-  const day = d.getDay(); // 0 Sun .. 6 Sat
-  const diff = (day === 0 ? -6 : 1) - day; // shift to Monday
-  const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + diff);
-  return toISO(monday);
-}
-function getAccumKey(weekStart, area){ return `pi_accum:${weekStart}:${area}`; }
-function getAccumIndexKey(weekStart){ return `pi_accum_keys:${weekStart}`; }
-function loadAccum(area, weekStart){ try { const k = getAccumKey(weekStart, area); return safeNum(localStorage.getItem(k)); } catch(e){ return 0; } }
-function saveAccum(area, weekStart, value){
-  try {
-    const k = getAccumKey(weekStart, area);
-    localStorage.setItem(k, String(Math.round(value)));
-    // record key in index
-    const idxKey = getAccumIndexKey(weekStart);
-    const idx = JSON.parse(localStorage.getItem(idxKey) || '[]');
-    if (!idx.includes(k)) { idx.push(k); localStorage.setItem(idxKey, JSON.stringify(idx)); }
-  } catch(e){ dbg('Failed saving accum: ' + e.message); }
-}
-function clearAccumForWeek(weekStart){
-  try {
-    const idxKey = getAccumIndexKey(weekStart);
-    const idx = JSON.parse(localStorage.getItem(idxKey) || '[]');
-    for (const k of idx) localStorage.removeItem(k);
-    localStorage.removeItem(idxKey);
-  } catch(e){ dbg('Clear accum error: ' + e.message); }
-}
-
-/* ---------- load & render ---------- */
 async function loadAndRender(){
   dbg('Loading JSON...');
-  const j = await tryLoadJson();
-  if (!j){
-    dbg('Using demo fallback data.');
-    payload = demoPayload();
-  } else {
-    payload = j;
-  }
-  // Live date canonicalization
-  const todayIso = (payload.meta && payload.meta.today) ? (new Date(payload.meta.today)).toISOString().slice(0,10) : new Date().toISOString().slice(0,10);
-  const weekStart = getWeekStartISO(todayIso);
-  // Weekly reset logic: if we don't have currentWeek recorded or is different -> old week detected
-  const storedCurrentWeek = localStorage.getItem('pi_week_current');
-  if (storedCurrentWeek && storedCurrentWeek !== weekStart){
-    dbg('Week change detected. Clearing previous week accumulators (' + storedCurrentWeek + ' → ' + weekStart + ').');
-    // Clear previous week's accumulators (safety: only clear index tracked keys)
-    try {
-      const idxKey = getAccumIndexKey(storedCurrentWeek);
-      const idx = JSON.parse(localStorage.getItem(idxKey) || '[]');
-      for (const k of idx) localStorage.removeItem(k);
-      localStorage.removeItem(idxKey);
-    } catch(e){ dbg('Error clearing old week accumulators: ' + e.message); }
-  }
-  localStorage.setItem('pi_week_current', weekStart);
-
-  document.getElementById('liveDate').innerText = (payload.meta && payload.meta.today) ? payload.meta.today : new Date().toLocaleDateString();
-  // make target visible
-  document.getElementById('globalTargetPill').innerText = 'Target: ' + TARGET;
-  // attach weekStart to payload for render functions (used for persistence)
-  payload._weekStart = weekStart;
+  payload=await tryLoadJson();
+  if(!payload) payload=demoPayload();
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('liveDate').innerText=today;
   renderAll();
 }
 
+/* ---------- demo payload ---------- */
 function demoPayload(){
   return {
-    piData:[
-      {"Date ":46010,"Area ":"MPR","Total locations":14622,"Counted ":50,"Behind targe":0,"Above target":222.47,"Behind %":0},
-      {"Date ":46010,"Area ":"PB1","Total locations":4329,"Counted ":30,"Behind targe":0,"Above target":89.57,"Behind %":0},
-      {"Date ":46010,"Area ":"ZoneX","Total locations":2000,"Counted ":10,"Behind targe":0,"Above target":0,"Behind %":0}
-    ],
-    dailyTask:[{"Task ":"Aged stock report 7AM","Status":"Completed"},{"Task ":"PI Master file update","Status":"Not started"},{"Task ":"Field check","Status":"In progress"}],
-    weeklyTask:[{"Task":"(Weekly) SLA","Status":"Completed"},{"Task":"(Weekly) SIS report","Status":"Not started"}],
-    weeklyPiData:[{"Date ":46010,"Area ":"MPR","Daily Qty":127,"Week No":27," Weekly Qty":5103," Weekly %":0.85549}],
-    meta:{today:new Date().toISOString().slice(0,10), rows: 42}
+    piData:[{Area:'MPR',Counted:500},{Area:'PB1',Counted:300},{Area:'PB2',Counted:250}],
+    dailyTask:[{Task:'Aged stock report 7AM',Status:'Completed'},{Task:'PI Master file update',Status:'Not started'}],
+    weeklyTask:[{Task:'(Weekly) SLA',Status:'Completed'},{Task:'(Weekly) SIS report',Status:'Not started'}],
+    weeklyPiData:[{WeekNo:27,Area:'MPR',DailyQty:127,WeeklyQty:5103,WeeklyPct:0.855}],
+    meta:{today:new Date().toLocaleDateString(),rows:42}
   };
 }
 
-/* ---------- main render pipeline ---------- */
+/* ---------- render pipeline ---------- */
 function renderAll(){
-  renderTasks(payload.dailyTask || [], 'dailyList');
-  renderTasks(payload.weeklyTask || [], 'weeklyList');
-  renderPI(payload.piData || []);
-  renderWeeklyPI(payload.weeklyPiData || []);
+  renderTasks(payload.dailyTask||[],'dailyList');
+  renderTasks(payload.weeklyTask||[],'weeklyList');
+  renderPI(payload.piData||[]);
+  renderWeeklyPI(payload.weeklyPiData||[]);
   renderTaskDonuts(payload);
   computeAndRenderGauge(payload);
 }
 
-/* ---------- tasks (render improved badges) ---------- */
-function renderTasks(list, containerId){
-  const el = document.getElementById(containerId);
-  el.innerHTML = '';
-  if (!Array.isArray(list) || list.length === 0){
-    el.innerHTML = '<div class="small">No tasks</div>';
-    return;
-  }
-  // Map status to canonical
-  function canonicalStatus(s){
-    if (!s) return 'not started';
-    const xs = String(s).toLowerCase();
-    if (xs.includes('complete') || xs.includes('done')) return 'completed';
-    if (xs.includes('in progress') || xs.includes('progress') || xs.includes('started') || xs.includes('ongoing')) return 'in progress';
-    return 'not started';
-  }
-  list.sort((a,b)=>{
-    const sa = canonicalStatus(a.Status || a['Status '] || a.status || '');
-    const sb = canonicalStatus(b.Status || b['Status '] || b.status || '');
-    const ranks = { 'in progress': 0, 'not started': 1, 'completed': 2 };
-    return (ranks[sa]||9) - (ranks[sb]||9);
-  });
-  for (const t of list){
-    const nameKey = findKey(t, ['Task ','Task','task']);
-    const name = nameKey ? t[nameKey] : JSON.stringify(t).slice(0,60);
-    const rawStatus = t.Status || t['Status '] || t.status || '';
-    const state = canonicalStatus(rawStatus);
-    const badgeClass = state === 'completed' ? 'done' : (state === 'in progress' ? 'inprogress' : 'notstarted');
-    const badgeText = state === 'completed' ? 'Completed' : (state === 'in progress' ? 'In progress' : 'Not started');
-    const svg = state === 'completed' ? '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 8.2L6.2 12L14 4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-              : (state === 'in progress' ? '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2v6l4 2" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-              : '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2h12v12H2z" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-    const div = document.createElement('div');
-    div.className = 'taskCard';
-    div.innerHTML = '<div class="taskInfo"><div class="taskTitle">' + escapeHtml(name) + '</div><div class="taskMeta">' + escapeHtml(String(rawStatus || '')) + '</div></div><div><div class="badge ' + badgeClass + '">' + svg + '<span>' + badgeText + '</span></div></div>';
+/* ---------- tasks ---------- */
+function renderTasks(list,containerId){
+  const el=document.getElementById(containerId); el.innerHTML='';
+  if(!Array.isArray(list)||list.length===0){el.innerHTML='<div class="small">No tasks</div>';return;}
+  for(const t of list){
+    const nameKey=findKey(t,['Task ','Task','task']);
+    const name=nameKey?t[nameKey]:JSON.stringify(t).slice(0,60);
+    const status=t.Status||t['Status ']||t.status||'';
+    const done=String(status).toLowerCase().includes('complete')||String(status).toLowerCase().includes('done');
+    const div=document.createElement('div'); div.className='taskCard';
+    div.innerHTML='<div style="max-width:70%"><div style="font-weight:800;font-size:13px">'+escapeHtml(name)+'</div><div class="small">'+escapeHtml(status)+'</div></div><div><div class="badge '+(done?'done':'todo')+'">'+(done?'Completed':'Not started')+'</div></div>';
     el.appendChild(div);
   }
 }
 
-/* ---------- PI table + bar (uses persisted accumulators & TARGET) ---------- */
+/* ---------- PI table + bar ---------- */
 function renderPI(piList){
-  const tbody = document.querySelector('#piTable tbody');
-  tbody.innerHTML = '';
-  const rows = Array.isArray(piList) ? piList.slice() : [];
-  if (!rows.length){
-    tbody.innerHTML = '<tr><td colspan="6">No PI data</td></tr>';
-    if (charts.piBar){ charts.piBar.destroy(); charts.piBar = null; }
-    return;
+  const tbody=document.querySelector('#piTable tbody'); tbody.innerHTML='';
+  if(!piList.length){tbody.innerHTML='<tr><td colspan="3">No PI data</td></tr>'; if(charts.piBar){charts.piBar.destroy();charts.piBar=null;} return;}
+  const todayProgress=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+  const labels=[]; const countedArr=[]; const remainingArr=[];
+  for(const r of piList){
+    const area=r.Area||r['Area ']; if(!area) continue;
+    const counted=safeNum(r.Counted||0); 
+    const prev= todayProgress[area]||0;
+    const newCount=prev+counted;
+    todayProgress[area]=newCount;
+    labels.push(area);
+    countedArr.push(newCount);
+    remainingArr.push(Math.max(0,DAILY_TARGET-newCount));
+    tbody.insertAdjacentHTML('beforeend','<tr><td>'+escapeHtml(area)+'</td><td style="text-align:right">'+newCount+'</td><td style="text-align:right">'+Math.max(0,DAILY_TARGET-newCount)+'</td></tr>');
   }
-  const sample = rows[0];
-  const areaKey = findKey(sample, ['Area','Area ']);
-  const totalKey = findKey(sample, ['Total locations','Total locations ','Total']);
-  const countedKey = findKey(sample, ['Counted','Counted ']);
-  const data = [];
-  const weekStart = payload._weekStart || getWeekStartISO();
-  for (const r of rows){
-    const area = String(r[areaKey] || r['Area'] || r['Area '] || '').trim();
-    if (!area) continue;
-    if (/total/i.test(area)) continue; // skip aggregate totals
-    const total = safeNum(r[totalKey] || r['Total locations'] || 0);
-    const countedTodayRaw = safeNum(r[countedKey] || r['Counted '] || 0);
-    // Load previous accumulated for this area/week
-    const prevAccum = loadAccum(area, weekStart);
-    let accumulated = prevAccum;
-    // Heuristic: if countedTodayRaw is larger than total (likely cumulative), use it as accumulated (overwrite)
-    if (countedTodayRaw > total && countedTodayRaw >= prevAccum){
-      accumulated = countedTodayRaw;
-      dbg(`Heuristic: treating Counted ${countedTodayRaw} for area "${area}" as cumulative → set accumulated=${accumulated}`);
-    } else {
-      // Otherwise add today's counted to previous accumulated
-      accumulated = prevAccum + countedTodayRaw;
-    }
-    // Save back
-    saveAccum(area, weekStart, accumulated);
-    const remaining = Math.max(0, TARGET - accumulated);
-    data.push({ area, total, countedToday: countedTodayRaw, accumulated, remaining });
-    tbody.insertAdjacentHTML('beforeend', '<tr><td>' + escapeHtml(area) + '</td><td class="num">' + formatNumber(total) + '</td><td class="num">' + formatNumber(countedTodayRaw) + '</td><td class="num">' + formatNumber(accumulated) + '</td><td class="num">' + formatNumber(remaining) + '</td><td class="num">' + formatNumber(TARGET) + '</td></tr>');
-  }
-  // summary
-  const totalSum = data.reduce((s,d) => s + d.total, 0);
-  const countedSum = data.reduce((s,d) => s + d.accumulated, 0);
-  const remainingSum = Math.max(0, (TARGET * data.length) - countedSum); // note: if you want global target across all areas change logic
-  document.getElementById('countHint').innerText = 'Areas: ' + data.length + ' • Accumulated: ' + countedSum.toLocaleString() + ' • Average coverage vs target: ' + ((countedSum / Math.max(1, TARGET * data.length))*100).toFixed(2) + '%';
-  // sort top by total size for chart
-  const sorted = data.sort((a,b) => b.total - a.total).slice(0,12);
-  const labels = sorted.map(d => d.area);
-  const accumulatedArr = sorted.map(d => Math.min(d.accumulated, d.total)); // never show more than total
-  const remainingArr = sorted.map(d => Math.max(0, TARGET - d.accumulated));
-  const mode = document.getElementById('scaleMode').value || 'auto';
-  let displayAccum = accumulatedArr.slice();
-  let displayRemaining = remainingArr.slice();
-  if (mode === 'log'){
-    displayAccum = displayAccum.map(v => Math.log10(Math.max(1,v)));
-    displayRemaining = displayRemaining.map(v => Math.log10(Math.max(1,v)));
-  } else if (mode === 'auto'){
-    const maxVal = Math.max(...displayAccum.concat(displayRemaining), 1);
-    let factor = 1;
-    if (maxVal > 100000) factor = 0.001; else if (maxVal > 20000) factor = 0.01; else if (maxVal > 5000) factor = 0.1;
-    displayAccum = displayAccum.map(v => Number((v*factor).toFixed(3)));
-    displayRemaining = displayRemaining.map(v => Number((v*factor).toFixed(3)));
-  }
-  try { if (charts.piBar) charts.piBar.destroy(); } catch(e){ charts.piBar = null; }
-  const ctx = document.getElementById('piBar').getContext('2d');
-  charts.piBar = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        { label: 'Accumulated (towards target)', data: displayAccum, backgroundColor: createGradient(ctx, '#7dd3fc', '#0479a6') },
-        { label: 'Remaining (to ' + TARGET + ')', data: displayRemaining, backgroundColor: createGradient(ctx, '#8b5cf6', '#4a2a7a') }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { position: 'top' } },
-      scales: { x: { ticks: { color: '#cfeeff' } }, y: { ticks: { color: '#cfeeff', callback: v => formatNumber(v) } } }
-    }
-  });
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(todayProgress));
+  document.getElementById('countHint').innerText='Target per area: '+DAILY_TARGET+' • Areas: '+labels.length;
+  try{if(charts.piBar)charts.piBar.destroy();}catch(e){;}
+  const ctx=document.getElementById('piBar').getContext('2d');
+  charts.piBar=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Counted',data:countedArr,backgroundColor:'#7dd3fc'},{label:'Remaining',data:remainingArr,backgroundColor:'#f97316'}]},options:{responsive:true,plugins:{legend:{position:'top',labels:{color:'#cfeeff'}}},scales:{y:{beginAtZero:true}}}});
 }
 
-/* ---------- weekly PI ---------- */
-function renderWeeklyPI(list){
-  const tbody = document.querySelector('#weeklyPiTable tbody');
-  tbody.innerHTML = '';
-  if (!Array.isArray(list) || list.length === 0){
-    tbody.innerHTML = '<tr><td colspan="5">No weekly PI data</td></tr>';
-    if (charts.weeklyLine){ charts.weeklyLine.destroy(); charts.weeklyLine = null; }
-    document.getElementById('weekHint').innerText = '—';
-    return;
+/* ---------- Weekly PI ---------- */
+function renderWeeklyPI(data){
+  const tbody=document.querySelector('#weeklyPiTable tbody'); tbody.innerHTML='';
+  if(!data||!data.length){tbody.innerHTML='<tr><td colspan="5">No weekly data</td></tr>'; if(charts.weeklyLine){charts.weeklyLine.destroy();charts.weeklyLine=null;} return;}
+  const weekLabels=[], datasets={};
+  for(const r of data){
+    const wk=r.WeekNo; const area=r.Area; weekLabels.push('Week '+wk);
+    datasets[area]=datasets[area]||[]; datasets[area].push(r.DailyQty||0);
+    tbody.insertAdjacentHTML('beforeend','<tr><td>'+wk+'</td><td>'+escapeHtml(area)+'</td><td style="text-align:right">'+(r.DailyQty||0)+'</td><td style="text-align:right">'+(r.WeeklyQty||0)+'</td><td style="text-align:right">'+(r.WeeklyPct||0)+'</td></tr>');
   }
-  const wkK = findKey(list[0], ['Week No','Week','week']);
-  const areaK = findKey(list[0], ['Area','Area ']);
-  const dailyK = findKey(list[0], ['Daily Qty','DailyQty','Daily']);
-  const wqK = findKey(list[0], [' Weekly Qty','Weekly Qty','WeeklyQty']);
-  const agg = {};
-  for (const r of list){
-    const wk = r[wkK] || r['Week No'] || r['Week'] || '';
-    const weeklyQty = safeNum(r[wqK] || r[' Weekly Qty'] || r['Weekly Qty'] || 0);
-    const dailyQty = safeNum(r[dailyK] || 0);
-    const area = r[areaK] || '';
-    tbody.insertAdjacentHTML('beforeend', '<tr><td>' + escapeHtml(String(wk)) + '</td><td>' + escapeHtml(area) + '</td><td class="num">' + formatNumber(dailyQty) + '</td><td class="num">' + formatNumber(weeklyQty) + '</td><td class="num">' + (safeNum(r[' Weekly %']||r['Weekly %']||0)*100).toFixed(3) + '%</td></tr>');
-    agg[String(wk)] = (agg[String(wk)] || 0) + weeklyQty;
-  }
-  const weeks = Object.keys(agg).map(k => isFinite(Number(k)) ? Number(k) : k).sort((a,b) => a - b);
-  const labels = weeks.map(String);
-  const values = labels.map(l => agg[l] || 0);
-  document.getElementById('weekHint').innerText = 'Points: ' + labels.length;
-  try { if (charts.weeklyLine) charts.weeklyLine.destroy(); } catch(e){ charts.weeklyLine = null; }
-  const ctx = document.getElementById('weeklyLine').getContext('2d');
-  charts.weeklyLine = new Chart(ctx, {
-    type: 'line',
-    data: { labels: labels, datasets: [{ label: 'Weekly Qty', data: values, borderColor: '#7dd3fc', backgroundColor: 'rgba(125,211,252,0.08)', fill:true, tension:0.28 }]},
-    options: { responsive:true, maintainAspectRatio:false, scales: { y: { ticks: { callback: v => formatNumber(v) } } } }
-  });
+  try{if(charts.weeklyLine)charts.weeklyLine.destroy();}catch(e){}
+  const ctx=document.getElementById('weeklyLine').getContext('2d');
+  charts.weeklyLine=new Chart(ctx,{type:'line',data:{labels:weekLabels,datasets:Object.entries(datasets).map(([k,v],i)=>({label:k,data:v,borderColor:i%2===0?'#7dd3fc':'#8b5cf6',tension:0.2,fill:false}))},options:{responsive:true,plugins:{legend:{labels:{color:'#cfeeff'}}},scales:{y:{beginAtZero:true}}}});
 }
 
-/* ---------- donuts ---------- */
+/* ---------- task donuts ---------- */
 function renderTaskDonuts(payload){
-  const daily = Array.isArray(payload.dailyTask) ? payload.dailyTask : [];
-  const weekly = Array.isArray(payload.weeklyTask) ? payload.weeklyTask : [];
-  const dailyDone = daily.filter(t => String(t.Status||t['Status ']||'').toLowerCase().includes('complete') || String(t.Status||'').toLowerCase().includes('done')).length;
-  const dailyTotal = daily.length;
-  const dailyRemain = Math.max(0, dailyTotal - dailyDone);
-  const weeklyDone = weekly.filter(t => String(t.Status||t['Status ']||'').toLowerCase().includes('complete') || String(t.Status||'').toLowerCase().includes('done')).length;
-  const weeklyTotal = weekly.length;
-  const weeklyRemain = Math.max(0, weeklyTotal - weeklyDone);
-  document.getElementById('dailyCountSmall').innerText = dailyDone + '/' + dailyTotal;
-  document.getElementById('weeklyCountSmall').innerText = weeklyDone + '/' + weeklyTotal;
-  try { if (charts.dailyDonut) charts.dailyDonut.destroy(); } catch(e){ charts.dailyDonut = null; }
-  charts.dailyDonut = new Chart(document.getElementById('dailyDonut').getContext('2d'), {
-    type: 'doughnut',
-    data: { labels: ['Done','Remaining'], datasets: [{ data:[dailyDone,dailyRemain], backgroundColor: ['rgba(34,197,94,0.98)','rgba(249,115,115,0.18)'] }]},
-    options: { responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ display:false }, donut3D:{ depth:14 }, centerText:{ text: dailyTotal ? (dailyDone + '/' + dailyTotal) : '—', subtext:'Completed' } } }
-  });
-  try { if (charts.weeklyDonut) charts.weeklyDonut.destroy(); } catch(e){ charts.weeklyDonut = null; }
-  charts.weeklyDonut = new Chart(document.getElementById('weeklyDonut').getContext('2d'), {
-    type: 'doughnut',
-    data: { labels:['Done','Remaining'], datasets:[{ data:[weeklyDone,weeklyRemain], backgroundColor:['rgba(139,92,246,0.95)','rgba(125,211,252,0.14)'] }]},
-    options: { responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ display:false }, donut3D:{ depth:14 }, centerText:{ text: weeklyTotal?((weeklyDone/weeklyTotal*100).toFixed(1)+'%'):'—', subtext:'Completed' } } }
-  });
+  const dailyDone=(payload.dailyTask||[]).filter(t=>String(t.Status||'').toLowerCase().includes('complete')).length;
+  const dailyNot=(payload.dailyTask||[]).length-dailyDone;
+  const weeklyDone=(payload.weeklyTask||[]).filter(t=>String(t.Status||'').toLowerCase().includes('complete')).length;
+  const weeklyNot=(payload.weeklyTask||[]).length-weeklyDone;
+
+  const dailyCtx=document.getElementById('dailyDonut').getContext('2d');
+  const weeklyCtx=document.getElementById('weeklyDonut').getContext('2d');
+  if(charts.dailyDonut)charts.dailyDonut.destroy();
+  if(charts.weeklyDonut)charts.weeklyDonut.destroy();
+
+  charts.dailyDonut=new Chart(dailyCtx,{type:'doughnut',data:{labels:['Done','Not Started'],datasets:[{data:[dailyDone,dailyNot],backgroundColor:['#12b76a','#f97316']}]},options:{plugins:{legend:{position:'bottom',labels:{color:'#cfeeff'}}}}});
+  charts.weeklyDonut=new Chart(weeklyCtx,{type:'doughnut',data:{labels:['Done','Not Started'],datasets:[{data:[weeklyDone,weeklyNot],backgroundColor:['#12b76a','#f97316']}]},options:{plugins:{legend:{position:'bottom',labels:{color:'#cfeeff'}}}}});
+  document.getElementById('dailyCountSmall').innerText=dailyDone+'/'+(dailyDone+dailyNot);
+  document.getElementById('weeklyCountSmall').innerText=weeklyDone+'/'+(weeklyDone+weeklyNot);
 }
 
 /* ---------- gauge ---------- */
 function computeAndRenderGauge(payload){
-  const weeklyPi = Array.isArray(payload.weeklyPiData) ? payload.weeklyPiData : [];
-  const piData = Array.isArray(payload.piData) ? payload.piData : [];
-  // compute daily target fallback: average weekly /7 OR default to TARGET*0.1
-  let dailyTarget = 0;
-  if (weeklyPi.length){
-    weeklyPi.forEach(w => { dailyTarget += safeNum(w[' Weekly Qty'] || w['Weekly Qty'] || 0) / 7; });
-  } else {
-    const totalSum = piData.reduce((s,r)=>{ const tk = findKey(r, ['Total locations','Total locations ','Total']); return s + safeNum(r[tk] || r['Total locations'] || 0); }, 0);
-    dailyTarget = totalSum * 0.10;
-  }
-  // For gauge progress use accumulated total across areas vs (TARGET * number_of_areas) as a meaningful progress measure
-  const weekStart = payload._weekStart || getWeekStartISO();
-  let accumulatedTotal = 0;
-  const sample = piData[0] || {};
-  const areaKey = findKey(sample, ['Area','Area ']);
-  for (const r of piData){
-    const area = String(r[areaKey] || r['Area'] || r['Area '] || '').trim();
-    if (!area || /total/i.test(area)) continue;
-    accumulatedTotal += loadAccum(area, weekStart);
-  }
-  const areasCount = piData.filter(r => { const a = String(r[areaKey] || r['Area'] || r['Area '] || '').trim(); return a && !/total/i.test(a); }).length || 1;
-  // compare accumulatedTotal to (TARGET * areasCount)
-  const progress = clamp(accumulatedTotal / (TARGET * areasCount), 0, 1);
-  document.getElementById('gaugeCenterText').innerText = (progress*100).toFixed(2) + '% • ' + accumulatedTotal.toLocaleString() + '/' + (TARGET*areasCount).toLocaleString();
-  document.getElementById('gaugeBreakdown').innerText = 'Progress vs combined target (' + TARGET + ' per area)';
-  // mini gauge
-  let mini = document.querySelector('#gaugeMini canvas');
-  if (!mini){ mini = document.createElement('canvas'); mini.width = 260; mini.height = 120; document.getElementById('gaugeMini').appendChild(mini); }
-  try { if (charts.gaugeMini) charts.gaugeMini.destroy(); } catch(e){ charts.gaugeMini = null; }
-  charts.gaugeMini = new Chart(mini.getContext('2d'), {
-    type:'doughnut',
-    data:{ labels:['progress','rest'], datasets:[{ data:[progress, Math.max(0,1-progress)], backgroundColor:['rgba(125,211,252,0.98)','rgba(255,255,255,0.06)'] }]},
-    options:{ responsive:false, maintainAspectRatio:false, cutout:'70%', rotation:-90*Math.PI/180, circumference:180*Math.PI/180, plugins:{ legend:{ display:false }, donut3D:{ depth:10 } } }
-  });
+  const todayProgress=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+  const totalCounted=Object.values(todayProgress).reduce((a,v)=>a+v,0);
+  const totalRemaining=Math.max(0,DAILY_TARGET*Object.keys(todayProgress).length-totalCounted);
+  const ctx=document.getElementById('gaugeMini').getContext('2d');
+  if(charts.gaugeMini)charts.gaugeMini.destroy();
+  charts.gaugeMini=new Chart(ctx,{type:'doughnut',data:{labels:['Counted','Remaining'],datasets:[{data:[totalCounted,totalRemaining],backgroundColor:['#7dd3fc','#f97316']}]},options:{cutout:'70%',plugins:{legend:{display:false},centerText:{text:totalCounted,color:'#7dd3fc',subtext:'Remaining: '+totalRemaining,subColor:'#f97316'}}}});
+  document.getElementById('gaugeCenterText').innerText=totalCounted;
+  document.getElementById('gaugeBreakdown').innerText='Remaining: '+totalRemaining;
 }
 
-/* ---------- utilities: gradients, shade, export ---------- */
-function createGradient(ctx, c1, c2){
-  const g = ctx.createLinearGradient(0,0,0,ctx.canvas.height || 400);
-  g.addColorStop(0, c1);
-  g.addColorStop(1, c2);
-  return g;
-}
-function shadeColor(css, percent){
-  try {
-    if (css.indexOf('rgba') === 0 || css.indexOf('rgb') === 0){
-      const nums = css.replace(/rgba?\(|\)|\s/g,'').split(',').map(function(n){ return Number(n); });
-      const r = Math.round(nums[0] * (1 + percent));
-      const g = Math.round(nums[1] * (1 + percent));
-      const b = Math.round(nums[2] * (1 + percent));
-      const a = nums.length > 3 ? nums[3] : 1;
-      return 'rgba(' + clamp(r,0,255) + ',' + clamp(g,0,255) + ',' + clamp(b,0,255) + ',' + a + ')';
-    }
-    if (css[0] === '#'){
-      let c = css.substring(1);
-      if (c.length === 3){
-        let tmp = '';
-        for (let i=0;i<c.length;i++) tmp += c[i] + c[i];
-        c = tmp;
-      }
-      const num = parseInt(c, 16);
-      const rr = (num >> 16) + Math.round(255*percent);
-      const gg = ((num >> 8) & 0x00FF) + Math.round(255*percent);
-      const bb = (num & 0x0000FF) + Math.round(255*percent);
-      return 'rgba(' + clamp(rr,0,255) + ',' + clamp(gg,0,255) + ',' + clamp(bb,0,255) + ',1)';
-    }
-  } catch(e){}
-  return css;
-}
+/* ---------- helpers for upload/paste ---------- */
+function onUpload(){const f=document.createElement('input'); f.type='file'; f.accept='application/json'; f.onchange=async e=>{const file=e.target.files[0];if(!file)return;const txt=await file.text();try{payload=JSON.parse(txt);renderAll();}catch(e){dbg('JSON error: '+e)}}; f.click();}
+function onPaste(){const txt=prompt('Paste JSON here'); if(!txt)return; try{payload=JSON.parse(txt);renderAll();}catch(e){dbg('JSON error: '+e)}}
+async function tryLoadJson(){return null;}
+function downloadCsv(){dbg('Export CSV not implemented in demo');}
+function exportPNGs(){dbg('Export PNGs not implemented in demo');}
 
-/* ---------- CSV / PNG export ---------- */
-function downloadCsv(){
-  const rows = [['Area','Total','Counted (today)','Accumulated','Remaining','Target']];
-  document.querySelectorAll('#piTable tbody tr').forEach(tr=>{
-    const tds = tr.querySelectorAll('td');
-    if (!tds.length) return;
-    rows.push([tds[0].innerText, tds[1].innerText, tds[2].innerText, tds[3].innerText, tds[4].innerText, tds[5].innerText]);
-  });
-  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'pi_by_area.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-function exportPNGs(){
-  const ids = ['piBar','weeklyLine','dailyDonut','weeklyDonut'];
-  ids.forEach(id=>{
-    const c = document.getElementById(id);
-    if (!c) return;
-    try {
-      const url = c.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = id + '.png';
-      a.click();
-    } catch(e){ dbg('PNG export failed: ' + (e && e.message ? e.message : e)); }
-  });
-}
-
-/* ---------- upload / paste ---------- */
-function onUpload(){
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'application/json';
-  input.onchange = function(e){
-    const f = e.target.files[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = function(ev){
-      try {
-        payload = JSON.parse(ev.target.result);
-        dbg('Uploaded JSON parsed');
-        loadAndRender(); // reload so week logic runs
-      } catch(err){
-        alert('Invalid JSON file');
-        dbg('Upload parse error: ' + err.message);
-      }
-    };
-    r.readAsText(f);
-  };
-  input.click();
-}
-function onPaste(){
-  const txt = prompt('Paste dashboard JSON here (full object)');
-  if (!txt) return;
-  try {
-    payload = JSON.parse(txt);
-    dbg('Pasted JSON parsed');
-    loadAndRender();
-  } catch(e){
-    alert('Invalid JSON pasted');
-    dbg('Paste parse error: ' + (e && e.message ? e.message : e));
-  }
-}
+/* ---------- helpers ---------- */
+function shadeColor(color,percent){const f=color.split(","),t=percent<0?0:255,p=Math.abs(percent),R=parseInt(f[0].slice(f[0].indexOf('(')+1)),G=parseInt(f[1]),B=parseInt(f[2]);return "rgb("+(Math.round((t-R)*p)+R)+","+(Math.round((t-G)*p)+G)+","+(Math.round((t-B)*p)+B)+")";}
 
 /* ---------- init ---------- */
 loadAndRender();
-
 </script>
 </body>
 </html>
