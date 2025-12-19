@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Stock Team VCB — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{ --bg-blur:2px; --bg-bright:1.04; --overlay-opacity:0.04; --muted:#9aa4b2; --accentA:#7dd3fc; --accentB:#8b5cf6; --topbar-h:72px; }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial;background:transparent;color:#eaf6ff;}
+body::before{ content:""; position:fixed; inset:0; z-index:-6; background-image: url("https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=1920&q=80"); background-size:cover; background-position:center center; filter: blur(var(--bg-blur)) brightness(var(--bg-bright)) saturate(1.06); transform: scale(1.02); pointer-events:none; background-color:#071022; }
+body::after{ content:""; position:fixed; inset:0; z-index:-5; background-repeat:no-repeat; background-position:center center; background-size:640px; opacity:0.28; filter: drop-shadow(0 18px 40px rgba(0,0,0,0.35)) saturate(1.02); pointer-events:none; }
+#snowCanvas{ position:fixed; left:0; top:0; width:100%; height:100%; z-index:-4; pointer-events:none; opacity:1; }
+.bg-overlay{position:fixed; inset:0; z-index:-3; background: rgba(3,6,18,var(--overlay-opacity)); pointer-events:none;}
+.wrap{position:relative; z-index:2; width:100%; height:100vh; display:flex; flex-direction:column; padding:12px 18px; gap:12px}
+.topbar{height:var(--topbar-h); display:flex; align-items:center; justify-content:space-between; gap:12px}
+.brand h1{margin:0;font-size:20px;font-weight:800}
+.brand p{margin:0;color:var(--muted);font-size:12px}
+.controls{display:flex;gap:8px;align-items:center}
+.btn{background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;color:var(--accentA);cursor:pointer;font-weight:700}
+.main{display:grid; grid-template-columns:520px 560px 1fr; gap:18px; flex:1; min-height:0}
+@media (max-width:1500px){ .main{grid-template-columns:480px 1fr} }
+@media (max-width:900px){ body{overflow:auto} .wrap{height:auto} .main{grid-template-columns:1fr;grid-auto-rows:auto} }
+.panel{ background: rgba(2,6,23,0.20); backdrop-filter: blur(6px) saturate(1.02); border-radius:12px; padding:14px; border:1px solid rgba(255,255,255,0.06); box-shadow:0 10px 28px rgba(2,6,23,0.30); display:flex; flex-direction:column; min-height:0; z-index:2; }
+.taskHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.taskLists{display:flex;gap:12px;flex:1;min-height:0}
+.col{flex:1;display:flex;flex-direction:column;min-width:0}
+.taskList{overflow:auto;padding-right:8px;display:flex;flex-direction:column;gap:10px}
+.taskCard{display:flex;justify-content:space-between;align-items:flex-start;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.04));border:1px solid rgba(255,255,255,0.02)}
+.taskName{font-weight:700;font-size:13px;color:#eaf6ff;line-height:1.15;word-break:break-word}
+.taskNote{font-size:12px;color:var(--muted)}
+.badge{padding:6px 10px;border-radius:10px;font-weight:700;font-size:12px;white-space:nowrap;margin-left:10px}
+.badge.done{background:linear-gradient(90deg,#16a34a,#064e3b);color:white}
+.badge.todo{background:linear-gradient(90deg,#7f1d1d,#ef4444);color:white}
+.charts-area{display:flex;flex-direction:column;gap:12px;height:calc(100vh - var(--topbar-h) - 36px);min-height:0}
+.top-donuts{display:flex;gap:12px;flex:0 0 52%;min-height:0}
+.donutCard{flex:1;min-height:240px;position:relative;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);backdrop-filter:blur(4px)}
+.donutCard canvas{width:100% !important;height:100% !important;display:block}
+.gaugeCard{min-height:150px;position:relative;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.center-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;text-align:center}
+.center-label .num{font-weight:800;font-size:18px;color:#fff;letter-spacing:-0.5px}
+.center-label .sub{font-size:12px;color:var(--muted);margin-top:6px}
+.right{height:calc(100vh - var(--topbar-h) - 36px);display:flex;flex-direction:column;gap:12px;min-height:0}
+.piChart{flex:1;min-height:0;position:relative;padding:8px}
+.tablesRow{height:360px;display:flex;gap:12px;min-height:0}
+.tablePanel{flex:1;overflow:auto;border-radius:10px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(4px)}
+.tablePanel table{width:100%;border-collapse:collapse;color:#eaf6ff;font-size:13px}
+.tablePanel thead th{position:sticky;top:0;background:rgba(10,14,24,0.35);padding:8px;color:var(--muted);font-weight:700}
+.tablePanel td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:center}
+.tablePanel tbody tr.chosen { background: linear-gradient(90deg, rgba(125,211,252,0.06), rgba(139,92,246,0.02)); font-weight:700; }
+.bg-controls { position:fixed; right:14px; top: calc(var(--topbar-h) + 8px); z-index:9; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border:1px solid rgba(255,255,255,0.06); padding:8px 10px; border-radius:10px; backdrop-filter: blur(6px); color:#eaf6ff; font-size:13px; display:flex; gap:8px; align-items:center; box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+.bg-controls input{ background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.03); padding:6px 8px; border-radius:8px; color:#eaf6ff; width:250px; font-size:13px; }
+.bg-status { font-weight:700; color:var(--accentA); font-size:13px; margin-left:6px; text-align:right; }
+#christmasCountdown { position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:6; pointer-events:none; display:flex; align-items:center; gap:14px; background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.05); padding:10px 16px; border-radius:14px; box-shadow: 0 10px 40px rgba(0,0,0,0.45); backdrop-filter: blur(6px); }
+#christmasCountdown .bubble { width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; background: linear-gradient(135deg,#ffd6e0,#b78bff); box-shadow: 0 8px 30px rgba(139,92,246,0.22), inset 0 -6px 18px rgba(0,0,0,0.12); font-weight:900; color:#2b0632; font-size:18px; transform:translateZ(0); }
+#christmasCountdown .text { display:flex; flex-direction:column; align-items:flex-start; justify-content:center; }
+#christmasCountdown .text .title { font-weight:700; font-size:12px; color:#ffdce6; letter-spacing:0.6px; }
+#christmasCountdown .text .sub { font-weight:600; font-size:13px; color:#eaf6ff; opacity:0.95; margin-top:2px; }
+.kiosk-fallback { position:fixed !important; inset:0 !important; width:100% !important; height:100% !important; margin:0 !important; padding:0 !important; z-index:9999 !important; background: rgba(2,6,23,0.95); }
+.kiosk-hide-topbar .topbar{ display:none !important; }
+.kiosk-exit-hint{ position:fixed; right:12px; bottom:12px; z-index:10001; background:rgba(0,0,0,0.52); color:#fff; padding:8px 10px; border-radius:8px; font-weight:700; pointer-events:none; }
+.controls-advanced{display:flex;gap:8px;align-items:center;margin-left:12px}
+input[type=range]{accent-color: rgba(125,211,252,0.9)}
+.presetBtn{background:transparent;border:1px solid rgba(255,255,255,0.05);padding:6px 10px;border-radius:8px;color:var(--muted);cursor:pointer}
+</style>
+</head>
+<body>
+  <canvas id="snowCanvas"></canvas>
+  <div class="bg-overlay"></div>
+
+  <div class="bg-controls" role="status" aria-live="polite">
+    <div style="display:flex;flex-direction:column;">
+      <div style="font-size:12px;opacity:0.85">Background image (Drive file ID or public image URL)</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+        <input id="bgInput" placeholder="paste Drive file ID or full URL" title="Paste a Drive file ID or a public image URL">
+        <button id="bgApply" class="btn" style="padding:6px 10px;font-size:13px">Apply</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end">
+      <div id="bgStatus" class="bg-status">default background active</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:right">Tip: set Drive file sharing to "Anyone with the link — Viewer"</div>
+    </div>
+  </div>
+
+  <div id="christmasCountdown" aria-hidden="true">
+    <div class="bubble" id="xmasBubble">—</div>
+    <div class="text"><div class="title">Christmas countdown</div><div class="sub" id="xmasSubtitle">days • hh:mm:ss</div></div>
+  </div>
+
+  <div class="wrap" id="appWrap">
+    <div class="topbar">
+      <div class="brand"><h1>Stock Team VCB</h1><p id="metaLine">Live • <span id="liveTime">—</span></p></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="controls">
+          <button class="btn" id="refreshBtn">Refresh</button>
+          <button class="btn" id="kioskBtn">Kiosk</button>
+          <button class="btn" id="snowToggle">Toggle Snow</button>
+
+          <div class="controls-advanced" style="margin-left:12px">
+            <label class="muted" style="font-size:12px">Density</label>
+            <input id="snowRange" type="range" min="0" max="100" step="1" value="95" style="width:140px">
+            <label class="muted" style="font-size:12px">Wind</label>
+            <input id="windRange" type="range" min="-2" max="2" step="0.1" value="0.3" style="width:100px">
+            <button class="presetBtn" id="presetLight">Light</button>
+            <button class="presetBtn" id="presetMed">Medium</button>
+            <button class="presetBtn" id="presetHeavy">Heavy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- LEFT -->
+      <div class="panel tasks">
+        <div class="taskHeader">
+          <div><strong style="font-size:15px">Tasks Overview</strong><div class="muted">Daily & Weekly</div></div>
+          <div class="muted">Daily: <span id="dailyTotals">—</span> • Weekly: <span id="weeklyTotals">—</span></div>
+        </div>
+        <div class="taskLists">
+          <div class="col"><div style="font-weight:700;margin-bottom:8px">Daily <span class="muted" style="font-size:12px">Today</span></div><div class="taskList" id="dailyList"></div></div>
+          <div class="col"><div style="font-weight:700;margin-bottom:8px">Weekly <span class="muted" style="font-size:12px">This week</span></div><div class="taskList" id="weeklyList"></div></div>
+        </div>
+      </div>
+
+      <!-- MIDDLE -->
+      <div class="panel charts-area">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Charts</strong><div class="muted">Daily & Weekly — 3D look</div></div>
+          <div class="muted">Live • <span id="liveTimeSmall">—</span></div>
+        </div>
+
+        <div class="top-donuts"><div class="donutCard"><canvas id="dailyDonut"></canvas></div><div class="donutCard"><canvas id="weeklyDonut"></canvas></div></div>
+
+        <div class="gaugeCard"><canvas id="weeklyGauge" style="width:260px;max-width:100%"></canvas><div class="center-label" id="gaugeCenter"><div class="num">—</div><div class="sub" id="gaugeRaw">raw: —</div></div></div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="panel right">
+        <div class="piChart"><canvas id="piArea"></canvas></div>
+
+        <div class="tablesRow">
+          <div class="tablePanel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong>PI Weekly Series</strong><div id="week32Info" class="muted"></div></div><table><thead><tr><th>Week</th><th>Qty</th><th>Weekly % (raw)</th></tr></thead><tbody id="piWeeklyBody"></tbody></table></div>
+
+          <div class="tablePanel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong>PI Daily Areas</strong><div id="piDailyTotal" class="muted"></div></div><table><thead><tr><th style="text-align:left">Area</th><th>Count</th></tr></thead><tbody id="piAreaBody"></tbody><tfoot><tr><th style="text-align:left">Total</th><th id="piAreaTotal">0</th></tr></tfoot></table><div style="height:8px"></div><div id="piYearSummary" class="muted"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="kioskExitHint" class="kiosk-exit-hint" style="display:none">Press Kiosk to exit or press ESC</div>
+
+<script>
+  // NOTE: This version is GitHub Pages friendly (no google.script.run). To feed live data,
+  // put a `data/dashboard.json` file in the repo (example provided in README or below).
+  var BG_FILE_ID = '';
+
+  // ---------- Background helpers ----------
+  function setBgStatus(s, color){
+    var el = document.getElementById('bgStatus');
+    if (el) { el.innerText = s; el.style.color = color || 'var(--accentA)'; }
+  }
+
+  function tryApplyBackgroundDirect(candidateUrl){
+    setBgStatus('loading…', '#7dd3fc');
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function(){
+      var sheet = document.createElement('style');
+      sheet.id = 'bgAppliedStyle';
+      sheet.innerHTML = 'body::before{ background-image: url("' + candidateUrl.replace(/"/g,'\\"') + '"); }';
+      var prev = document.getElementById('bgAppliedStyle');
+      if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+      document.head.appendChild(sheet);
+      setBgStatus('background loaded (direct)', '#7dd3fc');
+      console.info('Background applied (direct):', candidateUrl);
+    };
+    img.onerror = function(err){
+      setBgStatus('load failed (direct)', '#ff7a7a');
+      console.warn('Background failed to load (direct):', candidateUrl, err);
+    };
+    img.src = candidateUrl;
+  }
+
+  function applyBackgroundViaServer(driveFileId){
+    // server-side Drive fetch was removed for a static-hosted version.
+    setBgStatus('server background disabled', '#ffd36b');
+    console.warn('applyBackgroundViaServer is disabled on GitHub Pages. Use a public image URL instead.');
+  }
+
+  function driveFileIdToUcUrl(id){
+    return 'https://drive.google.com/uc?export=view&id=' + encodeURIComponent(id);
+  }
+
+  document.getElementById('bgApply').addEventListener('click', function(){
+    var v = (document.getElementById('bgInput').value||'').trim();
+    if (!v) { setBgStatus('enter id or URL', '#ff7a7a'); return; }
+    try {
+      var u = new URL(v);
+      var host = (u.hostname || '').toLowerCase();
+      if (host.indexOf('drive.google.com') !== -1 || host.indexOf('docs.google.com') !== -1) {
+        var p = u.pathname.split('/');
+        var idx = p.indexOf('d');
+        var id = (idx >= 0 && p[idx+1]) ? p[idx+1] : (u.searchParams.get('id') || '');
+        if (id) {
+          var direct = driveFileIdToUcUrl(id);
+          tryApplyBackgroundDirect(direct);
+          setTimeout(function(){
+            var st = (document.getElementById('bgStatus')||{innerText:''}).innerText.toLowerCase();
+            if (st.indexOf('load failed') !== -1) applyBackgroundViaServer(id);
+          }, 1200);
+          return;
+        }
+        applyBackgroundViaServer(v);
+        return;
+      }
+      tryApplyBackgroundDirect(v);
+    } catch(e){
+      // not a URL -> assume it's an ID
+      var idOnly = v;
+      var direct2 = driveFileIdToUcUrl(idOnly);
+      tryApplyBackgroundDirect(direct2);
+      setTimeout(function(){
+        var st = (document.getElementById('bgStatus')||{innerText:''}).innerText.toLowerCase();
+        if (st.indexOf('load failed') !== -1) applyBackgroundViaServer(idOnly);
+      }, 1200);
+    }
+  });
+
+  // Local file upload (optional)
+  document.getElementById('bgApplyFile') && document.getElementById('bgApplyFile').addEventListener('click', function(){
+    var inp = document.getElementById('bgFile');
+    if (!inp || !inp.files || !inp.files[0]) { setBgStatus('no file selected', '#ff7a7a'); return; }
+    var f = inp.files[0];
+    if (!f.type || f.type.indexOf('image/') !== 0) { setBgStatus('select an image file', '#ff7a7a'); return; }
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var dataUrl = ev.target.result;
+      var sheet = document.createElement('style');
+      sheet.id = 'bgAppliedStyle';
+      sheet.innerHTML = 'body::before{ background-image: url("' + dataUrl.replace(/"/g,'\\"') + '"); }';
+      var prev = document.getElementById('bgAppliedStyle');
+      if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+      document.head.appendChild(sheet);
+      setBgStatus('background loaded (local)', '#7dd3fc');
+    };
+    reader.onerror = function(){ setBgStatus('file read error', '#7ff7a7'); };
+    reader.readAsDataURL(f);
+  });
+
+  (function autoApplyServerBG(){
+    if (BG_FILE_ID && BG_FILE_ID.length) {
+      var direct = driveFileIdToUcUrl(BG_FILE_ID);
+      tryApplyBackgroundDirect(direct);
+      setTimeout(function(){
+        var st = (document.getElementById('bgStatus')||{innerText:''}).innerText.toLowerCase();
+        if (st.indexOf('load failed') !== -1) applyBackgroundViaServer(BG_FILE_ID);
+      }, 1200);
+    }
+  })();
+
+  // ---------- Snow canvas ----------
+  var sCanvas = document.getElementById('snowCanvas');
+  var sCtx = sCanvas.getContext('2d');
+  var W = sCanvas.width = window.innerWidth, H = sCanvas.height = window.innerHeight;
+  var flakes = [], angle = 0, snowInterval = null;
+  var snowOn = true;
+  var snowIntensity = Number((document.getElementById('snowRange') && document.getElementById('snowRange').value) || 95);
+  var windFactor = Number((document.getElementById('windRange') && document.getElementById('windRange').value) || 0.3);
+
+  function initSnow(){
+    flakes = [];
+    var area = Math.max(1, W*H);
+    var base = Math.round(area / 140000);
+    var factor = Math.max(0.02, Math.min(1, snowIntensity/100));
+    var count = Math.max(30, Math.round(base * (1 + factor * 9)));
+    for (var i=0;i<count;i++){
+      var size = Math.random()*2 + 0.8 + factor*1.6;
+      var alpha = Math.min(1, 0.18 + Math.random()*0.48*factor);
+      flakes.push({
+        x: Math.random()*W,
+        y: Math.random()*H,
+        r: size,
+        d: Math.random()*2,
+        alpha: alpha,
+        vx: (Math.random()*0.6 - 0.3) * (1 + Math.abs(windFactor))
+      });
+    }
+  }
+
+  function drawSnow(){
+    sCtx.clearRect(0,0,W,H);
+    angle += 0.008;
+    for (var fi=0; fi<flakes.length; fi++){
+      var f = flakes[fi];
+      sCtx.beginPath();
+      sCtx.fillStyle = 'rgba(255,255,255,' + f.alpha + ')';
+      sCtx.arc(f.x, f.y, f.r, 0, Math.PI*2);
+      sCtx.fill();
+      if (f.r > 1.6){
+        sCtx.beginPath();
+        sCtx.fillStyle = 'rgba(255,255,255,' + Math.min(0.12, f.alpha*0.12) + ')';
+        sCtx.arc(f.x, f.y, f.r*2.6, 0, Math.PI*2);
+        sCtx.fill();
+      }
+    }
+    updateSnow();
+  }
+
+  function updateSnow(){
+    for (var fi=0; fi<flakes.length; fi++){
+      var f = flakes[fi];
+      f.x += f.vx + Math.sin((f.y/120) + angle) * 0.6 * (windFactor || 0.3);
+      f.y += Math.cos(angle + f.d) + 0.8 + f.r/2;
+      if (f.y > H + 12){ f.x = Math.random()*W; f.y = -12; }
+      if (f.x > W + 20) f.x = -20;
+      if (f.x < -20) f.x = W + 20;
+    }
+  }
+
+  function startSnow(){ if (snowInterval) return; initSnow(); snowInterval = setInterval(drawSnow, 28); sCanvas.style.display='block'; }
+  function stopSnow(){ if (snowInterval){ clearInterval(snowInterval); snowInterval=null; } sCtx.clearRect(0,0,W,H); sCanvas.style.display='none'; }
+  function restartSnow(){ stopSnow(); startSnow(); }
+
+  window.addEventListener('resize', function(){ W = sCanvas.width = window.innerWidth; H = sCanvas.height = window.innerHeight; if (snowOn) restartSnow(); });
+
+  var rEl = document.getElementById('snowRange');
+  if (rEl) rEl.addEventListener('input', function(e){ snowIntensity = Number(e.target.value); restartSnow(); });
+  var wEl = document.getElementById('windRange');
+  if (wEl) wEl.addEventListener('input', function(e){ windFactor = Number(e.target.value); restartSnow(); });
+
+  var presetLight = document.getElementById('presetLight');
+  if (presetLight) presetLight.addEventListener('click', function(){ if (rEl) rEl.value = 25; if (wEl) wEl.value = -0.2; snowIntensity=25; windFactor=-0.2; restartSnow(); });
+  var presetMed = document.getElementById('presetMed');
+  if (presetMed) presetMed.addEventListener('click', function(){ if (rEl) rEl.value = 60; if (wEl) wEl.value = 0.3; snowIntensity=60; windFactor=0.3; restartSnow(); });
+  var presetHeavy = document.getElementById('presetHeavy');
+  if (presetHeavy) presetHeavy.addEventListener('click', function(){ if (rEl) rEl.value = 100; if (wEl) wEl.value = 0.8; snowIntensity=100; windFactor=0.8; restartSnow(); });
+
+  var snowToggle = document.getElementById('snowToggle');
+  if (snowToggle) snowToggle.addEventListener('click', function(){ snowOn = !snowOn; if (snowOn) startSnow(); else stopSnow(); });
+
+  startSnow();
+
+  // ---------- Christmas countdown ----------
+  function updateChristmasCountdown(){
+    var now = new Date();
+    var year = now.getFullYear();
+    var target = new Date(year,11,25,0,0,0);
+    if (now.getTime() > target.getTime()) { year++; target = new Date(year,11,25,0,0,0); }
+    var diff = Math.max(0, target.getTime() - now.getTime());
+    var days = Math.floor(diff / (1000*60*60*24));
+    diff -= days * (1000*60*60*24);
+    var hours = Math.floor(diff / (1000*60*60));
+    diff -= hours * (1000*60*60);
+    var mins = Math.floor(diff / (1000*60));
+    diff -= mins * (1000*60);
+    var secs = Math.floor(diff / 1000);
+    function pad(n){ return ('0' + n).slice(-2); }
+    var bubble = document.getElementById('xmasBubble');
+    var sub = document.getElementById('xmasSubtitle');
+    if (bubble) bubble.innerText = String(days);
+    if (sub) sub.innerText = pad(hours) + ':' + pad(mins) + ':' + pad(secs) + ' until Christmas ' + String(year);
+  }
+  setInterval(updateChristmasCountdown, 1000);
+  updateChristmasCountdown();
+
+  // ---------- Charts & data ----------
+  var centerTextPlugin = {
+    id: 'centerTextPlugin',
+    afterDraw: function(chart){
+      var cfg = null;
+      if (chart && chart.config && chart.config.options && chart.config.options.plugins && chart.config.options.plugins.centerText) {
+        cfg = chart.config.options.plugins.centerText;
+      }
+      if (!cfg) return;
+      var ctx = chart.ctx; ctx.save();
+      var x = (chart.chartArea.left + chart.chartArea.right)/2;
+      var y = (chart.chartArea.top + chart.chartArea.bottom)/2;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle = cfg.color || '#fff'; ctx.font = cfg.font || '700 16px Poppins';
+      ctx.fillText(cfg.text || '', x, y);
+      if (cfg.subtext) { ctx.font = cfg.subFont || '400 12px Poppins'; ctx.fillStyle = cfg.subColor || '#cbd6e6'; ctx.fillText(cfg.subtext, x, y + 18); }
+      ctx.restore();
+    }
+  };
+  Chart.register(centerTextPlugin);
+
+  var donut3DPlugin = {
+    id: 'donut3DPlugin',
+    beforeDraw: function(chart, args, options){
+      if (!options || !options.depth) return;
+      var ctx = chart.ctx;
+      var meta = chart.getDatasetMeta(0);
+      if (!meta) return;
+      var first = meta.data[0];
+      var centerX = (chart.chartArea.left + chart.chartArea.right)/2;
+      var centerY = (chart.chartArea.top + chart.chartArea.bottom)/2;
+      var outerRadius = (first && first.outerRadius) ? first.outerRadius : (Math.min(chart.width, chart.height)/2 * 0.9);
+      var innerRadius = (first && first.innerRadius) ? first.innerRadius : (outerRadius * 0.6);
+      var depth = options.depth;
+      var slices = chart.data.datasets[0].data;
+      var colors = chart.data.datasets[0].backgroundColor;
+      var startAngle = (chart.options.rotation || 0) - Math.PI/2;
+      var total = 0;
+      for (var si=0; si<slices.length; si++) { var v = slices[si]; total += (typeof v === 'number' ? v : 0); }
+      if (!total) total = 1;
+      var angles = [];
+      for (si=0; si<slices.length; si++) {
+        var a = (slices[si]/total) * (chart.options.circumference || (Math.PI*2));
+        angles.push({ start: startAngle, end: startAngle + a });
+        startAngle += a;
+      }
+      var step = Math.max(2, Math.round(depth/6));
+      for (var layer = depth; layer > 0; layer -= step) {
+        var yOffset = layer * 0.6;
+        for (var i=0;i<angles.length;i++){
+          var ainfo = angles[i];
+          ctx.beginPath();
+          ctx.fillStyle = shadeColor(colors[i] || 'rgba(255,255,255,0.08)', -0.18 - (layer/depth)*0.12);
+          ctx.moveTo(centerX, centerY + yOffset);
+          ctx.arc(centerX, centerY + yOffset, outerRadius, ainfo.start, ainfo.end);
+          ctx.arc(centerX, centerY + yOffset, innerRadius, ainfo.end, ainfo.start, true);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+    }
+  };
+  Chart.register(donut3DPlugin);
+
+  function shadeColor(css, percent) {
+    try {
+      if (css.indexOf('rgba') === 0 || css.indexOf('rgb') === 0) {
+        var nums = css.replace(/rgba?\(|\)|\s/g,'').split(',').map(function(n){ return Number(n); });
+        var r = Math.round(nums[0]*(1+percent)), g = Math.round(nums[1]*(1+percent)), b = Math.round(nums[2]*(1+percent));
+        var a = (nums.length>3?nums[3]:1);
+        return 'rgba(' + clamp(r,0,255) + ',' + clamp(g,0,255) + ',' + clamp(b,0,255) + ',' + a + ')';
+      }
+      if (css[0] === '#') {
+        var c = css.substring(1);
+        if (c.length === 3) { var tmpC = ''; for (var ci=0;ci<c.length;ci++) tmpC += c[ci] + c[ci]; c = tmpC; }
+        var num = parseInt(c,16);
+        var rr = (num >> 16) + Math.round(255*percent);
+        var gg = ((num >> 8) & 0x00FF) + Math.round(255*percent);
+        var bb = (num & 0x0000FF) + Math.round(255*percent);
+        return 'rgba(' + clamp(rr,0,255) + ',' + clamp(gg,0,255) + ',' + clamp(bb,0,255) + ',1)';
+      }
+    } catch(e){}
+    return css;
+  }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+  Chart.defaults.font.family = "'Poppins', system-ui, Arial";
+  var dailyDonut=null, weeklyDonut=null, weeklyGauge=null, piArea=null;
+
+  // helper: ISO week number
+  function getISOWeek(d) {
+    var date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var dayNum = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+    var yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+    var weekNo = Math.floor(((date - yearStart) / 86400000 + 1)/7) + 1;
+    return weekNo;
+  }
+
+  // ---------- REFRESH: fetch JSON from repo ----------
+  function refresh(){
+    var btn = document.getElementById('refreshBtn');
+    if (btn) btn.innerText = 'Refreshing...';
+
+    fetch('./data/dashboard.json?_=' + Date.now())
+      .then(function(r){ if (!r.ok) throw new Error('network response not ok'); return r.json(); })
+      .then(function(payload){
+        render(payload);
+        if (btn) btn.innerText='Refresh';
+      })
+      .catch(function(err){
+        console.warn('Fetch failed, using demo payload', err);
+        render(window.__demoPayload);
+        if (btn) btn.innerText='Refresh';
+        setBgStatus('using demo data', '#ffd36b');
+      });
+  }
+
+  function safeNumber(v, fallback){
+    if (typeof fallback === 'undefined') fallback = null;
+    if (v === null || v === undefined) return fallback;
+    if (typeof v === 'number') return isFinite(v) ? v : fallback;
+    var s = String(v).trim().replace(',', '.');
+    var n = Number(s);
+    return isFinite(n) ? n : fallback;
+  }
+
+  function render(payload){
+    if (!payload) payload = window.__demoPayload;
+    if (payload && payload.error) payload = window.__demoPayload;
+
+    var dailyTotalsEl = document.getElementById('dailyTotals');
+    var weeklyTotalsEl = document.getElementById('weeklyTotals');
+    if (dailyTotalsEl) dailyTotalsEl.innerText = (payload && payload.daily && payload.daily.scheduled) ? payload.daily.scheduled : 0;
+    if (weeklyTotalsEl) weeklyTotalsEl.innerText = (payload && payload.weekly && payload.weekly.scheduled) ? payload.weekly.scheduled : 0;
+
+    populateList('dailyList', (payload && payload.daily && payload.daily.list) ? payload.daily.list : []);
+    populateList('weeklyList', (payload && payload.weekly && payload.weekly.list) ? payload.weekly.list : []);
+
+    try { if (dailyDonut) dailyDonut.destroy(); } catch(e){}
+    try { if (weeklyDonut) weeklyDonut.destroy(); } catch(e){}
+    try { if (weeklyGauge) weeklyGauge.destroy(); } catch(e){}
+    try { if (piArea) piArea.destroy(); } catch(e){}
+
+    // daily donut
+    var dSched = safeNumber((payload && payload.daily && payload.daily.scheduled) ? payload.daily.scheduled : null, null);
+    var dListLen = (payload && payload.daily && Array.isArray(payload.daily.list)) ? payload.daily.list.length : 0;
+    var dailyScheduled = (dSched !== null && dSched > 0) ? dSched : dListLen;
+    var dDoneProvided = safeNumber((payload && payload.daily && payload.daily.done) ? payload.daily.done : null, null);
+    var dDoneFromList = (payload && payload.daily && Array.isArray(payload.daily.list)) ? payload.daily.list.filter(function(x){ return x && x.done; }).length : 0;
+    var dailyDone = (dDoneProvided !== null && dDoneProvided >= 0) ? dDoneProvided : dDoneFromList;
+    var dailyRemain = Math.max(0, (dailyScheduled||0) - (dailyDone||0));
+
+    var ctxD = document.getElementById('dailyDonut').getContext('2d');
+    dailyDonut = new Chart(ctxD, {
+      type:'doughnut',
+      data:{ labels:['Done','Remaining'], datasets:[{ data:[dailyDone,dailyRemain], backgroundColor:['rgba(125,211,252,0.98)','rgba(139,92,246,0.16)'] }]},
+      options:{
+        responsive:true, maintainAspectRatio:false, cutout:'60%',
+        rotation: -0.8 * Math.PI / 2,
+        plugins: { donut3DPlugin:{depth:18}, centerText:{ text: (String(dailyDone) + '/' + String(dailyScheduled)), subtext:'Completed', color:'#fff' }, legend:{display:false} }
+      }, plugins:[donut3DPlugin, centerTextPlugin]
+    });
+
+    // weekly donut
+    var wSchedRaw = (payload && payload.weekly && payload.weekly.scheduled) ? payload.weekly.scheduled : null;
+    var wSchedFromList = (payload && payload.weekly && Array.isArray(payload.weekly.list)) ? payload.weekly.list.length : 0;
+    var weeklyScheduled = (safeNumber(wSchedRaw, null) !== null && safeNumber(wSchedRaw) > 0) ? safeNumber(wSchedRaw) : wSchedFromList;
+    var wDoneRaw = (payload && payload.weekly && payload.weekly.done) ? payload.weekly.done : null;
+    var wDoneFromList = (payload && payload.weekly && Array.isArray(payload.weekly.list)) ? payload.weekly.list.filter(function(x){ return x && x.done; }).length : 0;
+    var weeklyDone = (safeNumber(wDoneRaw, null) !== null && safeNumber(wDoneRaw) >= 0) ? safeNumber(wDoneRaw) : wDoneFromList;
+    var weeklyRemain = Math.max(0, (weeklyScheduled||0) - (weeklyDone||0));
+    var weeklyPct = (weeklyScheduled && weeklyScheduled > 0) ? (weeklyDone/weeklyScheduled * 100) : null;
+
+    var ctxW = document.getElementById('weeklyDonut').getContext('2d');
+    weeklyDonut = new Chart(ctxW, {
+      type:'doughnut',
+      data:{ labels:['Completed','Remaining'], datasets:[{ data:[weeklyDone,weeklyRemain], backgroundColor:['rgba(139,92,246,0.98)','rgba(125,211,252,0.14)'] }]},
+      options:{
+        responsive:true, maintainAspectRatio:false, cutout:'60%',
+        rotation: -0.9 * Math.PI / 2,
+        plugins: { donut3DPlugin:{depth:20}, centerText:{ text: (weeklyPct !== null ? (weeklyPct.toFixed(2) + '%') : (String(weeklyDone) + '/' + String(weeklyScheduled))), subtext:'Completed', color:'#fff' }, legend:{display:false} }
+      }, plugins:[donut3DPlugin, centerTextPlugin]
+    });
+
+    // ===== PI: choose LAST POPULATED WEEK (qty > 0) =====
+    var series = (payload && payload.pi && Array.isArray(payload.pi.weeklySeries)) ? payload.pi.weeklySeries : [];
+    var weekObj = null;
+    var chosenWeekNumber = null;
+
+    // filter to only weeks where qty > 0
+    var populated = series.filter(function(s){
+      return s && !isNaN(Number(s.qty)) && Number(s.qty) > 0;
+    });
+
+    if (populated.length > 0) {
+      var maxPopWeek = populated.reduce(function(acc, cur){
+        var w = Number(cur.week);
+        if (isNaN(w)) return acc;
+        return (acc === null || w > acc) ? w : acc;
+      }, null);
+      if (maxPopWeek !== null) {
+        chosenWeekNumber = maxPopWeek;
+        for (var k=0;k<series.length;k++){
+          if (Number(series[k].week) === Number(chosenWeekNumber)) { weekObj = series[k]; break; }
+        }
+      }
+    }
+
+    if (!weekObj && series.length > 0) {
+      var maxWeek = series.reduce(function(acc, cur){
+        var w = Number(cur.week);
+        if (isNaN(w)) return acc;
+        return (acc === null || w > acc) ? w : acc;
+      }, null);
+      if (maxWeek !== null) {
+        chosenWeekNumber = (chosenWeekNumber === null) ? maxWeek : chosenWeekNumber;
+        for (var kk=0; kk<series.length; kk++){
+          if (Number(series[kk].week) === Number(maxWeek)) { weekObj = series[kk]; break; }
+        }
+      }
+    }
+
+    if (!weekObj && payload && payload.pi && payload.pi.week32) {
+      weekObj = payload.pi.week32;
+      chosenWeekNumber = (typeof weekObj.week !== 'undefined' && !isNaN(Number(weekObj.week))) ? Number(weekObj.week) : chosenWeekNumber;
+    }
+
+    var weekPctRaw = (weekObj && (typeof weekObj.pct !== 'undefined')) ? weekObj.pct : null;
+    var gaugeVal = (weekPctRaw !== null && typeof weekPctRaw !== 'undefined' && !isNaN(Number(weekPctRaw))) ? Math.max(0, Math.min(1, Number(weekPctRaw))) : 0;
+
+    var ctxG = document.getElementById('weeklyGauge').getContext('2d');
+    weeklyGauge = new Chart(ctxG, {
+      type:'doughnut',
+      data:{ labels:['pct','rest'], datasets:[{ data:[gaugeVal, Math.max(0,1-gaugeVal)], backgroundColor:['rgba(125,211,252,0.98)','rgba(255,255,255,0.06)'] }]},
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'78%', rotation:-90*Math.PI/180, circumference:180*Math.PI/180, plugins:{legend:{display:false}} }
+    });
+    var gaugeCenter = document.getElementById('gaugeCenter');
+    if (gaugeCenter && gaugeCenter.querySelector('.num')) gaugeCenter.querySelector('.num').innerText = (isNaN(gaugeVal) ? '—' : ((gaugeVal*100).toFixed(2) + '%'));
+    var gaugeRawEl = document.getElementById('gaugeRaw');
+    if (gaugeRawEl) gaugeRawEl.innerText = 'raw: ' + (weekPctRaw === null ? '—' : String(weekPctRaw));
+
+    var w32infoEl = document.getElementById('week32Info');
+    if (w32infoEl) {
+      if (weekObj && typeof weekObj.qty !== 'undefined') {
+        var wkLabel = (chosenWeekNumber !== null) ? chosenWeekNumber : (weekObj.week || '—');
+        w32infoEl.innerText = 'Week ' + String(wkLabel) + ' → qty: ' + String(weekObj.qty) + ' • raw: ' + String(weekPctRaw);
+      } else {
+        w32infoEl.innerText = 'No week data available';
+      }
+    }
+
+    var labels = [];
+    var vals = [];
+    for (var si=0; si<series.length; si++) {
+      labels.push('W' + String(series[si].week));
+      vals.push(Number(series[si].qty || 0));
+    }
+    var ctxPI = document.getElementById('piArea').getContext('2d');
+    piArea = new Chart(ctxPI, {
+      type:'line',
+      data:{ labels: labels, datasets:[{ data:vals, borderColor:'rgba(125,211,252,0.95)', backgroundColor:'rgba(125,211,252,0.08)', fill:true, tension:0.28, pointRadius:2 }]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false}, ticks:{color:'#cfeeff'}}, y:{beginAtZero:true, ticks:{color:'#cfeeff'}} }, animation:{duration:900} }
+    });
+
+    var pbody = document.getElementById('piWeeklyBody');
+    if (pbody) pbody.innerHTML = '';
+    for (si=0; si<series.length; si++) {
+      var r = series[si];
+      var raw = (typeof r.pct === 'string') ? r.pct : ((r.pct === null || typeof r.pct === 'undefined') ? '' : String(r.pct));
+      var pctTip = (typeof r.pct !== 'undefined' && r.pct !== null && !isNaN(Number(r.pct))) ? (Number(r.pct)*100).toFixed(4) + '%' : '';
+      var weekNum = Number(r.week);
+      var trClass = (chosenWeekNumber !== null && !isNaN(weekNum) && Number(weekNum) === Number(chosenWeekNumber)) ? ' class="chosen"' : '';
+      if (pbody) pbody.insertAdjacentHTML('beforeend', '<tr'+trClass+'><td>' + escapeHtml(String(r.week)) + '</td><td>' + escapeHtml(String(r.qty)) + '</td><td title="' + escapeHtml(pctTip) + '">' + escapeHtml(raw) + '</td></tr>');
+    }
+
+    var pa = document.getElementById('piAreaBody'); if (pa) pa.innerHTML = '';
+    var tot = 0;
+    var dailyAreas = (payload && payload.pi && Array.isArray(payload.pi.dailyAreas)) ? payload.pi.dailyAreas : [];
+    for (var ai=0; ai<dailyAreas.length; ai++) { tot += Number(dailyAreas[ai].count || 0); if (pa) pa.insertAdjacentHTML('beforeend', '<tr><td style="text-align:left">' + escapeHtml(dailyAreas[ai].area) + '</td><td>' + escapeHtml(String(dailyAreas[ai].count)) + '</td></tr>'); }
+    var totalEl = document.getElementById('piAreaTotal'); if (totalEl) totalEl.innerText = tot;
+    var piDailyTotalEl = document.getElementById('piDailyTotal'); if (piDailyTotalEl) piDailyTotalEl.innerText = 'Total: ' + ((payload && payload.pi && payload.pi.dailyTotal) ? payload.pi.dailyTotal : 0);
+
+    var ys = (payload && payload.pi && payload.pi.yearSummary) ? payload.pi.yearSummary : {};
+    var parts = [];
+    if (typeof ys['Completed'] !== 'undefined') parts.push('Completed: ' + String(ys['Completed']));
+    if (typeof ys['Behind the target'] !== 'undefined') parts.push('Behind: ' + String(ys['Behind the target']));
+    if (typeof ys['Left this year'] !== 'undefined') parts.push('Left: ' + String(ys['Left this year']));
+    var ysel = document.getElementById('piYearSummary'); if (ysel) ysel.innerText = parts.join(' • ');
+
+    var metaLine = document.getElementById('metaLine');
+    if (metaLine) metaLine.innerText = 'Live • ' + ((payload && payload.meta && payload.meta.today) ? payload.meta.today : '') + ' • rows: ' + ((payload && payload.meta && payload.meta.rows) ? payload.meta.rows : 0);
+  }
+
+  function populateList(id, items){
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    for (var i=0;i<items.length;i++){
+      var it = items[i];
+      var card = document.createElement('div'); card.className='taskCard';
+      var left = document.createElement('div'); left.style.display='flex'; left.style.flexDirection='column';
+      var n = document.createElement('div'); n.className='taskName'; n.innerText = it.task || '';
+      var note = document.createElement('div'); note.className='taskNote'; note.innerText = it.lastStatus || '';
+      left.appendChild(n); left.appendChild(note);
+      var badge = document.createElement('div'); badge.className='badge ' + (it.done ? 'done' : 'todo'); badge.innerText = it.done ? 'Done' : 'To do';
+      card.appendChild(left); card.appendChild(badge);
+      el.appendChild(card);
+    }
+  }
+
+  function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function startClock(){ setInterval(function(){ var s = new Date().toLocaleString('en-GB'); var lt = document.getElementById('liveTime'); if (lt) lt.innerText = s; var ls = document.getElementById('liveTimeSmall'); if (ls) ls.innerText = s; },1000); }
+  startClock();
+
+  (function demo(){
+    if (window.__demoPayload) return;
+    window.__demoPayload = {
+      daily: { scheduled: 13, done: 6, list: [ {task:'SHRINKAGE RECONCILATION DAILY', done:false, lastStatus:'09:00'}, {task:'PI Master file update', done:false, lastStatus:''}, {task:'PI – exceptions', done:true, lastStatus:''} ] },
+      weekly: { scheduled: 11, done: 3, list:[ {task:'(Weekly) SLA', done:false, lastStatus:''},{task:'(Weekly) Shrinkage', done:true, lastStatus:''} ] },
+      pi: { weeklySeries:[ {week:27,qty:5103,pct:0.00855490360435876},{week:28,qty:6457,pct:0.0108248113998324},{week:29,qty:7494,pct:0.0125632858340319},{week:30,qty:6901,pct:0.011569153394803},{week:31,qty:5447,pct:0.00913160100586756},{week:32,qty:4524,pct:0.00758424140821458},{week:33,qty:1151,pct:0.00192958927074602},{week:34,qty:0,pct:0},{week:35,qty:0,pct:0}], week32:{qty:4524,pct:0.00758424140821458}, dailyAreas:[{area:'MPR',count:3}], dailyTotal:3, yearSummary:{ 'Completed':0.42 } },
+      meta:{ today: new Date().toLocaleDateString('en-GB'), rows: 152 }
+    };
+  })();
+
+  var refreshBtn = document.getElementById('refreshBtn');
+  if (refreshBtn) refreshBtn.addEventListener('click', refresh);
+
+  var kioskBtn = document.getElementById('kioskBtn');
+  var isKiosk = false;
+  function enterKioskFullscreen(){ var el=document.documentElement; if (el.requestFullscreen) return el.requestFullscreen(); if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen(); if (el.msRequestFullscreen) return el.msRequestFullscreen(); return Promise.reject(new Error('Fullscreen API not supported')); }
+  function exitKioskFullscreen(){ if (document.exitFullscreen) return document.exitFullscreen(); if (document.webkitExitFullscreen) return document.webkitExitFullscreen(); if (document.msExitFullscreen) return document.msExitFullscreen(); return Promise.reject(new Error('Exit fullscreen not supported')); }
+  function applyKioskFallback(enable){ if (enable) { document.body.classList.add('kiosk-fallback','kiosk-hide-topbar'); document.getElementById('kioskExitHint').style.display='block'; setTimeout(function(){ window.dispatchEvent(new Event('resize')); },250); } else { document.body.classList.remove('kiosk-fallback','kiosk-hide-topbar'); document.getElementById('kioskExitHint').style.display='none'; setTimeout(function(){ window.dispatchEvent(new Event('resize')); },250); } }
+  function toggleKioskIfAvailable(){ if (!isKiosk) { enterKioskFullscreen().then(function(){ isKiosk = true; document.getElementById('kioskExitHint').style.display='none'; }).catch(function(){ applyKioskFallback(true); isKiosk = true; }); } else { exitKioskFullscreen().then(function(){ isKiosk = false; applyKioskFallback(false); }).catch(function(){ isKiosk = false; applyKioskFallback(false); }); } }
+  if (kioskBtn) kioskBtn.addEventListener('click', toggleKioskIfAvailable);
+  window.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' || ev.key === 'Esc') { if (isKiosk) toggleKioskIfAvailable(); } });
+  document.addEventListener('fullscreenchange', function(){ if (!document.fullscreenElement && !document.webkitFullscreenElement) { isKiosk = false; applyKioskFallback(false); } });
+
+  // initial render
+  refresh();
+
+  setTimeout(function(){
+    var st = (document.getElementById('bgStatus')||{innerText:''}).innerText.toLowerCase();
+    if (st.indexOf('load failed') !== -1 || st.indexOf('enter id') !== -1) {
+      console.warn('Background not loaded. If using Drive: set file sharing to "Anyone with the link - Viewer", or paste a public image URL into the background control.');
+    }
+  }, 2200);
+</script>
+</body>
+</html>
