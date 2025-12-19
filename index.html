@@ -1,589 +1,627 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Stock Team VCB</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<style>
-  :root{ --bg:#021026; --panel:#071227; --muted:#98a8bd; --accentA:#7dd3fc; --accentB:#8b5cf6; }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial;background:linear-gradient(180deg,#021026,#05122a);color:#eaf6ff}
-  header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px}
-  h1{margin:0;font-size:20px}
-  .actions{display:flex;gap:8px;align-items:center}
-  button, select, input{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--accentA);cursor:pointer}
-  button.primary{background:linear-gradient(90deg,var(--accentA),var(--accentB));color:#021026;border:0}
-  .layout{display:grid;grid-template-columns:320px 1fr 440px;gap:12px;height:calc(100vh - 72px);padding:12px}
-  .panel{background:var(--panel);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 18px 40px rgba(2,6,23,0.45);display:flex;flex-direction:column;min-height:0;overflow:hidden}
-  .taskList{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:6px}
-  .taskCard{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(0,0,0,0.06));border:1px solid rgba(255,255,255,0.02);box-shadow: 0 6px 18px rgba(0,0,0,0.35)}
-  .badge{padding:6px 12px;border-radius:999px;color:#fff;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,0.35), inset 0 -3px rgba(0,0,0,0.08)}
-  .done{background:linear-gradient(90deg,#16a34a,#064e3b)}
-  .todo{background:linear-gradient(90deg,#f97316,#b91c1c)}
-  .charts{display:grid;grid-template-rows:1fr 1fr;gap:12px;min-height:0}
-  .chartRow{display:flex;gap:12px;min-height:0}
-  .chartCard{flex:1;display:flex;flex-direction:column;border-radius:12px;padding:10px;background:rgba(255,255,255,0.02);min-height:0}
-  .chartTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .canvasWrap{flex:1;min-height:0}
-  canvas{width:100% !important;height:100% !important;display:block}
-  table{width:100%;border-collapse:collapse;color:#eaf6ff;font-size:13px}
-  thead th{position:sticky;top:0;background:rgba(10,14,24,0.35);padding:8px;color:var(--muted);font-weight:700;text-align:left}
-  td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}
-  #debug{margin-top:8px;background:#071427;color:#fff;padding:8px;border-radius:8px;font-size:13px;max-height:160px;overflow:auto}
-  .small{font-size:12px;color:var(--muted)}
-  .controls-row { display:flex; gap:8px; align-items:center; margin-top:8px; }
-  body,html{overflow:hidden}
-  @media(max-width:1100px){ .layout{grid-template-columns:1fr;grid-auto-rows:auto;height:calc(100vh - 72px)} body,html{overflow:auto} }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stock Team VCB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --bg:#021026; --panel:#071227; --muted:#98a8bd; --accentA:#7dd3fc; --accentB:#8b5cf6; }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:'Poppins',Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#021026,#05122a);color:#eaf6ff}
+    header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px}
+    h1{margin:0;font-size:20px}
+    .actions{display:flex;gap:8px;align-items:center}
+    button, select, input{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--accentA);cursor:pointer}
+    button.primary{background:linear-gradient(90deg,var(--accentA),var(--accentB));color:#021026;border:0}
+    .layout{display:grid;grid-template-columns:320px 1fr 420px;gap:12px;height:calc(100vh - 72px);padding:12px}
+    .panel{background:var(--panel);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 18px 40px rgba(2,6,23,0.45);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+    .taskList{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:6px}
+    .taskCard{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(0,0,0,0.06));border:1px solid rgba(255,255,255,0.02)}
+    .badge{padding:6px 12px;border-radius:999px;color:#fff;font-weight:800}
+    .done{background:linear-gradient(90deg,#16a34a,#064e3b)}
+    .todo{background:linear-gradient(90deg,#f97316,#b91c1c)}
+    .charts{display:grid;grid-template-rows:1fr 1fr;gap:12px;min-height:0}
+    .chartRow{display:flex;gap:12px;min-height:0}
+    .chartCard{flex:1;display:flex;flex-direction:column;border-radius:12px;padding:10px;background:rgba(255,255,255,0.02);min-height:0}
+    .chartTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .canvasWrap{flex:1;min-height:0}
+    canvas{width:100% !important;height:100% !important;display:block}
+    table{width:100%;border-collapse:collapse;color:#eaf6ff;font-size:13px}
+    thead th{position:sticky;top:0;background:rgba(10,14,24,0.35);padding:8px;color:var(--muted);font-weight:700;text-align:left}
+    td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    #debug{margin-top:8px;background:#071427;color:#fff;padding:8px;border-radius:8px;font-size:13px;max-height:160px;overflow:auto}
+    .small{font-size:12px;color:var(--muted)}
+    body,html{overflow:hidden}
+    @media(max-width:1100px){ .layout{grid-template-columns:1fr;grid-auto-rows:auto;height:calc(100vh - 72px)} body,html{overflow:auto} }
+  </style>
 </head>
 <body>
-<header>
-  <div>
-    <h1>Stock Team VCB</h1>
-    <div class="small" id="metaLine">Live • <span id="liveDate">—</span></div>
-  </div>
-
-  <div class="actions">
-    <label class="small" style="margin-right:6px">Scale</label>
-    <select id="scaleMode" title="Scale mode">
-      <option value="auto">Auto</option>
-      <option value="raw">Raw</option>
-      <option value="log">Log</option>
-    </select>
-    <button id="refreshBtn">Refresh</button>
-    <button id="uploadBtn">Upload JSON</button>
-    <button id="pasteBtn">Paste JSON</button>
-    <button id="exportCsv">Export CSV</button>
-    <button id="exportPng" class="primary">Export PNGs</button>
-  </div>
-</header>
-
-<div class="layout">
-  <!-- LEFT: tasks + settings -->
-  <div class="panel">
-    <h3 style="margin:0 0 8px 0">Daily tasks</h3>
-    <div id="dailyList" class="taskList"></div>
-
-    <div style="height:10px"></div>
-    <h3 style="margin:8px 0 8px 0">Weekly tasks</h3>
-    <div id="weeklyList" class="taskList"></div>
-
-    <div class="controls-row" style="margin-top:12px;">
-      <label class="small">Daily target</label>
-      <input id="targetInput" type="number" placeholder="1193" style="width:110px" />
-      <button id="saveTargetBtn">Save target</button>
+  <header>
+    <div>
+      <h1>Stock Team VCB</h1>
+      <div class="small" id="metaLine">Live • <span id="liveDate">—</span></div>
     </div>
 
-    <div class="controls-row">
-      <button id="resetWeekBtn">Reset week progress</button>
-      <button id="showHistoryBtn">Show history (debug)</button>
+    <div class="actions">
+      <label class="small" style="margin-right:6px">Scale</label>
+      <select id="scaleMode" title="Scale mode">
+        <option value="auto">Auto</option>
+        <option value="raw">Raw</option>
+        <option value="log">Log</option>
+      </select>
+      <button id="refreshBtn">Refresh</button>
+      <button id="uploadBtn">Upload JSON</button>
+      <button id="pasteBtn">Paste JSON</button>
+      <button id="exportCsv">Export CSV</button>
+      <button id="exportPng" class="primary">Export PNGs</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- LEFT -->
+    <div class="panel">
+      <h3 style="margin:0 0 8px 0">Daily tasks</h3>
+      <div id="dailyList" class="taskList"></div>
+
+      <div style="height:10px"></div>
+      <h3 style="margin:8px 0 8px 0">Weekly tasks</h3>
+      <div id="weeklyList" class="taskList"></div>
+
+      <div style="margin-top:12px" class="small">Daily target</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+        <input id="targetInput" type="number" placeholder="1193" style="width:110px" />
+        <button id="saveTargetBtn">Save target</button>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="resetWeekBtn">Reset week</button>
+        <button id="showHistoryBtn">Show history</button>
+      </div>
+
+      <div class="small" style="margin-top:10px">Notes: target saved locally. Daily deltas saved locally and rolled into weekly accumulations.</div>
     </div>
 
-    <div style="margin-top:12px" class="small">Notes: target saved locally; daily deltas stored locally and rolled into weekly accumulations.</div>
-  </div>
+    <!-- CENTER -->
+    <div class="panel charts">
+      <div class="chartRow">
+        <div class="chartCard">
+          <div class="chartTitle"><div style="font-weight:700">Counted Today vs Remaining (top areas)</div><div class="small" id="countHint">—</div></div>
+          <div class="canvasWrap"><canvas id="piBar"></canvas></div>
+        </div>
+        <div class="chartCard">
+          <div class="chartTitle"><div style="font-weight:700">Weekly PI — Series</div><div class="small" id="weekHint">—</div></div>
+          <div class="canvasWrap"><canvas id="weeklyLine"></canvas></div>
+        </div>
+      </div>
 
-  <!-- CENTER: charts -->
-  <div class="panel charts">
-    <div class="chartRow">
-      <div class="chartCard">
-        <div class="chartTitle"><div style="font-weight:700">Counted Today vs Remaining (top areas)</div><div class="small" id="countHint">—</div></div>
-        <div class="canvasWrap"><canvas id="piBar"></canvas></div>
-      </div>
-      <div class="chartCard">
-        <div class="chartTitle"><div style="font-weight:700">Weekly PI — Series</div><div class="small" id="weekHint">—</div></div>
-        <div class="canvasWrap"><canvas id="weeklyLine"></canvas></div>
-      </div>
-    </div>
-
-    <div class="chartRow">
-      <div class="chartCard">
-        <div class="chartTitle"><div style="font-weight:700">Daily tasks</div><div class="small" id="dailyCountSmall">—</div></div>
-        <div class="canvasWrap"><canvas id="dailyDonut"></canvas></div>
-      </div>
-      <div class="chartCard">
-        <div class="chartTitle"><div style="font-weight:700">Weekly tasks</div><div class="small" id="weeklyCountSmall">—</div></div>
-        <div class="canvasWrap"><canvas id="weeklyDonut"></canvas></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RIGHT: gauge + tables -->
-  <div class="panel">
-    <h3 style="margin:0 0 8px 0">Daily progress (gauge)</h3>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-      <div style="width:140px;height:120px"><canvas id="gaugeMini"></canvas></div>
-      <div>
-        <div id="gaugeCenterText" style="font-weight:800;font-size:18px">—</div>
-        <div id="gaugeBreakdown" class="small">—</div>
+      <div class="chartRow">
+        <div class="chartCard">
+          <div class="chartTitle"><div style="font-weight:700">Daily tasks</div><div class="small" id="dailyCountSmall">—</div></div>
+          <div class="canvasWrap"><canvas id="dailyDonut"></canvas></div>
+        </div>
+        <div class="chartCard">
+          <div class="chartTitle"><div style="font-weight:700">Weekly tasks</div><div class="small" id="weeklyCountSmall">—</div></div>
+          <div class="canvasWrap"><canvas id="weeklyDonut"></canvas></div>
+        </div>
       </div>
     </div>
 
-    <h3 style="margin-top:6px">PI — Daily by area</h3>
-    <div style="flex:1;overflow:auto;margin-bottom:8px">
-      <table id="piTable"><thead><tr><th>Area</th><th style="text-align:right">Total (cum.)</th><th style="text-align:right">Counted today</th><th style="text-align:right">Target</th><th style="text-align:right">Remaining</th></tr></thead><tbody></tbody></table>
-    </div>
+    <!-- RIGHT -->
+    <div class="panel">
+      <h3>Daily progress (gauge)</h3>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="width:140px;height:120px"><canvas id="gaugeMini"></canvas></div>
+        <div>
+          <div id="gaugeCenterText" style="font-weight:800;font-size:18px">—</div>
+          <div id="gaugeBreakdown" class="small">—</div>
+        </div>
+      </div>
 
-    <h3 style="margin-top:6px">Weekly details</h3>
-    <div style="max-height:160px;overflow:auto">
-      <table id="weeklyPiTable"><thead><tr><th>Week</th><th>Area</th><th style="text-align:right">Daily</th><th style="text-align:right">Weekly</th><th style="text-align:right">Weekly %</th></tr></thead><tbody></tbody></table>
+      <h3 style="margin-top:6px">PI — Daily by area</h3>
+      <div style="flex:1;overflow:auto;margin-bottom:8px">
+        <table id="piTable"><thead><tr><th>Area</th><th style="text-align:right">Total (cum.)</th><th style="text-align:right">Counted today</th><th style="text-align:right">Target</th><th style="text-align:right">Remaining</th></tr></thead><tbody></tbody></table>
+      </div>
+
+      <h3 style="margin-top:6px">Weekly details</h3>
+      <div style="max-height:160px;overflow:auto">
+        <table id="weeklyPiTable"><thead><tr><th>Week</th><th>Area</th><th style="text-align:right">Daily</th><th style="text-align:right">Weekly</th><th style="text-align:right">Weekly %</th></tr></thead><tbody></tbody></table>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="debug" aria-live="polite"></div>
+  <div id="debug" aria-live="polite"></div>
 
-<script>
-/* ---------- small helpers ---------- */
-function dbg(msg){
-  const el = document.getElementById('debug');
-  const d = document.createElement('div');
-  d.textContent = msg;
-  el.appendChild(d);
-  el.scrollTop = el.scrollHeight;
-  console.log(msg);
-}
-function safeNum(v){
-  if (v === null || v === undefined) return 0;
-  if (typeof v === 'number') return isFinite(v) ? v : 0;
-  const s = String(v).replace(/,/g,'').trim();
-  const n = Number(s);
-  return isFinite(n) ? n : 0;
-}
-function findKey(obj, candidates){
-  if (!obj) return undefined;
-  if (!Array.isArray(candidates)) candidates = [candidates];
-  const ks = Object.keys(obj);
-  for (const c of candidates) {
-    for (const k of ks) {
-      if (k.trim().toLowerCase() === c.trim().toLowerCase()) return k;
-    }
+  <script>
+  // ---------- helpers ----------
+  function dbg(msg) {
+    var el = document.getElementById('debug');
+    var d = document.createElement('div');
+    d.textContent = msg;
+    el.appendChild(d);
+    el.scrollTop = el.scrollHeight;
+    console.log(msg);
   }
-  for (const c of candidates) {
-    for (const k of ks) {
-      if (k.trim().toLowerCase().indexOf(c.trim().toLowerCase()) !== -1) return k;
-    }
+  function safeNum(v) {
+    if (v === null || v === undefined) return 0;
+    if (typeof v === 'number') return isFinite(v) ? v : 0;
+    var s = String(v).replace(/,/g,'').trim();
+    var n = Number(s);
+    return isFinite(n) ? n : 0;
   }
-  return undefined;
-}
-function escapeHtml(s){ return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function formatNumber(n){ n = Number(n) || 0; if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1)+'M'; if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1)+'K'; return n.toLocaleString(); }
-function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-
-/* ---------- chart plugins (3D-like) ---------- */
-const donut3D = {
-  id: 'donut3D',
-  beforeDraw(chart, args, options){
-    if (!options || !options.depth) return;
-    const ctx = chart.ctx;
-    const meta = chart.getDatasetMeta(0);
-    if (!meta) return;
-    const first = meta.data[0]; if (!first) return;
-    const cx = (chart.chartArea.left + chart.chartArea.right) / 2;
-    const cy = (chart.chartArea.top + chart.chartArea.bottom) / 2;
-    const outerR = first.outerRadius || Math.min(chart.width, chart.height) / 2 * 0.9;
-    const innerR = first.innerRadius || outerR * 0.6;
-    const depth = options.depth;
-    const slices = chart.data.datasets[0].data;
-    const colors = chart.data.datasets[0].backgroundColor || [];
-    let startAngle = (chart.options.rotation || 0) - Math.PI/2;
-    const total = slices.reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0) || 1;
-    const angles = [];
-    for (let i = 0; i < slices.length; i++){
-      const a = (slices[i] / total) * (chart.options.circumference || (Math.PI * 2));
-      angles.push({ start: startAngle, end: startAngle + a });
-      startAngle += a;
-    }
-    const step = Math.max(2, Math.round(depth / 6));
-    for (let layer = depth; layer > 0; layer -= step){
-      const yOff = layer * 0.6;
-      for (let i = 0; i < angles.length; i++){
-        const ainfo = angles[i];
-        ctx.beginPath();
-        ctx.fillStyle = shadeColor(colors[i] || 'rgba(255,255,255,0.08)', -0.12 - (layer / depth) * 0.12);
-        ctx.moveTo(cx, cy + yOff);
-        ctx.arc(cx, cy + yOff, outerR, ainfo.start, ainfo.end);
-        ctx.arc(cx, cy + yOff, innerR, ainfo.end, ainfo.start, true);
-        ctx.closePath();
-        ctx.fill();
+  function findKey(obj, candidates) {
+    if (!obj) return undefined;
+    if (!Array.isArray(candidates)) candidates = [candidates];
+    var ks = Object.keys(obj);
+    var i,j;
+    for (i = 0; i < candidates.length; i += 1) {
+      var c = candidates[i].toLowerCase();
+      for (j = 0; j < ks.length; j += 1) {
+        if (ks[j].trim().toLowerCase() === c) return ks[j];
       }
     }
+    for (i = 0; i < candidates.length; i += 1) {
+      var c2 = candidates[i].toLowerCase();
+      for (j = 0; j < ks.length; j += 1) {
+        if (ks[j].trim().toLowerCase().indexOf(c2) !== -1) return ks[j];
+      }
+    }
+    return undefined;
   }
-};
-const centerText = {
-  id: 'centerText',
-  afterDraw(chart){
-    const cfg = chart && chart.config && chart.config.options && chart.config.options.plugins && chart.config.options.plugins.centerText;
-    if (!cfg) return;
-    const ctx = chart.ctx; ctx.save();
-    const x = (chart.chartArea.left + chart.chartArea.right) / 2;
-    const y = (chart.chartArea.top + chart.chartArea.bottom) / 2;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = cfg.color || '#fff'; ctx.font = cfg.font || '700 16px Poppins'; ctx.fillText(cfg.text || '', x, y - 8);
-    if (cfg.subtext){ ctx.font = cfg.subFont || '400 12px Poppins'; ctx.fillStyle = cfg.subColor || '#cfeeff'; ctx.fillText(cfg.subtext, x, y + 14); }
-    ctx.restore();
+  function escapeHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
-};
-Chart.register(donut3D, centerText);
-
-/* ---------- storage keys ---------- */
-const STORAGE = {
-  LAST_CUM: 'vcb_last_cumulative',
-  DAILY_HISTORY: 'vcb_daily_history',
-  WEEK_ACC_PREFIX: 'vcb_week_acc_',
-  TARGET: 'vcb_target'
-};
-
-function getSavedTarget(){ const s = localStorage.getItem(STORAGE.TARGET); const n = safeNum(s); return n > 0 ? n : 1193; }
-function saveTarget(v){ localStorage.setItem(STORAGE.TARGET, String(Number(v))); }
-
-/* ---------- date helpers ---------- */
-function todayISO(){ return new Date().toISOString().slice(0,10); }
-function getISOWeekKey(dateObj){
-  const date = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
-  date.setHours(0,0,0,0);
-  date.setDate(date.getDate() + 4 - (date.getDay()||7));
-  const yearStart = new Date(date.getFullYear(),0,1);
-  const weekNo = Math.floor(((date - yearStart) / 86400000 + 1)/7) + 1;
-  return date.getFullYear() + '-W' + String(weekNo).padStart(2,'0');
-}
-
-/* ---------- robust fetch ---------- */
-const tryUrls = ['./data/dashboard.json','/data/dashboard.json','data/dashboard.json','./dashboard.json','/dashboard.json'];
-const FETCH_TIMEOUT = 6000;
-async function fetchJsonWithTimeout(url, timeout){
-  const controller = new AbortController();
-  const id = setTimeout(()=>controller.abort(), timeout);
-  try {
-    dbg('Trying: ' + url);
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(id);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const j = await res.json();
-    dbg('Loaded: ' + url);
-    return { ok:true, json:j, url };
-  } catch (err){
-    clearTimeout(id);
-    dbg('Failed: ' + url + ' — ' + (err && err.message ? err.message : String(err)));
-    return { ok:false, err, url };
+  function formatNumber(n) {
+    n = Number(n) || 0;
+    if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M';
+    if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1) + 'K';
+    return n.toLocaleString();
   }
-}
-async function tryLoadJson(){
-  document.getElementById('debug').innerHTML = '';
-  for (const u of tryUrls){
-    const r = await fetchJsonWithTimeout(u, FETCH_TIMEOUT);
-    if (r.ok) return r.json;
-  }
-  dbg('Auto fetch failed. Use Upload or Paste JSON.');
-  return null;
-}
+  function clamp(v,a,b) { return Math.max(a, Math.min(b, v)); }
 
-/* ---------- UI wiring ---------- */
-document.getElementById('refreshBtn').addEventListener('click', loadAndRender);
-document.getElementById('uploadBtn').addEventListener('click', onUpload);
-document.getElementById('pasteBtn').addEventListener('click', onPaste);
-document.getElementById('exportCsv').addEventListener('click', downloadCsv);
-document.getElementById('exportPng').addEventListener('click', exportPNGs);
-document.getElementById('saveTargetBtn').addEventListener('click', ()=>{
-  const v = Number(document.getElementById('targetInput').value || '');
-  if (!isFinite(v) || v <= 0){ alert('Enter a valid positive number'); return; }
-  saveTarget(v);
-  dbg('Target saved: ' + v);
-  renderAll();
-});
-document.getElementById('resetWeekBtn').addEventListener('click', ()=>{
-  const wkKey = getISOWeekKey(new Date());
-  localStorage.removeItem(STORAGE.WEEK_ACC_PREFIX + wkKey);
-  localStorage.removeItem(STORAGE.DAILY_HISTORY);
-  localStorage.removeItem(STORAGE.LAST_CUM);
-  dbg('Week progress reset for ' + wkKey + ' and daily history/last cumulative cleared.');
-  loadAndRender();
-});
-document.getElementById('showHistoryBtn').addEventListener('click', ()=>{
-  dbg('LAST_CUM: ' + localStorage.getItem(STORAGE.LAST_CUM));
-  dbg('DAILY_HISTORY: ' + localStorage.getItem(STORAGE.DAILY_HISTORY));
-  const wk = getISOWeekKey(new Date()); dbg('WEEK_ACC ('+wk+'): ' + localStorage.getItem(STORAGE.WEEK_ACC_PREFIX + wk));
-});
-
-/* ---------- main ---------- */
-let payload = null;
-let charts = { piBar:null, weeklyLine:null, dailyDonut:null, weeklyDonut:null, gaugeMini:null };
-
-async function loadAndRender(){
-  dbg('Loading JSON...');
-  const j = await tryLoadJson();
-  if (!j){ dbg('Using demo fallback'); payload = demoPayload(); }
-  else payload = j;
-  document.getElementById('liveDate').innerText = (payload.meta && payload.meta.today) ? payload.meta.today : new Date().toLocaleDateString();
-  document.getElementById('targetInput').value = String(getSavedTarget());
-  renderAll();
-}
-function demoPayload(){
-  return {
-    piData:[
-      {"Date ":46010,"Area ":"MPR","Total locations":14622,"Counted ":3936,"Behind targe":0,"Above target":222.47,"Behind %":0},
-      {"Date ":46010,"Area ":"PB1","Total locations":4329,"Counted ":1189,"Behind targe":0,"Above target":89.57,"Behind %":0},
-      {"Date ":46010,"Area ":"Total:","Total locations":137369,"Counted ":37994,"Behind targe":237.71,"Above target":3245.80,"Behind %":0.00173}
-    ],
-    dailyTask:[{"Task ":"Aged stock report 7AM","Status":"Completed"},{"Task ":"PI Master file update","Status":"Not started"}],
-    weeklyTask:[{"Task":"(Weekly) SLA","Status":"Completed"},{"Task":"(Weekly) SIS report","Status":"Not started"}],
-    weeklyPiData:[{"Date ":46010,"Area ":"MPR","Daily Qty":127,"Week No":27," Weekly Qty":5103," Weekly %":0.85549}],
-    meta:{today:new Date().toLocaleDateString(), rows: 42}
+  // ---------- storage keys ----------
+  var STORAGE = {
+    LAST_CUM: 'vcb_last_cumulative_v1',
+    DAILY_HISTORY: 'vcb_daily_history_v1',
+    WEEK_ACC_PREFIX: 'vcb_week_acc_v1_',
+    TARGET: 'vcb_target_v1'
   };
-}
 
-/* ---------- storage helpers ---------- */
-function loadLastCumulative(){ try{ return JSON.parse(localStorage.getItem(STORAGE.LAST_CUM) || '{}'); }catch(e){ return {}; } }
-function saveLastCumulative(obj){ localStorage.setItem(STORAGE.LAST_CUM, JSON.stringify(obj)); }
-function loadDailyHistory(){ try{ return JSON.parse(localStorage.getItem(STORAGE.DAILY_HISTORY) || '{}'); }catch(e){ return {}; } }
-function saveDailyHistory(obj){ localStorage.setItem(STORAGE.DAILY_HISTORY, JSON.stringify(obj)); }
-function loadWeekAcc(weekKey){ try{ return JSON.parse(localStorage.getItem(STORAGE.WEEK_ACC_PREFIX + weekKey) || '{}'); }catch(e){ return {}; } }
-function saveWeekAcc(weekKey, obj){ localStorage.setItem(STORAGE.WEEK_ACC_PREFIX + weekKey, JSON.stringify(obj)); }
-
-/* ---------- render pipeline ---------- */
-function renderAll(){
-  renderTasks(payload.dailyTask || [], 'dailyList');
-  renderTasks(payload.weeklyTask || [], 'weeklyList');
-  processPIAndRender(payload.piData || []);
-  renderWeeklyPI(payload.weeklyPiData || []);
-  renderTaskDonuts(payload);
-  computeAndRenderGauge(payload);
-}
-
-/* ---------- tasks ---------- */
-function renderTasks(list, containerId){
-  const el = document.getElementById(containerId);
-  el.innerHTML = '';
-  if (!Array.isArray(list) || list.length === 0){ el.innerHTML = '<div class="small">No tasks</div>'; return; }
-  list.sort((a,b)=>{
-    const sa = String(a.Status || a['Status '] || '').toLowerCase();
-    const sb = String(b.Status || b['Status '] || '').toLowerCase();
-    const da = sa.includes('complete') || sa.includes('done');
-    const db = sb.includes('complete') || sb.includes('done');
-    if (da && !db) return 1;
-    if (db && !da) return -1;
-    return 0;
-  });
-  for (const t of list){
-    const nameKey = findKey(t, ['Task ','Task','task']);
-    const name = nameKey ? t[nameKey] : JSON.stringify(t).slice(0,60);
-    const status = t.Status || t['Status '] || t.status || '';
-    const done = String(status).toLowerCase().includes('complete') || String(status).toLowerCase().includes('done');
-    const div = document.createElement('div'); div.className = 'taskCard';
-    div.innerHTML = '<div style="max-width:72%"><div style="font-weight:800;font-size:13px">' + escapeHtml(name) + '</div><div class="small">' + escapeHtml(status) + '</div></div><div><div class="badge ' + (done ? 'done' : 'todo') + '">' + (done ? 'Completed' : 'Not started') + '</div></div>';
-    el.appendChild(div);
+  function getSavedTarget() {
+    var s = localStorage.getItem(STORAGE.TARGET);
+    var n = safeNum(s);
+    return n > 0 ? n : 1193;
   }
-}
-
-/* ---------- process PI: compute deltas and persist ---------- */
-function processPIAndRender(piList){
-  const lastCum = loadLastCumulative();
-  const dailyHistory = loadDailyHistory();
-  const today = todayISO();
-  const weekKey = getISOWeekKey(new Date());
-  const weekAcc = loadWeekAcc(weekKey);
-  const target = getSavedTarget();
-
-  const sample = Array.isArray(piList) && piList.length ? piList[0] : {};
-  const areaK = findKey(sample, ['Area','Area ']);
-  const totalK = findKey(sample, ['Total locations','Total locations ','Total']);
-  const countedK = findKey(sample, ['Counted','Counted ']);
-
-  const rows = Array.isArray(piList) ? piList.slice() : [];
-  const data = [];
-
-  for (const r of rows){
-    const area = String(r[areaK] || r['Area'] || r['Area '] || '').trim();
-    if (!area) continue;
-    if (/total/i.test(area)) continue;
-    const cum = safeNum(r[countedK] || r['Counted '] || 0);
-    const prev = safeNum(lastCum[area] || 0);
-    let delta = cum - prev;
-    if (prev === 0 && cum > 0 && !lastCum.hasOwnProperty(area)) delta = cum;
-    if (delta < 0) delta = cum;
-    data.push({ area, total: safeNum(r[totalK] || r['Total locations'] || 0), cum, delta: Math.round(delta) });
+  function saveTarget(v) {
+    localStorage.setItem(STORAGE.TARGET, String(Number(v)));
   }
 
-  const todaysEntry = dailyHistory[today] || {};
-  let addedToday = false;
-  for (const d of data){
-    if (!todaysEntry.hasOwnProperty(d.area)){
-      todaysEntry[d.area] = d.delta;
-      weekAcc[d.area] = safeNum(weekAcc[d.area] || 0) + d.delta;
-      addedToday = true;
-    } else {
-      d.delta = safeNum(todaysEntry[d.area] || 0);
+  function todayISO() {
+    return new Date().toISOString().slice(0,10);
+  }
+  function getISOWeekKey(dateObj) {
+    var date = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+    date.setHours(0,0,0,0);
+    date.setDate(date.getDate() + 4 - (date.getDay()||7));
+    var yearStart = new Date(date.getFullYear(),0,1);
+    var weekNo = Math.floor(((date - yearStart) / 86400000 + 1)/7) + 1;
+    return date.getFullYear() + '-W' + String(weekNo).padStart(2,'0');
+  }
+
+  // ---------- robust fetch attempts ----------
+  var tryUrls = ['./data/dashboard.json','/data/dashboard.json','data/dashboard.json','./dashboard.json','/dashboard.json'];
+  var FETCH_TIMEOUT = 6000;
+
+  function fetchJsonWithTimeout(url, timeout) {
+    return new Promise(function(resolve) {
+      var controller = new AbortController();
+      var id = setTimeout(function(){ controller.abort(); }, timeout);
+      fetch(url, { signal: controller.signal }).then(function(res) {
+        clearTimeout(id);
+        if (!res.ok) {
+          resolve({ ok:false, err: new Error('HTTP ' + res.status), url: url });
+          return;
+        }
+        res.json().then(function(j){
+          resolve({ ok:true, json:j, url:url });
+        }).catch(function(err){
+          resolve({ ok:false, err:err, url:url });
+        });
+      }).catch(function(err){
+        clearTimeout(id);
+        resolve({ ok:false, err:err, url:url });
+      });
+    });
+  }
+
+  function tryLoadJson() {
+    var debugEl = document.getElementById('debug');
+    debugEl.innerHTML = '';
+    var chain = Promise.resolve(null);
+    var index = 0;
+    function tryNext() {
+      if (index >= tryUrls.length) {
+        dbg('Auto fetch failed. Use Upload or Paste JSON.');
+        return Promise.resolve(null);
+      }
+      var u = tryUrls[index++];
+      dbg('Trying: ' + u);
+      return fetchJsonWithTimeout(u, FETCH_TIMEOUT).then(function(r){
+        if (r && r.ok) {
+          dbg('Loaded: ' + r.url);
+          return r.json;
+        }
+        dbg('Failed: ' + u + ' — ' + (r.err && r.err.message ? r.err.message : String(r.err)));
+        return tryNext();
+      });
     }
-    lastCum[d.area] = d.cum;
-  }
-  if (addedToday){
-    dailyHistory[today] = todaysEntry;
-    saveDailyHistory(dailyHistory);
-    saveWeekAcc(weekKey, weekAcc);
-    saveLastCumulative(lastCum);
-    dbg('Saved daily deltas for ' + today + ' and updated weekly accum (' + weekKey + ')');
-  } else {
-    saveLastCumulative(lastCum);
+    return tryNext();
   }
 
-  const tbody = document.querySelector('#piTable tbody'); tbody.innerHTML = '';
-  for (const d of data){
-    const remaining = Math.max(0, target - d.delta);
-    tbody.insertAdjacentHTML('beforeend',
-      '<tr><td>' + escapeHtml(d.area) + '</td>' +
-      '<td style="text-align:right">' + formatNumber(d.total) + '</td>' +
-      '<td style="text-align:right">' + formatNumber(d.delta) + '</td>' +
-      '<td style="text-align:right">' + formatNumber(target) + '</td>' +
-      '<td style="text-align:right">' + formatNumber(remaining) + '</td></tr>'
-    );
-  }
-
-  const totalSum = data.reduce((s,d)=>s+d.total,0);
-  const countedSum = data.reduce((s,d)=>s+d.delta,0);
-  document.getElementById('countHint').innerText = 'Total locations: ' + formatNumber(totalSum) + ' • Counted today: ' + formatNumber(countedSum) + ' • Target: ' + formatNumber(target);
-
-  const sorted = data.sort((a,b)=>b.total - a.total).slice(0,12);
-  const labels = sorted.map(d => d.area);
-  const countedArr = sorted.map(d => d.delta);
-  const remainingArr = sorted.map(d => Math.max(0, target - d.delta));
-
-  const mode = document.getElementById('scaleMode').value || 'auto';
-  let displayCounted = countedArr.slice();
-  let displayRemaining = remainingArr.slice();
-  if (mode === 'log'){ displayCounted = displayCounted.map(v => Math.log10(Math.max(1,v))); displayRemaining = displayRemaining.map(v => Math.log10(Math.max(1,v))); }
-  else if (mode === 'auto'){
-    const maxV = Math.max(...displayCounted.concat(displayRemaining),1);
-    let factor = 1;
-    if (maxV > 100000) factor = 0.001; else if (maxV > 20000) factor = 0.01; else if (maxV > 5000) factor = 0.1;
-    displayCounted = displayCounted.map(v => Number((v*factor).toFixed(3)));
-    displayRemaining = displayRemaining.map(v => Number((v*factor).toFixed(3)));
-  }
-
-  try{ if (charts.piBar) charts.piBar.destroy(); } catch(e){ charts.piBar = null; }
-  const ctx = document.getElementById('piBar').getContext('2d');
-  charts.piBar = new Chart(ctx, {
-    type:'bar',
-    data:{ labels, datasets:[
-      { label:'Counted today', data:displayCounted, backgroundColor:createGradient(ctx,'#7dd3fc','#0479a6')},
-      { label:'Remaining', data:displayRemaining, backgroundColor:createGradient(ctx,'#8b5cf6','#4a2a7a')}
-    ]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{ x:{ticks:{color:'#cfeeff'}}, y:{ticks:{color:'#cfeeff',callback:v=>formatNumber(v)}} }
+  // ---------- UI wiring ----------
+  document.getElementById('refreshBtn').addEventListener('click', loadAndRender);
+  document.getElementById('uploadBtn').addEventListener('click', onUpload);
+  document.getElementById('pasteBtn').addEventListener('click', onPaste);
+  document.getElementById('exportCsv').addEventListener('click', downloadCsv);
+  document.getElementById('exportPng').addEventListener('click', exportPNGs);
+  document.getElementById('saveTargetBtn').addEventListener('click', function(){
+    var v = Number(document.getElementById('targetInput').value || '');
+    if (!isFinite(v) || v <= 0) { alert('Enter a valid positive number'); return; }
+    saveTarget(v);
+    dbg('Target saved: ' + v);
+    renderAll();
   });
-}
-
-/* ---------- weekly PI ---------- */
-function renderWeeklyPI(list){
-  const tbody = document.querySelector('#weeklyPiTable tbody'); tbody.innerHTML = '';
-  if (!Array.isArray(list) || list.length === 0){ tbody.innerHTML = '<tr><td colspan="5">No weekly PI data</td></tr>'; if (charts.weeklyLine){ charts.weeklyLine.destroy(); charts.weeklyLine=null; } document.getElementById('weekHint').innerText='—'; return; }
-  const wkK = findKey(list[0], ['Week No','Week','week']);
-  const areaK = findKey(list[0], ['Area','Area ']);
-  const dailyK = findKey(list[0], ['Daily Qty','DailyQty','Daily']);
-  const wqK = findKey(list[0], [' Weekly Qty','Weekly Qty','WeeklyQty']);
-  const agg = {};
-  for (const r of list){
-    const wk = r[wkK] || r['Week No'] || r['Week'] || '';
-    const weeklyQty = safeNum(r[wqK] || r[' Weekly Qty'] || r['Weekly Qty'] || 0);
-    const dailyQty = safeNum(r[dailyK] || 0);
-    const area = r[areaK] || '';
-    tbody.insertAdjacentHTML('beforeend', '<tr><td>' + escapeHtml(String(wk)) + '</td><td>' + escapeHtml(area) + '</td><td style="text-align:right">' + formatNumber(dailyQty) + '</td><td style="text-align:right">' + formatNumber(weeklyQty) + '</td><td style="text-align:right">' + (safeNum(r[' Weekly %']||r['Weekly %']||0)*100).toFixed(3) + '%</td></tr>');
-    agg[String(wk)] = (agg[String(wk)] || 0) + weeklyQty;
-  }
-  const weeks = Object.keys(agg).map(k=>isFinite(Number(k))?Number(k):k).sort((a,b)=>a-b);
-  const labels = weeks.map(String);
-  const values = labels.map(l=>agg[l]||0);
-  document.getElementById('weekHint').innerText = 'Weeks: ' + labels.length;
-  try{ if (charts.weeklyLine) charts.weeklyLine.destroy(); } catch(e){ charts.weeklyLine=null; }
-  const ctx = document.getElementById('weeklyLine').getContext('2d');
-  charts.weeklyLine = new Chart(ctx, { type:'line', data:{ labels, datasets:[{ data: values, label:'Weekly Qty', borderColor:'#7dd3fc', backgroundColor:'rgba(125,211,252,0.08)', fill:true, tension:0.28 }]}, options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ticks:{callback:v=>formatNumber(v)}} } } });
-}
-
-/* ---------- donuts ---------- */
-function renderTaskDonuts(payload){
-  const daily = Array.isArray(payload.dailyTask) ? payload.dailyTask : [];
-  const weekly = Array.isArray(payload.weeklyTask) ? payload.weeklyTask : [];
-  const dailyDone = daily.filter(t => String(t.Status||t['Status ']||'').toLowerCase().includes('complete') || String(t.Status||'').toLowerCase().includes('done')).length;
-  const dailyTotal = daily.length;
-  const dailyRemain = Math.max(0, dailyTotal - dailyDone);
-  const weeklyDone = weekly.filter(t => String(t.Status||t['Status ']||'').toLowerCase().includes('complete') || String(t.Status||'').toLowerCase().includes('done')).length;
-  const weeklyTotal = weekly.length;
-  const weeklyRemain = Math.max(0, weeklyTotal - weeklyDone);
-  document.getElementById('dailyCountSmall').innerText = dailyDone + '/' + dailyTotal;
-  document.getElementById('weeklyCountSmall').innerText = weeklyDone + '/' + weeklyTotal;
-  try{ if (charts.dailyDonut) charts.dailyDonut.destroy(); } catch(e){ charts.dailyDonut=null; }
-  charts.dailyDonut = new Chart(document.getElementById('dailyDonut').getContext('2d'), { type:'doughnut', data:{ labels:['Done','Remaining'], datasets:[{ data:[dailyDone,dailyRemain], backgroundColor:['rgba(34,197,94,0.98)','rgba(249,115,115,0.18)'] }]}, options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{legend:{display:false}, donut3D:{depth:14}, centerText:{ text: dailyTotal ? (dailyDone + '/' + dailyTotal) : '—', subtext:'Completed' } } } });
-  try{ if (charts.weeklyDonut) charts.weeklyDonut.destroy(); } catch(e){ charts.weeklyDonut=null; }
-  charts.weeklyDonut = new Chart(document.getElementById('weeklyDonut').getContext('2d'), { type:'doughnut', data:{ labels:['Done','Remaining'], datasets:[{ data:[weeklyDone,weeklyRemain], backgroundColor:['rgba(139,92,246,0.95)','rgba(125,211,252,0.14)'] }]}, options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{legend:{display:false}, donut3D:{depth:14}, centerText:{ text: weeklyTotal?((weeklyDone/weeklyTotal*100).toFixed(1)+'%'):'—', subtext:'Completed' } } } });
-}
-
-/* ---------- gauge ---------- */
-function computeAndRenderGauge(payload){
-  const target = getSavedTarget();
-  const dailyHistory = loadDailyHistory();
-  const countedTodayTotal = Object.values(dailyHistory[todayISO()] || {}).reduce((s,v)=>s + safeNum(v), 0);
-  const progress = target ? clamp(countedTodayTotal / target, 0, 1) : 0;
-  document.getElementById('gaugeCenterText').innerText = (progress*100).toFixed(2) + '% • ' + formatNumber(countedTodayTotal) + '/' + formatNumber(target);
-  document.getElementById('gaugeBreakdown').innerText = 'Daily target: ' + formatNumber(target) + ' (saved)';
-  let mini = document.querySelector('#gaugeMini canvas');
-  if (!mini){ mini = document.createElement('canvas'); mini.width = 260; mini.height = 120; document.getElementById('gaugeMini').appendChild(mini); }
-  try{ if (charts.gaugeMini) charts.gaugeMini.destroy(); } catch(e){ charts.gaugeMini = null; }
-  charts.gaugeMini = new Chart(mini.getContext('2d'), { type:'doughnut', data:{ labels:['progress','rest'], datasets:[{ data:[progress, Math.max(0,1-progress)], backgroundColor:['rgba(125,211,252,0.98)','rgba(255,255,255,0.06)'] }]}, options:{ responsive:false, maintainAspectRatio:false, cutout:'70%', rotation:-90*Math.PI/180, circumference:180*Math.PI/180, plugins:{legend:{display:false}, donut3D:{depth:10}} } });
-}
-
-/* ---------- gradients + shade ---------- */
-function createGradient(ctx, c1, c2){ const g = ctx.createLinearGradient(0,0,0,ctx.canvas.height || 400); g.addColorStop(0,c1); g.addColorStop(1,c2); return g; }
-function shadeColor(css, percent){
-  try {
-    if (css.indexOf('rgba') === 0 || css.indexOf('rgb') === 0){
-      const nums = css.replace(/rgba?\(|\)|\s/g,'').split(',').map(n=>Number(n));
-      const r = Math.round(nums[0]*(1+percent)); const g = Math.round(nums[1]*(1+percent)); const b = Math.round(nums[2]*(1+percent));
-      const a = nums.length>3?nums[3]:1; return 'rgba(' + clamp(r,0,255) + ',' + clamp(g,0,255) + ',' + clamp(b,0,255) + ',' + a + ')';
-    }
-    if (css[0] === '#'){ let c = css.substring(1); if (c.length===3){ let tmp=''; for (let i=0;i<c.length;i++) tmp += c[i]+c[i]; c=tmp; } const num = parseInt(c,16); const rr = (num>>16)+Math.round(255*percent); const gg = ((num>>8)&0x00FF)+Math.round(255*percent); const bb=(num & 0x0000FF)+Math.round(255*percent); return 'rgba(' + clamp(rr,0,255) + ',' + clamp(gg,0,255) + ',' + clamp(bb,0,255) + ',1)'; }
-  } catch(e){}
-  return css;
-}
-
-/* ---------- CSV/PNG export ---------- */
-function downloadCsv(){
-  const rows=[['Area','Total','CountedToday','Target','Remaining']];
-  document.querySelectorAll('#piTable tbody tr').forEach(tr=>{
-    const cols = tr.querySelectorAll('td'); if (!cols.length) return;
-    rows.push([cols[0].innerText, cols[1].innerText, cols[2].innerText, cols[3].innerText, cols[4].innerText]);
+  document.getElementById('resetWeekBtn').addEventListener('click', function(){
+    var wkKey = getISOWeekKey(new Date());
+    localStorage.removeItem(STORAGE.WEEK_ACC_PREFIX + wkKey);
+    localStorage.removeItem(STORAGE.DAILY_HISTORY);
+    localStorage.removeItem(STORAGE.LAST_CUM);
+    dbg('Week progress reset for ' + wkKey + ' and daily history/last cumulative cleared.');
+    loadAndRender();
   });
-  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'pi_by_area.csv'; a.click(); URL.revokeObjectURL(url);
-}
-function exportPNGs(){
-  const ids = ['piBar','weeklyLine','dailyDonut','weeklyDonut'];
-  ids.forEach(id=>{
-    const c = document.getElementById(id); if (!c) return;
-    try { const url = c.toDataURL('image/png'); const a = document.createElement('a'); a.href = url; a.download = id + '.png'; a.click(); } catch(e){ dbg('PNG export failed: ' + (e && e.message ? e.message : e)); }
+  document.getElementById('showHistoryBtn').addEventListener('click', function(){
+    dbg('LAST_CUM: ' + localStorage.getItem(STORAGE.LAST_CUM));
+    dbg('DAILY_HISTORY: ' + localStorage.getItem(STORAGE.DAILY_HISTORY));
+    var wk = getISOWeekKey(new Date());
+    dbg('WEEK_ACC ('+ wk + '): ' + localStorage.getItem(STORAGE.WEEK_ACC_PREFIX + wk));
   });
-}
 
-/* ---------- upload / paste ---------- */
-function onUpload(){
-  const input = document.createElement('input'); input.type='file'; input.accept='application/json';
-  input.onchange = e => {
-    const f = e.target.files[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = ev => {
-      try { payload = JSON.parse(ev.target.result); dbg('Uploaded JSON parsed'); renderAll(); } catch(err){ alert('Invalid JSON file'); dbg('Upload parse error: ' + err.message); }
+  // ---------- charts state ----------
+  var charts = { piBar:null, weeklyLine:null, dailyDonut:null, weeklyDonut:null, gaugeMini:null };
+
+  // ---------- main load & render ----------
+  var payload = null;
+
+  function demoPayload() {
+    return {
+      piData:[
+        {"Date ":46010,"Area ":"MPR","Total locations":14622,"Counted ":3936,"Behind targe":0,"Above target":222.47,"Behind %":0},
+        {"Date ":46010,"Area ":"PB1","Total locations":4329,"Counted ":1189,"Behind targe":0,"Above target":89.57,"Behind %":0},
+        {"Date ":46010,"Area ":"Total:","Total locations":137369,"Counted ":37994,"Behind targe":237.71,"Above target":3245.80,"Behind %":0.00173}
+      ],
+      dailyTask:[{"Task ":"Aged stock report 7AM","Status":"Completed"},{"Task ":"PI Master file update","Status":"Not started"}],
+      weeklyTask:[{"Task":"(Weekly) SLA","Status":"Completed"},{"Task":"(Weekly) SIS report","Status":"Not started"}],
+      weeklyPiData:[{"Date ":46010,"Area ":"MPR","Daily Qty":127,"Week No":27," Weekly Qty":5103," Weekly %":0.85549}],
+      meta:{today:new Date().toLocaleDateString(), rows: 42}
     };
-    r.readAsText(f);
-  };
-  input.click();
-}
-function onPaste(){
-  const txt = prompt('Paste dashboard JSON here (full object)');
-  if (!txt) return;
-  try { payload = JSON.parse(txt); dbg('Pasted JSON parsed'); renderAll(); } catch(e){ alert('Invalid JSON pasted'); dbg('Paste parse error: ' + (e && e.message ? e.message : e)); }
-}
+  }
 
-/* ---------- start ---------- */
-loadAndRender();
+  function loadLastCumulative() {
+    try { return JSON.parse(localStorage.getItem(STORAGE.LAST_CUM) || '{}'); }
+    catch (e) { return {}; }
+  }
+  function saveLastCumulative(obj) {
+    localStorage.setItem(STORAGE.LAST_CUM, JSON.stringify(obj));
+  }
+  function loadDailyHistory() {
+    try { return JSON.parse(localStorage.getItem(STORAGE.DAILY_HISTORY) || '{}'); }
+    catch (e) { return {}; }
+  }
+  function saveDailyHistory(obj) {
+    localStorage.setItem(STORAGE.DAILY_HISTORY, JSON.stringify(obj));
+  }
+  function loadWeekAcc(weekKey) {
+    try { return JSON.parse(localStorage.getItem(STORAGE.WEEK_ACC_PREFIX + weekKey) || '{}'); }
+    catch (e) { return {}; }
+  }
+  function saveWeekAcc(weekKey, obj) {
+    localStorage.setItem(STORAGE.WEEK_ACC_PREFIX + weekKey, JSON.stringify(obj));
+  }
 
-</script>
+  function renderAll() {
+    renderTasks(payload.dailyTask || [], 'dailyList');
+    renderTasks(payload.weeklyTask || [], 'weeklyList');
+    processPIAndRender(payload.piData || []);
+    renderWeeklyPI(payload.weeklyPiData || []);
+    renderTaskDonuts(payload);
+    computeAndRenderGauge(payload);
+  }
+
+  function renderTasks(list, containerId) {
+    var el = document.getElementById(containerId);
+    el.innerHTML = '';
+    if (!Array.isArray(list) || list.length === 0) { el.innerHTML = '<div class="small">No tasks</div>'; return; }
+    list.sort(function(a,b){
+      var sa = String(a.Status || a['Status '] || '').toLowerCase();
+      var sb = String(b.Status || b['Status '] || '').toLowerCase();
+      var da = sa.indexOf('complete') !== -1 || sa.indexOf('done') !== -1;
+      var db = sb.indexOf('complete') !== -1 || sb.indexOf('done') !== -1;
+      if (da && !db) return 1;
+      if (db && !da) return -1;
+      return 0;
+    });
+    for (var i = 0; i < list.length; i += 1) {
+      var t = list[i];
+      var nameKey = findKey(t, ['Task ','Task','task']);
+      var name = nameKey ? t[nameKey] : JSON.stringify(t).slice(0,60);
+      var status = t.Status || t['Status '] || t.status || '';
+      var done = String(status).toLowerCase().indexOf('complete') !== -1 || String(status).toLowerCase().indexOf('done') !== -1;
+      var div = document.createElement('div'); div.className = 'taskCard';
+      div.innerHTML = '<div style="max-width:72%"><div style="font-weight:800;font-size:13px">' + escapeHtml(name) + '</div><div class="small">' + escapeHtml(status) + '</div></div><div><div class="badge ' + (done ? 'done' : 'todo') + '">' + (done ? 'Completed' : 'Not started') + '</div></div>';
+      el.appendChild(div);
+    }
+  }
+
+  function processPIAndRender(piList) {
+    var lastCum = loadLastCumulative();
+    var dailyHistory = loadDailyHistory();
+    var today = todayISO();
+    var weekKey = getISOWeekKey(new Date());
+    var weekAcc = loadWeekAcc(weekKey);
+    var target = getSavedTarget();
+
+    var sample = Array.isArray(piList) && piList.length ? piList[0] : {};
+    var areaK = findKey(sample, ['Area','Area ']);
+    var totalK = findKey(sample, ['Total locations','Total locations ','Total']);
+    var countedK = findKey(sample, ['Counted','Counted ']);
+
+    var rows = Array.isArray(piList) ? piList.slice() : [];
+    var data = [];
+
+    for (var r = 0; r < rows.length; r += 1) {
+      var rec = rows[r];
+      var area = String(rec[areaK] || rec['Area'] || rec['Area '] || '').trim();
+      if (!area) continue;
+      if (/total/i.test(area)) continue;
+      var cum = safeNum(rec[countedK] || rec['Counted '] || 0);
+      var prev = safeNum(lastCum[area] || 0);
+      var delta = cum - prev;
+      if (prev === 0 && cum > 0 && !lastCum.hasOwnProperty(area)) delta = cum;
+      if (delta < 0) delta = cum;
+      data.push({ area: area, total: safeNum(rec[totalK] || rec['Total locations'] || 0), cum: cum, delta: Math.round(delta) });
+    }
+
+    var todaysEntry = dailyHistory[today] || {};
+    var addedToday = false;
+    for (var k = 0; k < data.length; k += 1) {
+      var d = data[k];
+      if (!todaysEntry.hasOwnProperty(d.area)) {
+        todaysEntry[d.area] = d.delta;
+        weekAcc[d.area] = safeNum(weekAcc[d.area] || 0) + d.delta;
+        addedToday = true;
+      } else {
+        d.delta = safeNum(todaysEntry[d.area] || 0);
+      }
+      lastCum[d.area] = d.cum;
+    }
+
+    if (addedToday) {
+      dailyHistory[today] = todaysEntry;
+      saveDailyHistory(dailyHistory);
+      saveWeekAcc(weekKey, weekAcc);
+      saveLastCumulative(lastCum);
+      dbg('Saved daily deltas for ' + today + ' and updated weekly accum (' + weekKey + ')');
+    } else {
+      saveLastCumulative(lastCum);
+    }
+
+    var tbody = document.querySelector('#piTable tbody'); tbody.innerHTML = '';
+    for (var m = 0; m < data.length; m += 1) {
+      var dd = data[m];
+      var remaining = Math.max(0, target - dd.delta);
+      tbody.insertAdjacentHTML('beforeend',
+        '<tr><td>' + escapeHtml(dd.area) + '</td>' +
+        '<td style="text-align:right">' + formatNumber(dd.total) + '</td>' +
+        '<td style="text-align:right">' + formatNumber(dd.delta) + '</td>' +
+        '<td style="text-align:right">' + formatNumber(target) + '</td>' +
+        '<td style="text-align:right">' + formatNumber(remaining) + '</td></tr>'
+      );
+    }
+
+    var totalSum = data.reduce(function(s,x){return s + (x.total||0);}, 0);
+    var countedSum = data.reduce(function(s,x){return s + (x.delta||0);}, 0);
+    document.getElementById('countHint').innerText = 'Total locations: ' + formatNumber(totalSum) + ' • Counted today: ' + formatNumber(countedSum) + ' • Target: ' + formatNumber(target);
+
+    // prepare bar chart (top areas by total)
+    var sorted = data.slice().sort(function(a,b){ return (b.total||0) - (a.total||0); }).slice(0,12);
+    var labels = sorted.map(function(x){return x.area;});
+    var countedArr = sorted.map(function(x){return x.delta;});
+    var remainingArr = sorted.map(function(x){ return Math.max(0, target - x.delta); });
+
+    var mode = document.getElementById('scaleMode').value || 'auto';
+    var displayCounted = countedArr.slice();
+    var displayRemaining = remainingArr.slice();
+    if (mode === 'log') {
+      displayCounted = displayCounted.map(function(v){ return Math.log10(Math.max(1,v)); });
+      displayRemaining = displayRemaining.map(function(v){ return Math.log10(Math.max(1,v)); });
+    } else if (mode === 'auto') {
+      var maxV = Math.max.apply(null, displayCounted.concat(displayRemaining).map(function(v){ return Math.abs(Number(v)||0); }), 1);
+      var factor = 1;
+      if (maxV > 100000) factor = 0.001; else if (maxV > 20000) factor = 0.01; else if (maxV > 5000) factor = 0.1;
+      displayCounted = displayCounted.map(function(v){ return Number((v*factor).toFixed(3)); });
+      displayRemaining = displayRemaining.map(function(v){ return Number((v*factor).toFixed(3)); });
+    }
+
+    try { if (charts.piBar) charts.piBar.destroy(); } catch(e) {}
+    var ctx = document.getElementById('piBar').getContext('2d');
+    charts.piBar = new Chart(ctx, {
+      type:'bar',
+      data:{ labels: labels, datasets: [
+        { label:'Counted today', data: displayCounted, backgroundColor: 'rgba(125,211,252,0.95)' },
+        { label:'Remaining', data: displayRemaining, backgroundColor: 'rgba(139,92,246,0.7)' }
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{ x:{ticks:{color:'#cfeeff'}}, y:{ticks:{color:'#cfeeff',callback:function(v){ return formatNumber(v); }}} }
+    });
+  }
+
+  function renderWeeklyPI(list) {
+    var tbody = document.querySelector('#weeklyPiTable tbody'); tbody.innerHTML = '';
+    if (!Array.isArray(list) || list.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5">No weekly PI data</td></tr>';
+      if (charts.weeklyLine) try { charts.weeklyLine.destroy(); } catch(e) {}
+      document.getElementById('weekHint').innerText = '—';
+      return;
+    }
+    var wkK = findKey(list[0], ['Week No','Week','week']);
+    var areaK = findKey(list[0], ['Area','Area ']);
+    var dailyK = findKey(list[0], ['Daily Qty','DailyQty','Daily']);
+    var wqK = findKey(list[0], [' Weekly Qty','Weekly Qty','WeeklyQty']);
+    var agg = {};
+    for (var i = 0; i < list.length; i += 1) {
+      var r = list[i];
+      var wk = (r[wkK] || r['Week No'] || r['Week'] || '') + '';
+      var weeklyQty = safeNum(r[wqK] || r[' Weekly Qty'] || r['Weekly Qty'] || 0);
+      var dailyQty = safeNum(r[dailyK] || 0);
+      var area = r[areaK] || '';
+      tbody.insertAdjacentHTML('beforeend', '<tr><td>' + escapeHtml(String(wk)) + '</td><td>' + escapeHtml(area) + '</td><td style="text-align:right">' + formatNumber(dailyQty) + '</td><td style="text-align:right">' + formatNumber(weeklyQty) + '</td><td style="text-align:right">' + (safeNum(r[' Weekly %']||r['Weekly %']||0)*100).toFixed(3) + '%</td></tr>');
+      agg[wk] = (agg[wk] || 0) + weeklyQty;
+    }
+    var weeks = Object.keys(agg).map(function(k){ var n = Number(k); return isFinite(n) ? n : k; }).sort(function(a,b){ return a - b; });
+    var labels = weeks.map(function(w){ return String(w); });
+    var values = labels.map(function(l){ return agg[l] || 0; });
+    document.getElementById('weekHint').innerText = 'Weeks: ' + labels.length;
+    try { if (charts.weeklyLine) charts.weeklyLine.destroy(); } catch(e) {}
+    var ctx2 = document.getElementById('weeklyLine').getContext('2d');
+    charts.weeklyLine = new Chart(ctx2, { type:'line', data:{ labels: labels, datasets:[{ data: values, label:'Weekly Qty', borderColor:'#7dd3fc', backgroundColor:'rgba(125,211,252,0.08)', fill:true, tension:0.28 }]}, options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ ticks:{ callback:function(v){ return formatNumber(v); } } } } });
+  }
+
+  function renderTaskDonuts(payload) {
+    var daily = Array.isArray(payload.dailyTask) ? payload.dailyTask : [];
+    var weekly = Array.isArray(payload.weeklyTask) ? payload.weeklyTask : [];
+    var dailyDone = daily.filter(function(t){ return String(t.Status||t['Status ']||'').toLowerCase().indexOf('complete') !== -1 || String(t.Status||'').toLowerCase().indexOf('done') !== -1; }).length;
+    var dailyTotal = daily.length;
+    var dailyRemain = Math.max(0, dailyTotal - dailyDone);
+    var weeklyDone = weekly.filter(function(t){ return String(t.Status||t['Status ']||'').toLowerCase().indexOf('complete') !== -1 || String(t.Status||'').toLowerCase().indexOf('done') !== -1; }).length;
+    var weeklyTotal = weekly.length;
+    var weeklyRemain = Math.max(0, weeklyTotal - weeklyDone);
+    document.getElementById('dailyCountSmall').innerText = dailyDone + '/' + dailyTotal;
+    document.getElementById('weeklyCountSmall').innerText = weeklyDone + '/' + weeklyTotal;
+
+    try { if (charts.dailyDonut) charts.dailyDonut.destroy(); } catch(e) {}
+    charts.dailyDonut = new Chart(document.getElementById('dailyDonut').getContext('2d'), {
+      type:'doughnut',
+      data:{ labels:['Done','Remaining'], datasets:[{ data:[dailyDone,dailyRemain], backgroundColor:['rgba(34,197,94,0.98)','rgba(249,115,115,0.18)'] }]},
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ display:false } } }
+    });
+    try { if (charts.weeklyDonut) charts.weeklyDonut.destroy(); } catch(e) {}
+    charts.weeklyDonut = new Chart(document.getElementById('weeklyDonut').getContext('2d'), {
+      type:'doughnut',
+      data:{ labels:['Done','Remaining'], datasets:[{ data:[weeklyDone,weeklyRemain], backgroundColor:['rgba(139,92,246,0.95)','rgba(125,211,252,0.14)'] }]},
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ display:false } } }
+    });
+  }
+
+  function computeAndRenderGauge(payload) {
+    var target = getSavedTarget();
+    var dailyHistory = loadDailyHistory();
+    var countedTodayTotal = 0;
+    var todays = dailyHistory[todayISO()] || {};
+    Object.keys(todays).forEach(function(k){ countedTodayTotal += safeNum(todays[k]); });
+    var progress = target ? clamp(countedTodayTotal / target, 0, 1) : 0;
+    document.getElementById('gaugeCenterText').innerText = (progress*100).toFixed(2) + '% • ' + formatNumber(countedTodayTotal) + '/' + formatNumber(target);
+    document.getElementById('gaugeBreakdown').innerText = 'Daily target: ' + formatNumber(target) + ' (saved)';
+
+    try { if (charts.gaugeMini) charts.gaugeMini.destroy(); } catch(e) {}
+    var miniCanvas = document.getElementById('gaugeMini');
+    var ctx = miniCanvas.getContext('2d');
+    charts.gaugeMini = new Chart(ctx, {
+      type:'doughnut',
+      data:{ labels:['progress','rest'], datasets:[{ data:[progress, Math.max(0,1-progress)], backgroundColor:['rgba(125,211,252,0.98)','rgba(255,255,255,0.06)'] }]},
+      options:{ responsive:false, maintainAspectRatio:false, cutout:'70%', rotation:-90*Math.PI/180, circumference:180*Math.PI/180, plugins:{ legend:{ display:false } } }
+    });
+  }
+
+  // ---------- CSV / PNG export ----------
+  function downloadCsv() {
+    var rows = [['Area','Total','CountedToday','Target','Remaining']];
+    document.querySelectorAll('#piTable tbody tr').forEach(function(tr){
+      var cols = tr.querySelectorAll('td'); if (!cols.length) return;
+      rows.push([cols[0].innerText, cols[1].innerText, cols[2].innerText, cols[3].innerText, cols[4].innerText]);
+    });
+    var csv = rows.map(function(r){ return r.map(function(c){ return '"' + String(c).replace(/"/g,'""') + '"'; }).join(','); }).join('\n');
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = url; a.download = 'pi_by_area.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+  function exportPNGs() {
+    var ids = ['piBar','weeklyLine','dailyDonut','weeklyDonut'];
+    ids.forEach(function(id){
+      var c = document.getElementById(id);
+      if (!c) return;
+      try {
+        var url = c.toDataURL('image/png');
+        var a = document.createElement('a'); a.href = url; a.download = id + '.png'; a.click();
+      } catch(e) { dbg('PNG export failed: ' + (e && e.message ? e.message : e)); }
+    });
+  }
+
+  // ---------- upload / paste ----------
+  function onUpload() {
+    var input = document.createElement('input'); input.type = 'file'; input.accept = 'application/json';
+    input.onchange = function(e) {
+      var f = e.target.files[0]; if (!f) return;
+      var r = new FileReader();
+      r.onload = function(ev) {
+        try { payload = JSON.parse(ev.target.result); dbg('Uploaded JSON parsed'); renderAll(); } catch(err) { alert('Invalid JSON file'); dbg('Upload parse error: ' + err.message); }
+      };
+      r.readAsText(f);
+    };
+    input.click();
+  }
+  function onPaste() {
+    var txt = prompt('Paste dashboard JSON here (full object)');
+    if (!txt) return;
+    try { payload = JSON.parse(txt); dbg('Pasted JSON parsed'); renderAll(); } catch(e) { alert('Invalid JSON pasted'); dbg('Paste parse error: ' + (e && e.message ? e.message : e)); }
+  }
+
+  // ---------- load flow ----------
+  function loadAndRender() {
+    dbg('Loading JSON...');
+    tryLoadJson().then(function(j) {
+      if (!j) {
+        dbg('Using demo fallback data.');
+        payload = demoPayload();
+      } else {
+        payload = j;
+      }
+      document.getElementById('liveDate').innerText = (payload.meta && payload.meta.today) ? payload.meta.today : new Date().toLocaleDateString();
+      document.getElementById('targetInput').value = String(getSavedTarget());
+      renderAll();
+    });
+  }
+
+  // tryLoadJson wrapper returns promise
+  function tryLoadJson() { return new Promise(function(res) { tryLoadJsonInternal().then(res); }); }
+  function tryLoadJsonInternal() {
+    return new Promise(function(resolve) {
+      var idx = 0;
+      function nextAttempt() {
+        if (idx >= tryUrls.length) { resolve(null); return; }
+        var url = tryUrls[idx++]; dbg('Trying: ' + url);
+        fetchJsonWithTimeout(url, FETCH_TIMEOUT).then(function(r){
+          if (r && r.ok) { resolve(r.json); return; }
+          dbg('Failed: ' + url + ' — ' + (r.err && r.err.message ? r.err.message : String(r.err)));
+          nextAttempt();
+        }).catch(function(){ nextAttempt(); });
+      }
+      nextAttempt();
+    });
+  }
+
+  // start
+  loadAndRender();
+  </script>
 </body>
 </html>
