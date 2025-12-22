@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Stock Team VCB — Dashboard (enhanced)</title>
+<title>Stock Team VCB — Dashboard (final)</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -133,12 +133,12 @@
 <div id="debug" aria-live="polite"></div>
 
 <script>
-/* ---------------- CONFIG ---------------- */
+/* ------------- CONFIG ------------- */
 const DAILY_TARGET = 1193;
 const STORAGE_PREFIX = 'vcb_daily_';
-const MAX_BARS = 10; // top N areas to show in bar chart
+const MAX_BARS = 10;
 
-/* ---------------- HELPERS ---------------- */
+/* ------------- HELPERS ------------- */
 function dbg(msg){
   const el = document.getElementById('debug');
   const d = document.createElement('div');
@@ -147,69 +147,64 @@ function dbg(msg){
   el.scrollTop = el.scrollHeight;
   console.log(msg);
 }
-function safeNum(v){ if (v == null) return 0; if (typeof v === 'number') return isFinite(v)? v:0; const s = String(v).replace(/,/g,'').trim(); const n = Number(s); return isFinite(n)? n:0; }
+function safeNum(v){ if (v == null) return 0; if (typeof v==='number') return isFinite(v)?v:0; const s = String(v).replace(/,/g,'').trim(); const n = Number(s); return isFinite(n)?n:0; }
 function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function todayISO(){ return new Date().toISOString().slice(0,10); }
 function storageKeyForToday(){ return STORAGE_PREFIX + todayISO(); }
 function findKey(obj, candidates){
-  if(!obj) return undefined;
-  if(!Array.isArray(candidates)) candidates=[candidates];
-  const ks = Object.keys(obj || {});
-  for(const c of candidates){
-    for(const k of ks) if(k.trim().toLowerCase()===c.trim().toLowerCase()) return k;
+  if (!obj) return undefined;
+  if (!Array.isArray(candidates)) candidates = [candidates];
+  const ks = Object.keys(obj);
+  for (const c of candidates){
+    for (const k of ks) if (k.trim().toLowerCase() === c.trim().toLowerCase()) return k;
   }
-  for(const c of candidates){
-    for(const k of ks) if(k.trim().toLowerCase().indexOf(c.trim().toLowerCase())!==-1) return k;
+  for (const c of candidates){
+    for (const k of ks) if (k.trim().toLowerCase().indexOf(c.trim().toLowerCase()) !== -1) return k;
   }
   return undefined;
 }
 function formatNumber(n){
-  n = Number(n)||0;
+  n = Number(n) || 0;
   if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M';
   if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1) + 'K';
   return n.toLocaleString();
 }
 
-/* ---------------- CHART PLUGINS (3D-ish gloss for bars) ---------------- */
+/* ------------- bar gloss plugin ------------- */
 const barGlossPlugin = {
   id: 'barGloss',
   afterDatasetsDraw(chart){
     const ctx = chart.ctx;
-    const dataset = chart.data.datasets[0];
-    if (!dataset) return;
-    ctx.save();
-    for (const meta of Object.values(chart.getDatasetMeta(0).data || [])){
-      const r = meta;
+    const meta = chart.getDatasetMeta(0);
+    if (!meta) return;
+    for (const r of meta.data){
       const x = r.x - r.width/2;
       const y = r.y;
       const w = r.width;
       const h = chart.chartArea.bottom - r.y;
-      // shadow
-      ctx.shadowColor = 'rgba(0,0,0,0.25)';
-      ctx.shadowBlur = 8;
-      ctx.fillStyle = 'rgba(0,0,0,0.01)';
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.22)';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = 'rgba(0,0,0,0.03)';
       ctx.fillRect(x, r.y, w, h);
-      // gloss highlight (ellipse) on top
       ctx.shadowBlur = 0;
-      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
       ctx.beginPath();
       ctx.ellipse(r.x, r.y + 6, w * 0.45, Math.max(6, w*0.12), 0, Math.PI, 2*Math.PI);
       ctx.fill();
+      ctx.restore();
     }
-    ctx.restore();
   }
 };
 Chart.register(barGlossPlugin);
 
-/* ---------------- STATE ---------------- */
+/* ------------- STATE ------------- */
 let payload = null;
 let charts = { piBar:null, weeklyLine:null, dailyDonut:null, weeklyDonut:null, gaugeMini:null };
 
-/* ---------------- FETCH with robust paths ---------------- */
+/* ------------- fetch robust ------------- */
 async function tryLoadJsonPaths(){
-  const candidates = [];
-  candidates.push('data/dashboard.json');
-  candidates.push('./data/dashboard.json');
+  const candidates = ['data/dashboard.json','./data/dashboard.json'];
   let base = location.pathname;
   if (!base.endsWith('/')) base = base.replace(/\/[^/]*$/, '/');
   candidates.push(location.origin + base + 'data/dashboard.json');
@@ -233,10 +228,9 @@ async function tryLoadJsonPaths(){
   return null;
 }
 
-/* ---------------- LOAD & INIT ---------------- */
+/* ------------- load & start ------------- */
 async function loadAndRender(){
   dbg('Start load...');
-  // inline fallback
   const inline = document.getElementById('inlinePayload');
   if (inline){
     try { payload = JSON.parse(inline.textContent); dbg('Using inline payload'); document.querySelector('#liveDate').innerText = new Date().toLocaleDateString(); reconcileAndPersist(); renderAll(); return; } catch(e){ dbg('Inline parse err: ' + e.message); }
@@ -249,33 +243,54 @@ async function loadAndRender(){
   renderAll();
 }
 
-/* ---------------- DEMO ---------------- */
+/* ------------- demo fallback ------------- */
 function demoPayload(){ return {
-  piData: [
-    {"Date":"22.12.2025","Area":"MPR","Total locations":14622,"Counted":3936},
-    {"Date":"22.12.2025","Area":"PB1","Total locations":4329,"Counted":1189},
-    {"Date":"22.12.2025","Area":"PB2","Total locations":795,"Counted":484}
-  ],
-  dailyTask: [ {"DATE":"22.12.2025","Task":"Aged stock report 7AM","Status":"Completed"} ],
-  weeklyTask: [ {"Date":"22.12.2025","Task":"(Weekly) SLA","Status":"Not started"} ],
-  weeklyPiData: []
+  piData:[{"Date":"22.12.2025","Area":"MPR","Total locations":14622,"Counted":3936},{"Date":"22.12.2025","Area":"PB1","Total locations":4329,"Counted":1189}],
+  dailyTask:[{"DATE":"22.12.2025","Task":"Aged stock report 7AM","Status":"Completed"}],
+  weeklyTask:[{"Date":"22.12.2025","Task":"(Weekly) SLA","Status":"Not started"}],
+  weeklyPiData:[]
 }; }
 
-/* ---------------- PERSISTENCE: prevent doubling ---------------- */
+/* ------------- persistence helpers ------------- */
 function loadStored(){
-  try { const raw = localStorage.getItem(storageKeyForToday()); return raw ? JSON.parse(raw) : { date: todayISO(), areas: {}, weekAccum: {}, weekStart: getWeekStartISO(new Date()) }; }
-  catch(e){ dbg('loadStored err: ' + e.message); return { date: todayISO(), areas: {}, weekAccum: {}, weekStart: getWeekStartISO(new Date()) }; }
+  try {
+    const raw = localStorage.getItem(storageKeyForToday());
+    return raw ? JSON.parse(raw) : { date: todayISO(), areas: {}, weekAccum: {}, weekStart: getWeekStartISO(new Date()) };
+  } catch(e){
+    dbg('loadStored err: ' + e.message);
+    return { date: todayISO(), areas: {}, weekAccum: {}, weekStart: getWeekStartISO(new Date()) };
+  }
 }
-function saveStored(obj){ try { localStorage.setItem(storageKeyForToday(), JSON.stringify(obj)); } catch(e){ dbg('saveStored err: ' + e.message); } }
-
+function saveStored(obj){
+  try { localStorage.setItem(storageKeyForToday(), JSON.stringify(obj)); } catch(e){ dbg('saveStored err: '+e.message); }
+}
 function getWeekStartISO(date){
   const d = new Date(date);
-  const day = d.getDay(); // 0..6
+  const day = d.getDay();
   const diff = (day === 0 ? -6 : 1) - day;
   const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + diff);
   return monday.toISOString().slice(0,10);
 }
 
+/* ------------- NEW: detect header/junk rows ------------- */
+function isHeaderRow(row){
+  if (!row || typeof row !== 'object') return true;
+  const areaVal = String(row['Area'] || row['Area '] || row.area || '').trim();
+  if (!areaVal) return true;
+  const lowerA = areaVal.toLowerCase();
+  if (lowerA === 'area' || lowerA.startsWith('total') || lowerA === 'total:') return true;
+  for (const v of Object.values(row)){
+    if (typeof v === 'string'){
+      const s = v.trim().toLowerCase();
+      if (s === 'counted' || s === 'total locations' || s === 'date' || s === 'locations behind the target' || s === 'area') return true;
+    }
+  }
+  const countedRaw = row['Counted'] || row['Counted '] || row['CountedToday'] || row.counted;
+  if (typeof countedRaw === 'string' && countedRaw.toLowerCase().includes('count')) return true;
+  return false;
+}
+
+/* ------------- reconcile & persist (updated) ------------- */
 function reconcileAndPersist(){
   const stored = loadStored();
   const currentWeek = getWeekStartISO(new Date());
@@ -285,35 +300,34 @@ function reconcileAndPersist(){
     stored.areas = {};
   }
   payload.piData = Array.isArray(payload.piData) ? payload.piData.slice() : [];
-  // build areas list from payload
-  const areaKey = findKey(payload.piData[0] || {}, ['Area','Area ']);
-  const countedKey = findKey(payload.piData[0] || {}, ['Counted','Counted ','CountedToday']);
-  const totalKey = findKey(payload.piData[0] || {}, ['Total locations','Total locations ','Total']);
-  const areas = [];
-  for (const r of payload.piData){
-    const area = r[areaKey] || r['Area'] || r['Area '] || '';
-    if (!area || /total/i.test(area)) continue;
-    areas.push(String(area));
-    const incoming = safeNum(r[countedKey] || r['Counted'] || r['CountedToday'] || 0);
-    if (!stored.areas) stored.areas = {};
-    if (!stored.areas.hasOwnProperty(area)){
-      // persist first seen counted for today
-      stored.areas[area] = incoming;
-      stored.weekAccum[area] = (stored.weekAccum[area] || 0) + incoming;
-    } else {
-      // stored already present: keep it (prevents doubling on refresh)
-    }
-  }
-  // attach helpful derived keys
+  const areaKey = findKey(payload.piData[0] || {}, ['Area','Area ']) || 'Area';
+  const countedKey = findKey(payload.piData[0] || {}, ['Counted','Counted ','CountedToday']) || 'Counted';
+  const totalKey = findKey(payload.piData[0] || {}, ['Total locations','Total locations ','Total']) || 'Total locations';
   payload._areaKey = areaKey;
   payload._countedKey = countedKey;
   payload._totalKey = totalKey;
-  payload._areas = areas;
+  const areas = [];
+  for (const r of payload.piData){
+    if (isHeaderRow(r)) continue;
+    const area = String(r[areaKey] || r['Area'] || '').trim();
+    if (!area) continue;
+    if (/total/i.test(area)) continue;
+    areas.push(area);
+    const incomingRaw = r[countedKey] !== undefined ? r[countedKey] : r['Counted'];
+    const incoming = safeNum(incomingRaw);
+    if (!stored.areas) stored.areas = {};
+    if (!stored.weekAccum) stored.weekAccum = {};
+    if (!stored.areas.hasOwnProperty(area)){
+      stored.areas[area] = incoming;
+      stored.weekAccum[area] = (stored.weekAccum[area] || 0) + incoming;
+    }
+  }
+  payload._areas = Array.from(new Set(areas));
   payload._stored = stored;
   saveStored(stored);
 }
 
-/* ---------------- RENDER pipeline ---------------- */
+/* ------------- render pipeline ------------- */
 function renderAll(){
   renderTasks(payload.dailyTask || [], 'dailyList');
   renderTasks(payload.weeklyTask || [], 'weeklyList');
@@ -323,7 +337,7 @@ function renderAll(){
   computeAndRenderGauge(payload);
 }
 
-/* ---------------- Tasks ---------------- */
+/* ------------- tasks ------------- */
 function renderTasks(list, containerId){
   const el = document.getElementById(containerId);
   el.innerHTML = '';
@@ -346,91 +360,80 @@ function renderTasks(list, containerId){
   }
 }
 
-/* ---------------- PI table + bar ---------------- */
+/* ------------- renderPI (updated) ------------- */
 function renderPI(piList, stored){
   const tbody = document.querySelector('#piTable tbody'); tbody.innerHTML = '';
-  const areaKey = payload._areaKey || findKey(piList[0]||{}, ['Area','Area ']);
-  const countedKey = payload._countedKey || findKey(piList[0]||{}, ['Counted','Counted ','CountedToday']);
-  const totalKey = payload._totalKey || findKey(piList[0]||{}, ['Total locations','Total locations ','Total']);
+  const areaKey = payload._areaKey || findKey(piList[0]||{}, ['Area','Area ']) || 'Area';
+  const countedKey = payload._countedKey || findKey(piList[0]||{}, ['Counted','Counted ','CountedToday']) || 'Counted';
+  const totalKey = payload._totalKey || findKey(piList[0]||{}, ['Total locations','Total locations ','Total']) || 'Total locations';
   const rows = [];
-  let totalCounted = 0;
   for (const r of piList){
-    const area = String(r[areaKey] || r['Area'] || r['Area '] || '').trim();
+    if (isHeaderRow(r)) continue;
+    const area = String(r[areaKey] || r['Area'] || '').trim();
     if (!area || /total/i.test(area)) continue;
-    const counted = safeNum(r[countedKey] || r['Counted'] || r['CountedToday'] || 0);
-    const totalLoc = safeNum(r[totalKey] || r['Total locations'] || 0);
-    const behindPct = safeNum(r['Behind %'] || r['Behind % ' ] || r['Behind targe'] || 0);
-    // prefer stored today's count if present (avoid double count)
-    const storedVal = (stored && stored.areas && stored.areas[area]) ? safeNum(stored.areas[area]) : counted;
-    rows.push({ area, counted: storedVal, totalLoc, behindPct });
-    totalCounted += storedVal;
+    const incoming = safeNum(r[countedKey] !== undefined ? r[countedKey] : r['Counted']);
+    const totalLoc = safeNum(r[totalKey] !== undefined ? r[totalKey] : r['Total locations']);
+    const behindPct = safeNum(r['Behind %'] || r['Behind % '] || r['Behind targe'] || 0);
+    const todayVal = (stored && stored.areas && stored.areas[area]) ? safeNum(stored.areas[area]) : incoming;
+    rows.push({ area, counted: todayVal, totalLoc, behindPct });
   }
-  // sort top by counted desc
   rows.sort((a,b) => b.counted - a.counted);
   const top = rows.slice(0, MAX_BARS);
+  let totalCounted = rows.reduce((s,r) => s + safeNum(r.counted), 0);
+  const remaining = Math.max(0, DAILY_TARGET - totalCounted);
+  const over = Math.max(0, totalCounted - DAILY_TARGET);
   for (const r of top){
     tbody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHtml(r.area)}</td><td style="text-align:right">${formatNumber(r.counted)}</td><td style="text-align:right">${formatNumber(r.totalLoc)}</td><td style="text-align:right">${(r.behindPct*100).toFixed(2)}%</td></tr>`);
   }
-  // remaining value to reach DAILY_TARGET (global)
-  const remaining = Math.max(0, DAILY_TARGET - totalCounted);
-
-  // Prepare bar chart: labels = top areas, last label = 'Remaining'
-  const labels = top.map(r => r.area).concat(['Remaining']);
-  const dataVals = top.map(r => r.counted).concat([remaining]);
-  // colors with gradient (generate)
-  const colors = generateColors(labels.length);
-
-  // destroy old chart
-  try { if (charts.piBar) charts.piBar.destroy(); } catch(e){}
+  const labels = top.map(t => t.area).concat(['Remaining']);
+  const dataVals = top.map(t => t.counted).concat([remaining]);
+  try{ if (charts.piBar) charts.piBar.destroy(); } catch(e){}
   const ctx = document.getElementById('piBar').getContext('2d');
   charts.piBar = new Chart(ctx, {
     type: 'bar',
-    data: { labels: labels, datasets: [{ label: 'Counted', data: dataVals, backgroundColor: colors, borderRadius:6 }] },
+    data: { labels: labels, datasets: [{ label: 'Counted', data: dataVals, backgroundColor: generateColors(labels.length), borderRadius:6 }] },
     options: {
       responsive:true, maintainAspectRatio:false,
-      plugins: {
-        legend: { display:false },
-        tooltip: { callbacks: { label: ctx => formatNumber(ctx.parsed.y) } }
-      },
-      scales: {
-        x: { ticks: { color:'#cfeeff' } },
-        y: { beginAtZero:true, ticks: { color:'#cfeeff', callback: v => formatNumber(v) } }
-      }
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => formatNumber(ctx.parsed.y) } } },
+      scales:{ y:{ beginAtZero:true, ticks:{ callback: v => formatNumber(v) } } }
     },
     plugins: [barGlossPlugin]
   });
-
-  // update summary UI & progress bar
-  document.getElementById('countHint').innerText = `Total counted today: ${formatNumber(totalCounted)} • Remaining: ${formatNumber(remaining)} (target ${formatNumber(DAILY_TARGET)})`;
+  const hint = over ? `Total counted today: ${formatNumber(totalCounted)} • Over by: ${formatNumber(over)} (target ${formatNumber(DAILY_TARGET)})` :
+    `Total counted today: ${formatNumber(totalCounted)} • Remaining: ${formatNumber(remaining)} (target ${formatNumber(DAILY_TARGET)})`;
+  document.getElementById('countHint').innerText = hint;
   const pct = Math.round(Math.min(100, (totalCounted / DAILY_TARGET) * 100));
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('targetSub').innerText = `${pct}% of ${formatNumber(DAILY_TARGET)}`;
 }
 
-/* ---------------- Weekly PI ---------------- */
+/* ------------- renderWeeklyPI (updated) ------------- */
 function renderWeeklyPI(list){
   const tbody = document.querySelector('#weeklyPiTable tbody'); tbody.innerHTML = '';
   if (!Array.isArray(list) || !list.length){ tbody.innerHTML = '<tr><td colspan="5">No weekly data</td></tr>'; try{ if (charts.weeklyLine) charts.weeklyLine.destroy(); }catch(e){} document.getElementById('weekHint').innerText='—'; return; }
   const agg = {}; const weeks = new Set();
   for (const r of list){
-    const wk = r['Week No'] || r['WeekNo'] || r.WeekNo || r.Week || '';
-    const area = r.Area || '';
+    if (isHeaderRow(r)) continue;
+    const area = r.Area || r['Area'] || '';
+    if (!area) continue;
     const dailyQty = safeNum(r['Daily Qty'] || r.DailyQty || r.Daily || 0);
     const weeklyQty = safeNum(r['Weekly Qty'] || r.WeeklyQty || 0);
     const weeklyPct = safeNum(r['Weekly %'] || r.WeeklyPct || 0);
-    tbody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHtml(String(wk))}</td><td>${escapeHtml(area)}</td><td style="text-align:right">${formatNumber(dailyQty)}</td><td style="text-align:right">${formatNumber(weeklyQty)}</td><td style="text-align:right">${(weeklyPct*100).toFixed(2)}%</td></tr>`);
+    const wk = r['Week No'] || r['WeekNo'] || r.WeekNo || r.Week || '';
+    if (String(wk).toLowerCase().includes('week')) continue;
     weeks.add(wk);
     agg[wk] = (agg[wk] || 0) + weeklyQty;
+    tbody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHtml(String(wk))}</td><td>${escapeHtml(area)}</td><td style="text-align:right">${formatNumber(dailyQty)}</td><td style="text-align:right">${formatNumber(weeklyQty)}</td><td style="text-align:right">${(weeklyPct*100).toFixed(2)}%</td></tr>`);
   }
-  const labels = Array.from(weeks).sort((a,b) => (isFinite(Number(a)) && isFinite(Number(b)) ? Number(a)-Number(b) : String(a).localeCompare(String(b))));
+  const labels = Array.from(weeks).sort((a,b) => (isFinite(Number(a)) && isFinite(Number(b))) ? Number(a)-Number(b) : String(a).localeCompare(String(b)));
   const values = labels.map(l => agg[l] || 0);
-  try { if (charts.weeklyLine) charts.weeklyLine.destroy(); } catch(e){}
+  try{ if (charts.weeklyLine) charts.weeklyLine.destroy(); } catch(e){}
   const ctx = document.getElementById('weeklyLine').getContext('2d');
-  charts.weeklyLine = new Chart(ctx, { type:'line', data:{ labels, datasets:[{ label:'Weekly qty', data: values, borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.08)', tension:0.25, fill:true }] }, options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ ticks:{ callback: v => formatNumber(v) } } } } });
+  charts.weeklyLine = new Chart(ctx, { type:'line', data:{ labels, datasets:[{ label:'Weekly qty', data: values, borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.08)', fill:true }] }, options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ ticks:{ callback: v => formatNumber(v) } } } } });
   document.getElementById('weekHint').innerText = 'Weeks: ' + labels.length;
 }
 
-/* ---------------- Task donuts ---------------- */
+/* ------------- task donuts ------------- */
 function renderTaskDonuts(payload){
   const dailyList = Array.isArray(payload.dailyTask) ? payload.dailyTask : [];
   const weeklyList = Array.isArray(payload.weeklyTask) ? payload.weeklyTask : [];
@@ -445,23 +448,28 @@ function renderTaskDonuts(payload){
   document.getElementById('weeklyCountSmall').innerText = weeklyDone + '/' + (weeklyDone + weeklyRem);
 }
 
-/* ---------------- Gauge ---------------- */
+/* ------------- gauge (shows over) ------------- */
 function computeAndRenderGauge(payload){
   const stored = payload._stored || {};
   let totalCounted = 0;
   for (const area of (payload._areas || [])){
-    totalCounted += safeNum((stored.areas && stored.areas[area]) ? stored.areas[area] : (payload.piData.find(x => String((x.Area||x['Area']||'')).trim() === area) || {})[findKey(payload.piData[0]||{}, ['Counted','Counted ','CountedToday'])] || 0);
+    totalCounted += safeNum((stored.areas && stored.areas[area]) ? stored.areas[area] : (payload.piData.find(x => String((x.Area||x['Area']||'')).trim() === area) || {})[payload._countedKey] || 0);
   }
   totalCounted = Math.round(totalCounted);
-  const remaining = Math.max(0, DAILY_TARGET - totalCounted);
+  const below = Math.min(totalCounted, DAILY_TARGET);
+  const over = Math.max(0, totalCounted - DAILY_TARGET);
   try { if (charts.gaugeMini) charts.gaugeMini.destroy(); } catch(e){}
   const ctx = document.getElementById('gaugeMini').getContext('2d');
-  charts.gaugeMini = new Chart(ctx, { type:'doughnut', data:{ labels:['Counted','Remaining'], datasets:[{ data:[totalCounted, remaining], backgroundColor:['#7dd3fc','#f97316'] }] }, options:{ rotation:-Math.PI, circumference:Math.PI, responsive:false, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{ label: ctx => formatNumber(ctx.parsed) } } } } });
+  charts.gaugeMini = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels:['Reached','Over'], datasets:[{ data:[below, over], backgroundColor:['#7dd3fc','#34d399'] }]},
+    options:{ rotation:-Math.PI, circumference:Math.PI, responsive:false, maintainAspectRatio:false, plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => formatNumber(ctx.parsed) } } } }
+  });
   document.getElementById('gaugeCenterText').innerText = formatNumber(totalCounted) + ' / ' + formatNumber(DAILY_TARGET);
-  document.getElementById('gaugeBreakdown').innerText = 'Remaining: ' + formatNumber(remaining);
+  document.getElementById('gaugeBreakdown').innerText = (over ? ('Over by: '+formatNumber(over)) : ('Remaining: ' + formatNumber(DAILY_TARGET - totalCounted)));
 }
 
-/* ---------------- UTIL ---------------- */
+/* ------------- utils ------------- */
 function generateColors(n){
   const base = ['#7dd3fc','#8b5cf6','#60a5fa','#f97316','#fbbf24','#f472b6','#34d399','#a78bfa','#fca5a5','#64748b'];
   const out=[];
@@ -469,31 +477,18 @@ function generateColors(n){
   return out;
 }
 
-/* ---------------- EXPORT / UPLOAD ---------------- */
+/* ------------- export / upload ------------- */
 function downloadCsv(){
   const rows=[['Area','Counted','Total locations','Behind %']];
-  document.querySelectorAll('#piTable tbody tr').forEach(tr=>{
-    const tds=tr.querySelectorAll('td'); if (!tds.length) return;
-    rows.push([tds[0].innerText, tds[1].innerText, tds[2].innerText, tds[3].innerText]);
-  });
+  document.querySelectorAll('#piTable tbody tr').forEach(tr=>{ const tds=tr.querySelectorAll('td'); if(!tds.length) return; rows.push([tds[0].innerText, tds[1].innerText, tds[2].innerText, tds[3].innerText]); });
   const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type:'text/csv' });
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pi_by_area_'+todayISO()+'.csv'; a.click(); URL.revokeObjectURL(a.href);
+  const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pi_by_area_'+todayISO()+'.csv'; a.click(); URL.revokeObjectURL(a.href);
 }
-function exportPNGs(){
-  ['piBar','weeklyLine','dailyDonut','weeklyDonut'].forEach(id=>{
-    const c=document.getElementById(id); if(!c) return;
-    try{ const url=c.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download = id+'_'+todayISO()+'.png'; a.click(); }catch(e){ dbg('PNG export failed: '+e.message); }
-  });
-}
-function onUpload(){
-  const input=document.createElement('input'); input.type='file'; input.accept='application/json';
-  input.onchange = e => { const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload = ev => { try { payload = JSON.parse(ev.target.result); dbg('Uploaded JSON parsed'); reconcileAndPersist(); renderAll(); } catch(err){ alert('Invalid JSON: '+err.message); dbg('Upload parse error: '+err.message); } }; r.readAsText(f); };
-  input.click();
-}
-function onPaste(){ const txt = prompt('Paste dashboard JSON here (full object)'); if(!txt) return; try{ payload = JSON.parse(txt); dbg('Pasted JSON parsed'); reconcileAndPersist(); renderAll(); } catch(e){ alert('Invalid JSON pasted: ' + (e && e.message ? e.message : e)); dbg('Paste parse error: '+(e && e.message ? e.message : e)); } }
+function exportPNGs(){ ['piBar','weeklyLine','dailyDonut','weeklyDonut'].forEach(id=>{ const c=document.getElementById(id); if(!c) return; try{ const url=c.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download=id+'_'+todayISO()+'.png'; a.click(); }catch(e){ dbg('PNG export failed: '+e.message); } }); }
+function onUpload(){ const input=document.createElement('input'); input.type='file'; input.accept='application/json'; input.onchange=e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{ try{ payload = JSON.parse(ev.target.result); dbg('Uploaded JSON parsed'); reconcileAndPersist(); renderAll(); }catch(err){ alert('Invalid JSON: '+err.message); dbg('Upload parse error: '+err.message); } }; r.readAsText(f); }; input.click(); }
+function onPaste(){ const txt = prompt('Paste dashboard JSON here (full object)'); if(!txt) return; try{ payload = JSON.parse(txt); dbg('Pasted JSON parsed'); reconcileAndPersist(); renderAll(); }catch(e){ alert('Invalid JSON pasted: ' + (e && e.message ? e.message : e)); dbg('Paste parse error: ' + (e && e.message ? e.message : e)); } }
 
-/* ---------------- EVENTS ---------------- */
+/* ------------- events ------------- */
 document.getElementById('refreshBtn').addEventListener('click', loadAndRender);
 document.getElementById('uploadBtn').addEventListener('click', onUpload);
 document.getElementById('pasteBtn').addEventListener('click', onPaste);
@@ -501,7 +496,7 @@ document.getElementById('exportCsv').addEventListener('click', downloadCsv);
 document.getElementById('exportPng').addEventListener('click', exportPNGs);
 document.getElementById('scaleMode').addEventListener('change', ()=>{ if (payload) renderAll(); });
 
-/* ---------------- START ---------------- */
+/* ------------- start ------------- */
 loadAndRender();
 </script>
 </body>
