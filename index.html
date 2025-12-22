@@ -1,27 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Team VCB | Executive Dashboard</title>
+    <title>Stock Team VCB | Supreme Command Center</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg: #0a0f1e;
-            --card-bg: #161e31;
-            --accent: #0ea5e9;
+            --bg: #020617;
+            --card: #0f172a;
+            --accent: #38bdf8;
             --success: #10b981;
-            --danger: #f43f5e;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --border: rgba(255, 255, 255, 0.08);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text: #f8fafc;
+            --text-dim: #64748b;
+            --border: rgba(255, 255, 255, 0.05);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg);
-            color: var(--text-primary);
+            color: var(--text);
             height: 100vh;
             overflow: hidden;
             display: flex;
@@ -29,251 +30,268 @@
             padding: 10px;
         }
 
-        /* --- HEADER --- */
+        /* --- HEADER & TARGET TRACKER --- */
         header {
-            height: 8vh;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
+            height: 10vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
             align-items: center;
-            padding: 0 25px;
+            background: var(--card);
+            padding: 0 20px;
+            border-radius: 15px;
             margin-bottom: 10px;
+            border: 1px solid var(--border);
         }
 
-        .header-brand h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; }
-        .header-brand span { color: var(--accent); }
-        
-        .header-clock { text-align: right; }
-        #date-text { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; }
-        #time-text { font-size: 1.6rem; font-weight: 700; font-family: 'Courier New', monospace; color: #fff; line-height: 1; }
+        .brand h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -1px; }
+        .brand span { color: var(--accent); }
 
-        /* --- GRID STRUCTURE --- */
-        .dashboard-main {
+        .target-monitor {
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .target-val { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+        .target-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); }
+
+        .clock-section { text-align: right; }
+        #time { font-size: 1.6rem; font-weight: 700; font-family: monospace; }
+        #date { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; }
+
+        /* --- DASHBOARD GRID --- */
+        .grid {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr;
+            grid-template-columns: 1fr 1.4fr 1fr;
             grid-template-rows: 1fr 1fr;
             gap: 10px;
             min-height: 0;
         }
 
         .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
+            background: var(--card);
             border-radius: 15px;
-            padding: 12px;
+            border: 1px solid var(--border);
+            padding: 15px;
             display: flex;
             flex-direction: column;
             min-height: 0;
-            position: relative;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
 
         .card-label {
             font-size: 0.7rem;
             font-weight: 700;
-            color: var(--text-secondary);
+            color: var(--accent);
             text-transform: uppercase;
+            margin-bottom: 10px;
             letter-spacing: 1px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
         }
 
-        /* --- CENTER AREA (GAUGE) --- */
-        .center-hero { grid-row: span 2; display: flex; flex-direction: column; justify-content: space-between; }
-        .gauge-wrap { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
-        .gauge-data { position: absolute; text-align: center; transform: translateY(10px); }
-        .gauge-data h2 { font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--accent); }
-        
-        /* --- TASK LISTS & MINI CHARTS --- */
-        .task-container { flex: 1; display: flex; gap: 10px; min-height: 0; }
-        .list-side { flex: 1.5; overflow-y: auto; padding-right: 5px; }
-        .chart-side { flex: 1; position: relative; }
+        /* --- CENTER SECTION --- */
+        .center-hero { grid-row: span 2; justify-content: space-around; }
+        .gauge-container { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+        .gauge-info { position: absolute; text-align: center; transform: translateY(15px); }
+        .gauge-info b { font-size: 3.5rem; display: block; line-height: 1; }
 
-        /* Custom Scrollbar */
-        .list-side::-webkit-scrollbar { width: 3px; }
-        .list-side::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        /* --- TASKS WITH PIE CHART --- */
+        .task-layout { flex: 1; display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; min-height: 0; }
+        .task-list { overflow-y: auto; padding-right: 5px; }
+        .task-list::-webkit-scrollbar { width: 3px; }
+        .task-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 5px; }
 
         .task-row {
+            background: rgba(255,255,255,0.03);
+            margin-bottom: 5px;
+            padding: 8px;
+            border-radius: 8px;
             font-size: 0.75rem;
-            background: rgba(0,0,0,0.2);
-            padding: 6px 10px;
-            border-radius: 6px;
-            margin-bottom: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 2px solid var(--border);
         }
-        .task-row.done { border-left-color: var(--success); opacity: 0.8; }
-        .task-row.todo { border-left-color: var(--danger); }
+        .dot { width: 6px; height: 6px; border-radius: 50%; }
 
-        .stat-pill {
-            background: rgba(0,0,0,0.3);
-            padding: 8px;
-            border-radius: 10px;
-            text-align: center;
-            flex: 1;
+        /* PULSING EFFECT FOR TARGET */
+        .pulse-red { animation: pulseR 2s infinite; }
+        @keyframes pulseR {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-        .stat-pill span { display: block; font-size: 0.6rem; color: var(--text-secondary); }
-        .stat-pill b { font-size: 1rem; color: #fff; }
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="header-brand">
+        <div class="brand">
             <h1>STOCK TEAM <span>VCB</span></h1>
         </div>
-        <div class="header-clock">
-            <div id="date-text">Loading System...</div>
-            <div id="time-text">00:00:00</div>
+        <div class="target-monitor" id="target-container">
+            <div class="target-val" id="target-status">0 / 1193</div>
+            <div class="target-label" id="target-msg">Daily Goal Progress</div>
+        </div>
+        <div class="clock-section">
+            <div id="time">00:00:00</div>
+            <div id="date">Așteptare date...</div>
         </div>
     </header>
 
-    <main class="dashboard-main">
-        
+    <main class="grid">
         <div class="card">
-            <div class="card-label">Daily Volume by Area</div>
-            <div style="flex:1; position:relative;">
-                <canvas id="dailyBarChart"></canvas>
-            </div>
+            <div class="card-label">Daily Performance / Area</div>
+            <div style="flex:1; position:relative;"><canvas id="dailyBars"></canvas></div>
         </div>
 
         <div class="card center-hero">
-            <div class="card-label">Total Inventory Cycle Progress</div>
-            <div class="gauge-wrap">
+            <div class="card-label" style="text-align: center;">Total Cycle Completion Status</div>
+            <div class="gauge-container">
                 <canvas id="cycleGauge"></canvas>
-                <div class="gauge-data">
-                    <h2 id="cyclePerc">0%</h2>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">ACCURACY INDEX</p>
+                <div class="gauge-info">
+                    <b id="perc-val">0%</b>
+                    <span style="font-size: 0.7rem; color: var(--text-dim);">TOTAL ACCURACY</span>
                 </div>
             </div>
-            <div style="display: flex; gap: 8px; margin-top: 10px;">
-                <div class="stat-pill"><span>Total Locs</span><b id="totalLocs">0</b></div>
-                <div class="stat-pill"><span>Counted</span><b id="totalCounted">0</b></div>
-                <div class="stat-pill"><span>Remaining</span><b id="totalRem" style="color:var(--danger)">0</b></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px;">
+                    <small style="color:var(--text-dim); font-size: 0.6rem;">COUNTED</small>
+                    <div id="c-counted" style="font-weight: bold;">0</div>
+                </div>
+                <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px;">
+                    <small style="color:var(--text-dim); font-size: 0.6rem;">REMAINING</small>
+                    <div id="c-rem" style="font-weight: bold; color: var(--danger);">0</div>
+                </div>
             </div>
         </div>
 
         <div class="card">
             <div class="card-label">Weekly Progress Trend</div>
-            <div style="flex:1; position:relative;">
-                <canvas id="weeklyLineChart"></canvas>
+            <div style="flex:1; position:relative;"><canvas id="weeklyLine"></canvas></div>
+        </div>
+
+        <div class="card">
+            <div class="card-label">Daily Task Status</div>
+            <div class="task-layout">
+                <div class="task-list" id="dailyTaskList"></div>
+                <div style="position:relative;"><canvas id="dailyPie"></canvas></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-label">Daily Operations Status</div>
-            <div class="task-container">
-                <div class="list-side" id="dailyList"></div>
-                <div class="chart-side"><canvas id="dailyPie"></canvas></div>
+            <div class="card-label">Weekly Task Status</div>
+            <div class="task-layout">
+                <div class="task-list" id="weeklyTaskList"></div>
+                <div style="position:relative;"><canvas id="weeklyPie"></canvas></div>
             </div>
         </div>
-
-        <div class="card">
-            <div class="card-header card-label">Weekly Compliance Status</div>
-            <div class="task-container">
-                <div class="list-side" id="weeklyList"></div>
-                <div class="chart-side"><canvas id="weeklyPie"></canvas></div>
-            </div>
-        </div>
-
     </main>
 
     <script>
-        // --- 1. CLOCK ---
-        function runClock() {
-            const now = new Date();
-            document.getElementById('date-text').textContent = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-            document.getElementById('time-text').textContent = now.toLocaleTimeString('en-GB');
-        }
-        setInterval(runClock, 1000);
-        runClock();
+        const DAILY_TARGET = 1193;
 
-        // --- 2. DATA LOAD ---
-        async function loadDashboard() {
+        // --- CEAS ---
+        function updateClock() {
+            const acum = new Date();
+            document.getElementById('time').innerText = acum.toLocaleTimeString('ro-RO');
+            document.getElementById('date').innerText = acum.toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- DATA ---
+        async function load() {
             try {
                 const res = await fetch('data/dashboard.json');
-                const data = await res.json();
-                renderAll(data);
-            } catch (e) { console.error("Data missing."); }
+                const d = await res.json();
+                render(d);
+            } catch (e) { console.error("Eroare incarcare JSON"); }
         }
 
-        function renderAll(data) {
+        function render(data) {
             const pi = data.piData || [];
             const wPi = data.weeklyPiData || [];
             
-            // Stats logic
+            // 1. Target Tracking Logic
+            const dailySum = wPi.reduce((a, b) => a + (b["Daily Qty"] || 0), 0);
+            const targetEl = document.getElementById('target-status');
+            const targetCont = document.getElementById('target-container');
+            targetEl.innerText = `${dailySum} / ${DAILY_TARGET}`;
+            
+            if(dailySum < DAILY_TARGET) {
+                targetEl.style.color = 'var(--danger)';
+                targetCont.classList.add('pulse-red');
+                document.getElementById('target-msg').innerText = `Needs ${DAILY_TARGET - dailySum} more`;
+            } else {
+                targetEl.style.color = 'var(--success)';
+                targetCont.classList.remove('pulse-red');
+                document.getElementById('target-msg').innerText = "Target Reached!";
+            }
+
+            // 2. Cycle Stats
             let tLoc = 0, tCnt = 0;
             pi.forEach(x => { tLoc += x["Total locations"]; tCnt += x.Counted; });
-            const cyclePerc = ((tCnt/tLoc)*100).toFixed(1);
-            
-            document.getElementById('cyclePerc').innerText = cyclePerc + "%";
-            document.getElementById('totalLocs').innerText = tLoc.toLocaleString();
-            document.getElementById('totalCounted').innerText = tCnt.toLocaleString();
-            document.getElementById('totalRem').innerText = (tLoc - tCnt).toLocaleString();
+            document.getElementById('perc-val').innerText = ((tCnt/tLoc)*100).toFixed(1) + "%";
+            document.getElementById('c-counted').innerText = tCnt.toLocaleString();
+            document.getElementById('c-rem').innerText = (tLoc - tCnt).toLocaleString();
 
-            // Render Charts
-            initDailyBar(wPi);
-            initWeeklyLine(wPi);
-            initCycleGauge(tCnt, tLoc - tCnt);
-            initTaskView('dailyList', 'dailyPie', data.dailyTask, '#0ea5e9');
-            initTaskView('weeklyList', 'weeklyPie', data.weeklyTask, '#10b981');
+            // 3. Charts
+            initBars(wPi);
+            initLine(wPi);
+            initCycle(tCnt, tLoc - tCnt);
+            initTasks('dailyTaskList', 'dailyPie', data.dailyTask, '#38bdf8');
+            initTasks('weeklyTaskList', 'weeklyPie', data.weeklyTask, '#10b981');
         }
 
-        // --- 3. CHARTS ENGINE ---
-
-        function initDailyBar(data) {
-            new Chart(document.getElementById('dailyBarChart'), {
+        function initBars(data) {
+            new Chart(document.getElementById('dailyBars'), {
                 type: 'bar',
                 data: {
                     labels: data.map(x => x.Area),
-                    datasets: [{ data: data.map(x => x["Daily Qty"]), backgroundColor: '#0ea5e9', borderRadius: 4 }]
+                    datasets: [{ data: data.map(x => x["Daily Qty"]), backgroundColor: '#38bdf8', borderRadius: 5 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b', font: {size: 9} } },
-                             x: { grid: { display: false }, ticks: { color: '#64748b', font: {size: 9} } } } }
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                             x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
             });
         }
 
-        function initWeeklyLine(data) {
+        function initLine(data) {
             const sorted = [...data].sort((a,b) => a["Week No"] - b["Week No"]);
-            new Chart(document.getElementById('weeklyLineChart'), {
+            new Chart(document.getElementById('weeklyLine'), {
                 type: 'line',
                 data: {
                     labels: sorted.map(x => "Wk " + x["Week No"]),
-                    datasets: [{ data: sorted.map(x => x["Weekly Qty"]), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.4 }]
+                    datasets: [{ data: sorted.map(x => x["Weekly Qty"]), borderColor: '#10b981', tension: 0.4, fill: true, backgroundColor: 'rgba(16, 185, 129, 0.1)' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b', font: {size: 9} } },
-                             x: { grid: { display: false }, ticks: { color: '#64748b', font: {size: 9} } } } }
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                             x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
             });
         }
 
-        function initCycleGauge(done, rem) {
+        function initCycle(c, r) {
             new Chart(document.getElementById('cycleGauge'), {
                 type: 'doughnut',
                 data: {
-                    datasets: [{ data: [done, rem], backgroundColor: ['#0ea5e9', 'rgba(255,255,255,0.05)'], borderWidth: 0, cutout: '85%' }]
+                    datasets: [{ data: [c, r], backgroundColor: ['#38bdf8', 'rgba(255,255,255,0.05)'], borderWidth: 0, cutout: '85%' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: 270 }
             });
         }
 
-        function initTaskView(listId, pieId, tasks, color) {
-            const listEl = document.getElementById(listId);
+        function initTasks(listId, pieId, tasks, color) {
+            const list = document.getElementById(listId);
             const done = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
             const pending = tasks.length - done;
 
-            listEl.innerHTML = tasks.map(t => {
+            list.innerHTML = tasks.map(t => {
                 const isDone = t.Status.toLowerCase().includes('complete');
-                return `<div class="task-row ${isDone ? 'done' : 'todo'}">
-                    <span>${t.Task || t.TASK}</span>
-                    <b style="font-size: 0.6rem;">${isDone ? 'OK' : '...'}</b>
+                return `<div class="task-row">
+                    <span style="color: ${isDone ? '#fff' : '#94a3b8'}">${t.Task || t.TASK}</span>
+                    <div class="dot" style="background: ${isDone ? 'var(--success)' : 'var(--danger)'}"></div>
                 </div>`;
             }).join('');
 
@@ -287,7 +305,7 @@
             });
         }
 
-        loadDashboard();
+        load();
     </script>
 </body>
 </html>
