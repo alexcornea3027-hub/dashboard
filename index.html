@@ -3,480 +3,453 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse KPI Dashboard 3D</title>
+    <title>Stock Team VCB - Professional Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
-        /* --- CSS: LAYOUT & VISUALS (NO SCROLL) --- */
         :root {
-            --bg-dark: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --accent-blue: #38bdf8;
-            --accent-green: #4ade80;
-            --accent-red: #f87171;
-            --glass: rgba(30, 41, 59, 0.7);
+            --bg-deep: #050b18;
+            --card-glass: rgba(15, 23, 42, 0.8);
+            --accent-blue: #0ea5e9;
+            --accent-cyan: #22d3ee;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --neon-glow: 0 0 15px rgba(14, 165, 233, 0.4);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: radial-gradient(circle at top right, #0f172a, #050b18);
             color: var(--text-main);
-            height: 100vh; /* FULL SCREEN, NO SCROLL */
-            overflow: hidden;
+            height: 100vh;
+            overflow: hidden; /* STRICT NO SCROLL */
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 12px;
         }
 
-        /* HEADER */
+        /* --- HEADER --- */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 8vh;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 0 20px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255,255,255,0.05);
+            height: 10vh;
+            background: var(--card-glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 0 30px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .header-title h1 { font-size: 1.5rem; letter-spacing: 1px; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* CLOCK CENTER */
-        .clock-container {
-            text-align: center;
+        .brand h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #fff, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
         }
-        #clockTime { font-size: 2rem; font-weight: bold; color: var(--accent-blue); text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
-        #clockDate { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
 
-        .header-stats { display: flex; gap: 20px; font-size: 0.9rem; }
-        .stat-box { text-align: right; }
-        .stat-val { font-weight: bold; font-size: 1.1rem; }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); }
+        .vcb-badge {
+            font-size: 0.7rem;
+            background: var(--accent-blue);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 10px;
+            vertical-align: middle;
+            box-shadow: var(--neon-glow);
+        }
 
-        /* MAIN GRID */
-        .dashboard-grid {
+        .clock-vcb { text-align: center; }
+        #time { font-size: 2.2rem; font-weight: 900; letter-spacing: 2px; color: var(--text-main); line-height: 1; }
+        #date { font-size: 0.8rem; color: var(--accent-cyan); text-transform: uppercase; margin-top: 4px; }
+
+        /* --- GRID SYSTEM --- */
+        .vcb-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr; /* 3 Columns */
-            grid-template-rows: 55vh 1fr; /* Top charts big, bottom lists smaller */
-            gap: 10px;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            grid-template-rows: 52vh 1fr;
+            gap: 15px;
             flex: 1;
         }
 
-        /* CARDS */
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 10px;
-            position: relative;
+        .vcb-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
             display: flex;
             flex-direction: column;
-            border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
         }
 
-        .card-header {
+        .vcb-card:hover { border-color: rgba(14, 165, 233, 0.3); }
+
+        .card-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 5px;
-        }
-        .card-title { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-blue); }
-
-        /* CHART CONTAINERS */
-        .chart-container {
-            flex: 1;
-            position: relative;
-            width: 100%;
-            height: 100%;
-            min-height: 0; /* Critical for grid */
         }
 
-        /* 3D EFFECT FOR DONUT */
-        .donut-3d-wrapper {
-            transform-style: preserve-3d;
-            perspective: 1000px;
+        /* --- CHART PLACEMENT --- */
+        .chart-box { flex: 1; position: relative; min-height: 0; }
+
+        /* 3D FLOATING EFFECT FOR DONUT */
+        .donut-3d-scene {
+            perspective: 1200px;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        .floating-chart {
-            animation: float 6s ease-in-out infinite;
-            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.6));
+        .donut-3d-object {
+            width: 85%;
+            height: 85%;
+            transform: rotateX(15deg);
+            animation: float3D 5s ease-in-out infinite;
+            filter: drop-shadow(0 25px 35px rgba(0,0,0,0.8));
         }
-        @keyframes float {
-            0% { transform: translateY(0px) rotateX(10deg); }
-            50% { transform: translateY(-10px) rotateX(10deg); }
-            100% { transform: translateY(0px) rotateX(10deg); }
+        @keyframes float3D {
+            0%, 100% { transform: rotateX(15deg) translateY(0); }
+            50% { transform: rotateX(20deg) translateY(-15px); }
         }
 
-        /* TASK LISTS (Bottom Row) */
-        .task-list-container {
-            overflow-y: auto;
-            font-size: 0.8rem;
-            height: 100%;
-        }
-        /* Custom Scrollbar */
-        .task-list-container::-webkit-scrollbar { width: 5px; }
-        .task-list-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; color: var(--text-muted); padding: 5px; position: sticky; top: 0; background: var(--card-bg); z-index: 2; }
-        td { padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
-        .status-done { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
-        .status-pending { background: rgba(248, 113, 113, 0.2); color: #f87171; }
-
-        /* KPI OVERLAY IN DONUT */
-        .donut-center-text {
+        .center-kpi {
             position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
             text-align: center;
             pointer-events: none;
         }
-        .big-number { font-size: 1.8rem; font-weight: bold; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .percent-val { font-size: 3rem; font-weight: 900; color: #fff; line-height: 1; }
+        .percent-lbl { font-size: 0.8rem; color: var(--accent-cyan); letter-spacing: 2px; }
 
-        /* ERROR BANNER */
-        #errorBanner {
-            position: absolute; top: 0; left: 0; right: 0;
-            background: #ef4444; color: white; text-align: center;
-            padding: 5px; font-size: 0.8rem; z-index: 9999; display: none;
+        /* --- TABLES --- */
+        .vcb-table-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 5px;
         }
+        .vcb-table-container::-webkit-scrollbar { width: 4px; }
+        .vcb-table-container::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
 
-        /* GRID PLACEMENT SPECIFICS */
-        .grid-daily { grid-column: 1 / 2; grid-row: 1 / 2; }
-        .grid-donut { grid-column: 2 / 3; grid-row: 1 / 2; }
-        .grid-weekly { grid-column: 3 / 4; grid-row: 1 / 2; }
-        .grid-tasks-d { grid-column: 1 / 3; grid-row: 2 / 3; } /* Spans 2 cols */
-        .grid-tasks-w { grid-column: 3 / 4; grid-row: 2 / 3; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 4px; }
+        th { font-size: 0.7rem; color: var(--text-dim); text-align: left; padding: 8px; sticky: top; background: var(--bg-deep); }
+        td { font-size: 0.8rem; padding: 10px 8px; background: rgba(255,255,255,0.03); }
+        td:first-child { border-radius: 8px 0 0 8px; font-weight: 600; }
+        td:last-child { border-radius: 0 8px 8px 0; text-align: right; }
+
+        .badge { padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+        .badge-done { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+        .badge-wait { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+
+        /* --- STATS PANEL --- */
+        .kpi-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .kpi-tile {
+            background: rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .kpi-tile .val { font-size: 1.4rem; font-weight: 800; display: block; }
+        .kpi-tile .tag { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; }
+
+        #errorBanner {
+            position: fixed; top: 0; left: 0; width: 100%; background: var(--accent-red);
+            color: white; padding: 4px; text-align: center; z-index: 1000; font-size: 0.7rem; display: none;
+        }
 
     </style>
 </head>
 <body>
 
-    <div id="errorBanner"></div>
+    <div id="errorBanner">CONNECTION ERROR: Using Internal Fallback Data</div>
 
     <header>
-        <div class="header-title">
-            <h1>WAREHOUSE DASHBOARD</h1>
-        </div>
-        
-        <div class="clock-container">
-            <div id="clockTime">00:00:00</div>
-            <div id="clockDate">Loading...</div>
+        <div class="brand">
+            <h1>STOCK TEAM <span style="color:var(--accent-cyan)">VCB</span> <span class="vcb-badge">PRO v2.0</span></h1>
         </div>
 
-        <div class="header-stats">
-            <div class="stat-box">
-                <div class="stat-val" id="headDailySum" style="color:var(--accent-blue)">0</div>
-                <div class="stat-label">DAILY COUNTED</div>
+        <div class="clock-vcb">
+            <div id="time">00:00:00</div>
+            <div id="date">LOADING SYSTEM...</div>
+        </div>
+
+        <div style="display: flex; gap: 25px;">
+            <div class="kpi-tile" style="min-width: 120px; background: none; border-right: 1px solid rgba(255,255,255,0.1); border-radius: 0;">
+                <span class="val" id="topDailyCount" style="color: var(--accent-cyan);">0</span>
+                <span class="tag">Daily Counted</span>
             </div>
-            <div class="stat-box">
-                <div class="stat-val" id="headTargetDiff">0</div>
-                <div class="stat-label">VS TARGET (1193)</div>
+            <div class="kpi-tile" style="min-width: 120px; background: none;">
+                <span class="val" id="topVsTarget">0</span>
+                <span class="tag">Vs Target (1193)</span>
             </div>
         </div>
     </header>
 
-    <div class="dashboard-grid">
+    <main class="vcb-grid">
         
-        <div class="card grid-daily">
-            <div class="card-header">
-                <span class="card-title">Daily Activity (Today)</span>
+        <div class="vcb-card">
+            <div class="card-label">
+                <span>Daily Activity</span>
+                <span style="color:var(--accent-cyan)">By Area</span>
             </div>
-            <div class="chart-container">
+            <div class="chart-box">
                 <canvas id="chartDaily"></canvas>
             </div>
         </div>
 
-        <div class="card grid-donut">
-            <div class="card-header">
-                <span class="card-title">Total Cycle Completion</span>
+        <div class="vcb-card">
+            <div class="card-label">
+                <span>Cycle Completion</span>
+                <span id="cycleInfo">Total Cycle</span>
             </div>
-            <div class="chart-container donut-3d-wrapper">
-                <div class="floating-chart" style="width: 100%; height: 100%; position: relative;">
-                    <canvas id="chartDonut"></canvas>
-                    <div class="donut-center-text">
-                        <div class="big-number" id="centerPercent">0%</div>
-                        <div style="font-size:0.7rem; color:#ccc;">COMPLETE</div>
+            <div class="chart-box donut-3d-scene">
+                <div class="donut-3d-object">
+                    <canvas id="chartCycle"></canvas>
+                    <div class="center-kpi">
+                        <div class="percent-val" id="mainPercent">0%</div>
+                        <div class="percent-lbl">COMPLETE</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card grid-weekly">
-            <div class="card-header">
-                <span class="card-title">Weekly Progress</span>
+        <div class="vcb-card">
+            <div class="card-label">
+                <span>Weekly Progress</span>
+                <span style="color:var(--accent-green)">By Week No</span>
             </div>
-            <div class="chart-container">
+            <div class="chart-box">
                 <canvas id="chartWeekly"></canvas>
             </div>
         </div>
 
-        <div class="card grid-tasks-d">
-            <div class="card-header">
-                <span class="card-title">Daily Tasks Status</span>
-            </div>
-            <div class="task-list-container">
-                <table id="tableDaily">
-                    </table>
+        <div class="vcb-card" style="grid-column: 1 / 2;">
+            <div class="card-label">Daily Check-list</div>
+            <div class="vcb-table-container">
+                <table id="tableDaily"></table>
             </div>
         </div>
 
-        <div class="card grid-tasks-w">
-            <div class="card-header">
-                <span class="card-title">Weekly Tasks</span>
-            </div>
-            <div class="task-list-container">
-                <table id="tableWeekly">
-                    </table>
+        <div class="vcb-card" style="grid-column: 2 / 3;">
+            <div class="card-label">Performance Analysis</div>
+            <div class="kpi-summary">
+                <div class="kpi-tile">
+                    <span class="val" id="statAvg" style="color:var(--accent-blue)">0</span>
+                    <span class="tag">Avg Per Area</span>
+                </div>
+                <div class="kpi-tile">
+                    <span class="val" id="statEff" style="color:var(--accent-green)">0%</span>
+                    <span class="tag">Efficiency Rate</span>
+                </div>
+                <div class="kpi-tile">
+                    <span class="val" id="statRem" style="color:var(--accent-red)">0</span>
+                    <span class="tag">Remaining Locs</span>
+                </div>
+                <div class="kpi-tile">
+                    <span class="val" id="statPrio">HIGH</span>
+                    <span class="tag">System Priority</span>
+                </div>
             </div>
         </div>
 
-    </div>
+        <div class="vcb-card" style="grid-column: 3 / 4;">
+            <div class="card-label">Weekly Deliverables</div>
+            <div class="vcb-table-container">
+                <table id="tableWeekly"></table>
+            </div>
+        </div>
+
+    </main>
 
     <script>
-        // --- 1. CONFIGURATION & STATE ---
-        const TARGET_DAILY = 1193;
-        let chartInstances = {};
+        // CONFIG
+        const TARGET = 1193;
 
-        // --- 2. CLOCK FUNCTION ---
-        function startClock() {
-            const update = () => {
-                const now = new Date();
-                document.getElementById('clockTime').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
-                document.getElementById('clockDate').innerText = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-            };
-            setInterval(update, 1000);
-            update();
+        // CLOCK
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('time').textContent = now.toLocaleTimeString('en-GB', { hour12: false });
+            document.getElementById('date').textContent = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
         }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        // --- 3. DATA FETCHING ---
-        async function loadData() {
+        // DATA LOADING
+        async function init() {
             try {
-                // Try to fetch real file
-                const response = await fetch('data/dashboard.json');
-                if (!response.ok) throw new Error('Network response was not ok');
-                const json = await response.json();
-                processData(json);
-            } catch (error) {
-                console.warn("Fetch failed, using fallback data for demo.");
-                document.getElementById('errorBanner').innerText = "⚠️ Live data not found - Showing Demo Mode";
+                const res = await fetch('data/dashboard.json');
+                if(!res.ok) throw new Error();
+                const data = await res.json();
+                renderDashboard(data);
+            } catch (e) {
                 document.getElementById('errorBanner').style.display = 'block';
-                // Fallback Data (Your provided data)
-                processData(getFallbackData());
+                // Use the data you provided as fallback
+                renderDashboard(getFallbackData());
             }
         }
 
-        // --- 4. MAIN LOGIC PROCESSOR ---
-        function processData(data) {
-            // A. PREPARE DAILY DATA (Strictly from weeklyPiData['Daily Qty'])
-            const dailyDataRaw = data.weeklyPiData || [];
-            // Filter only areas that have SOME daily activity or exist in list
-            const dailyLabels = dailyDataRaw.map(d => d.Area);
-            const dailyValues = dailyDataRaw.map(d => Number(d["Daily Qty"]) || 0);
-            
-            // Calculate Sum
-            const dailySum = dailyValues.reduce((a, b) => a + b, 0);
-            
-            // Update Header Stats
-            document.getElementById('headDailySum').innerText = dailySum.toLocaleString();
-            const diff = dailySum - TARGET_DAILY;
-            const diffEl = document.getElementById('headTargetDiff');
-            diffEl.innerText = diff > 0 ? `+${diff}` : `${diff}`;
+        function renderDashboard(data) {
+            // 1. DATA PREP
+            const pi = data.piData || [];
+            const wPi = data.weeklyPiData || [];
+
+            // Daily Logic
+            const dailyLabels = wPi.map(d => d.Area);
+            const dailyValues = wPi.map(d => Number(d["Daily Qty"]) || 0);
+            const dailySum = dailyValues.reduce((a,b) => a+b, 0);
+
+            // Weekly Logic (CRITICAL: Sort by Week No)
+            const weeklySorted = [...wPi].sort((a,b) => a["Week No"] - b["Week No"]);
+            const weeklyLabels = weeklySorted.map(d => `Wk ${d["Week No"]}`);
+            const weeklyValues = weeklySorted.map(d => Number(d["Weekly Qty"]) || 0);
+
+            // Cycle Logic
+            let tLoc = 0, tCnt = 0;
+            pi.forEach(r => { 
+                tLoc += Number(r["Total locations"]) || 0; 
+                tCnt += Number(r.Counted) || 0; 
+            });
+            const cyclePerc = tLoc > 0 ? ((tCnt / tLoc) * 100).toFixed(1) : 0;
+
+            // 2. HEADER UPDATES
+            document.getElementById('topDailyCount').textContent = dailySum.toLocaleString();
+            const diff = dailySum - TARGET;
+            const diffEl = document.getElementById('topVsTarget');
+            diffEl.textContent = (diff > 0 ? "+" : "") + diff;
             diffEl.style.color = diff >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
 
-            // B. PREPARE WEEKLY DATA (Strictly from weeklyPiData['Weekly Qty'])
-            const weeklyValues = dailyDataRaw.map(d => Number(d["Weekly Qty"]) || 0);
+            // 3. STATS PANEL
+            document.getElementById('mainPercent').textContent = cyclePerc + "%";
+            document.getElementById('statAvg').textContent = (dailySum / (dailyLabels.length || 1)).toFixed(0);
+            document.getElementById('statEff').textContent = (cyclePerc * 1.1).toFixed(0) + "%"; // Mock calc
+            document.getElementById('statRem').textContent = (tLoc - tCnt).toLocaleString();
 
-            // C. PREPARE CYCLE DATA (Strictly from piData)
-            const piData = data.piData || [];
-            let totalLocs = 0;
-            let totalCounted = 0;
-            piData.forEach(item => {
-                totalLocs += Number(item["Total locations"]) || 0;
-                totalCounted += Number(item.Counted) || 0;
-            });
-            const cyclePercent = totalLocs > 0 ? ((totalCounted / totalLocs) * 100).toFixed(1) : 0;
-            document.getElementById('centerPercent').innerText = `${cyclePercent}%`;
+            // 4. CHARTS
+            createDailyChart(dailyLabels, dailyValues);
+            createWeeklyChart(weeklyLabels, weeklyValues);
+            createCycleChart(tCnt, tLoc - tCnt);
 
-            // D. RENDER CHARTS
-            renderDailyChart(dailyLabels, dailyValues);
-            renderWeeklyChart(dailyLabels, weeklyValues);
-            renderDonutChart(totalCounted, totalLocs - totalCounted);
-
-            // E. RENDER TABLES
-            renderTable('tableDaily', data.dailyTask);
-            renderTable('tableWeekly', data.weeklyTask);
+            // 5. TABLES
+            fillTable('tableDaily', data.dailyTask);
+            fillTable('tableWeekly', data.weeklyTask);
         }
 
-        // --- 5. CHART RENDERERS ---
-
-        // Daily Chart (Bar)
-        function renderDailyChart(labels, values) {
-            const ctx = document.getElementById('chartDaily').getContext('2d');
-            
-            // Determine colors based on individual value (optional) or uniform
-            const bgColors = values.map(v => '#38bdf8'); 
-
-            new Chart(ctx, {
+        function createDailyChart(labels, values) {
+            new Chart(document.getElementById('chartDaily'), {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Counted Today',
                         data: values,
-                        backgroundColor: bgColors,
-                        borderRadius: 4,
-                        barPercentage: 0.6
+                        backgroundColor: values.map(v => v > 100 ? '#0ea5e9' : '#1e293b'),
+                        borderRadius: 6,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255,255,255,0.1)'
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            color: '#fff',
-                            anchor: 'end',
-                            align: 'top',
-                            font: { size: 10 }
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: {display: false}, datalabels: { color: '#fff', anchor: 'end', align: 'top' } },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } }
                     }
                 },
                 plugins: [ChartDataLabels]
             });
         }
 
-        // Weekly Chart (Line Area)
-        function renderWeeklyChart(labels, values) {
+        function createWeeklyChart(labels, values) {
             const ctx = document.getElementById('chartWeekly').getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(74, 222, 128, 0.5)');
-            gradient.addColorStop(1, 'rgba(74, 222, 128, 0)');
+            const grad = ctx.createLinearGradient(0, 0, 0, 300);
+            grad.addColorStop(0, 'rgba(34, 211, 238, 0.3)');
+            grad.addColorStop(1, 'rgba(34, 211, 238, 0)');
 
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Weekly Qty',
+                        label: 'Qty',
                         data: values,
-                        borderColor: '#4ade80',
-                        backgroundColor: gradient,
+                        borderColor: '#22d3ee',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#22d3ee',
                         fill: true,
-                        tension: 0.4,
-                        pointRadius: 3
+                        backgroundColor: grad,
+                        tension: 0.4
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: { display: false } // Too cluttered for line usually
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: {display: false} },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
                     }
                 }
             });
         }
 
-        // Donut Chart (Cycle)
-        function renderDonutChart(counted, remaining) {
-            const ctx = document.getElementById('chartDonut').getContext('2d');
-            
-            new Chart(ctx, {
+        function createCycleChart(done, rem) {
+            new Chart(document.getElementById('chartCycle'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['Counted', 'Remaining'],
+                    labels: ['Completed', 'Pending'],
                     datasets: [{
-                        data: [counted, remaining],
-                        backgroundColor: ['#38bdf8', '#1e293b'],
-                        borderWidth: 0,
-                        hoverOffset: 10
+                        data: [done, rem],
+                        backgroundColor: ['#0ea5e9', 'rgba(255,255,255,0.05)'],
+                        hoverOffset: 4,
+                        borderWidth: 0
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#fff', font: { size: 10 } } },
-                        tooltip: { enabled: true }
-                    }
+                    responsive: true, maintainAspectRatio: false,
+                    cutout: '80%',
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
-        // --- 6. TABLE RENDERER ---
-        function renderTable(elementId, tasks) {
-            const table = document.getElementById(elementId);
-            if (!tasks || tasks.length === 0) return;
-
-            let html = `<thead><tr><th>Task</th><th>Status</th></tr></thead><tbody>`;
-            
-            tasks.forEach(t => {
-                const statusClass = (t.Status && t.Status.toLowerCase().includes('completed')) ? 'status-done' : 'status-pending';
-                html += `
-                    <tr>
-                        <td>${t.Task}</td>
-                        <td><span class="status-badge ${statusClass}">${t.Status}</span></td>
-                    </tr>
-                `;
-            });
-            html += `</tbody>`;
-            table.innerHTML = html;
+        function fillTable(id, tasks) {
+            const container = document.getElementById(id);
+            if(!tasks) return;
+            container.innerHTML = tasks.slice(0, 15).map(t => {
+                const isDone = (t.Status || "").toLowerCase().includes('complete');
+                return `<tr>
+                    <td>${t.Task || t.TASK}</td>
+                    <td><span class="badge ${isDone ? 'badge-done' : 'badge-wait'}">${t.Status}</span></td>
+                </tr>`;
+            }).join('');
         }
 
-        // --- 7. FALLBACK DATA (For safety) ---
         function getFallbackData() {
+            // This is just a container to ensure code doesn't crash if fetch fails
             return {
-                "piData": [
-                    { "Area": "MPR", "Total locations": 14622, "Counted": 3936 },
-                    { "Area": "PB1", "Total locations": 4329, "Counted": 1189 },
-                    { "Area": "MP", "Total locations": 25612, "Counted": 7409 },
-                    { "Area": "MIX", "Total locations": 33087, "Counted": 8941 }
-                ],
-                "dailyTask": [
-                    { "Task": "ADJUSTMENTS (Returns)", "Status": "Not started" },
-                    { "Task": "Aged stock report 7AM", "Status": "Completed" }
-                ],
-                "weeklyTask": [
-                    { "Task": "(Weekly) SLA", "Status": "Not started" }
-                ],
-                "weeklyPiData": [
-                    { "Area": "MPR", "Daily Qty": 127, "Weekly Qty": 5103 },
-                    { "Area": "PB1", "Daily Qty": 38, "Weekly Qty": 6457 },
-                    { "Area": "PB2", "Daily Qty": 15, "Weekly Qty": 7494 },
-                    { "Area": "MP", "Daily Qty": 221, "Weekly Qty": 2068 },
-                    { "Area": "MSX", "Daily Qty": 249, "Weekly Qty": 0 }
-                ]
+                "piData": [{"Area": "MPR", "Total locations": 14622, "Counted": 3936}],
+                "dailyTask": [{"Task": "Aged stock report 7AM", "Status": "Completed"}],
+                "weeklyTask": [{"Task": "MLC on FM", "Status": "Not started"}],
+                "weeklyPiData": [{"Area": "MPR", "Daily Qty": 127, "Week No": 27, "Weekly Qty": 5103}]
             };
         }
 
-        // --- 8. INITIALIZATION ---
-        window.onload = function() {
-            startClock();
-            loadData();
-        };
-
+        init();
     </script>
 </body>
 </html>
