@@ -303,8 +303,10 @@
       areaFilter.onchange = renderAll;
 
       document.getElementById('downloadJson').onclick = ()=>{ const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='data.json'; a.click(); URL.revokeObjectURL(url); };
-      document.getElementById('exportCSV').onclick = ()=>{ const rows=[['Date','Area','Total locations','Counted','Above target','Behind %']]; (DATA.piData||[]).forEach(r=>rows.push([r.Date,r.Area,r['Total locations'],r.Counted,r['Above target'],r['Behind %']])); const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('
-'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='piData.csv'; a.click(); URL.revokeObjectURL(url); };
+      document.getElementById('exportCSV').onclick = ()=>{ const rows=[['Date','Area','Total locations','Counted','Above target','Behind %']]; (DATA.piData||[]).forEach(r=>rows.push([r.Date,r.Area,r['Total locations'],r.Counted,r['Above target'],r['Behind %']])); const csv = rows
+  .map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','))
+  .join('\n');
+ const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='piData.csv'; a.click(); URL.revokeObjectURL(url); };
 
       // initial render
       renderAll();
