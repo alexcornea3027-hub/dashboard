@@ -112,7 +112,7 @@
 
     <h3 style="margin-top:6px">PI — Daily by area</h3>
     <div style="flex:1;overflow:auto;margin-bottom:8px">
-      <table id="piTable"><thead><tr><th>Area</th><th style="text-align:right">Counted Today</th></tr></thead><tbody></tbody></table>
+      <table id="piTable"><thead><tr><th>Area</th><th style="text-align:right">Counted Today</th><th style="text-align:right">Cumulative</th></tr></thead><tbody></tbody></table>
     </div>
 
     <h3 style="margin-top:6px">Weekly details</h3>
@@ -126,8 +126,9 @@
 
 <script>
 /* ---------- constants ---------- */
-const DAILY_TARGET=1193; // fixed daily target
-const STORAGE_KEY='dailyProgress_'+new Date().toISOString().slice(0,10); // per day
+const DAILY_TARGET=1193; 
+const STORAGE_KEY_PREFIX='dailyProgress_';
+const AREAS=['MPR','PB1','PB2','PB3','PB4']; // define all possible areas
 
 /* ---------- state ---------- */
 let payload=null;
@@ -135,19 +136,18 @@ let charts={piBar:null,weeklyLine:null,dailyDonut:null,weeklyDonut:null,gaugeMin
 
 /* ---------- helpers ---------- */
 function dbg(msg){const el=document.getElementById('debug');const d=document.createElement('div');d.textContent=msg;el.appendChild(d);el.scrollTop=el.scrollHeight; console.log(msg);}
-function safeNum(v){if(v==null)return 0;return Number(v)||0;}
+function safeNum(v){return v==null?0:Number(v)||0;}
 function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-/* ---------- chart plugins 3D ---------- */
-const donut3D={id:'donut3D',beforeDraw(chart,args,opts){if(!opts||!opts.depth)return; const ctx=chart.ctx; const meta=chart.getDatasetMeta(0); if(!meta)return; const first=meta.data[0]; if(!first)return; const cx=(chart.chartArea.left+chart.chartArea.right)/2; const cy=(chart.chartArea.top+chart.chartArea.bottom)/2; const outerR=first.outerRadius||Math.min(chart.width,chart.height)/2*0.9; const innerR=first.innerRadius||outerR*0.6; const depth=opts.depth; const slices=chart.data.datasets[0].data; const colors=chart.data.datasets[0].backgroundColor||[]; let startAngle=(chart.options.rotation||0)-Math.PI/2; const total=slices.reduce((s,v)=>s+Number(v||0),0)||1; const angles=[]; for(let i=0;i<slices.length;i++){const a=(slices[i]/total)*(chart.options.circumference||(2*Math.PI)); angles.push({start:startAngle,end:startAngle+a}); startAngle+=a;} const step=Math.max(2,Math.round(depth/6)); for(let layer=depth;layer>0;layer-=step){const yOff=layer*0.6; for(let i=0;i<angles.length;i++){const ainfo=angles[i]; ctx.beginPath(); ctx.fillStyle=shadeColor(colors[i]||'rgba(255,255,255,0.08)',-0.12-(layer/depth)*0.12); ctx.moveTo(cx,cy+yOff); ctx.arc(cx,cy+yOff,outerR,ainfo.start,ainfo.end); ctx.arc(cx,cy+yOff,innerR,ainfo.end,ainfo.start,true); ctx.closePath(); ctx.fill();}}}};
-const centerText={id:'centerText',afterDraw(chart){const cfg=chart?.config?.options?.plugins?.centerText; if(!cfg)return; const ctx=chart.ctx; ctx.save(); const x=(chart.chartArea.left+chart.chartArea.right)/2; const y=(chart.chartArea.top+chart.chartArea.bottom)/2; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=cfg.color||'#fff'; ctx.font=cfg.font||'700 16px Poppins'; ctx.fillText(cfg.text||'',x,y-8); if(cfg.subtext){ctx.font=cfg.subFont||'400 12px Poppins';ctx.fillStyle=cfg.subColor||'#cfeeff';ctx.fillText(cfg.subtext,x,y+14);} ctx.restore();}};
-Chart.register(donut3D,centerText);
+function todayKey(){return STORAGE_KEY_PREFIX+new Date().toISOString().slice(0,10);}
+function loadStoredProgress(){return JSON.parse(localStorage.getItem(todayKey())||'{}');}
+function saveStoredProgress(obj){localStorage.setItem(todayKey(),JSON.stringify(obj));}
 
 /* ---------- load demo or real data ---------- */
 async function loadAndRender(){
   dbg('Loading JSON...');
   try{ const res=await fetch('./data/dashboard.json'); payload=await res.json(); } catch(e){dbg('Using demo payload'); payload=demoPayload();}
   document.getElementById('liveDate').innerText=new Date().toLocaleDateString();
+  mergeCumulative();
   renderAll();
 }
 
@@ -160,11 +160,22 @@ function demoPayload(){
   };
 }
 
+/* ---------- merge with stored cumulative ---------- */
+function mergeCumulative(){
+  const stored=loadStoredProgress();
+  for(const area of AREAS){
+    let todayCount=(payload.piData.find(a=>a.Area===area)?.CountedToday)||0;
+    stored[area]=(stored[area]||0)+todayCount;
+  }
+  saveStoredProgress(stored);
+  payload.cumulative=stored;
+}
+
 /* ---------- render pipeline ---------- */
 function renderAll(){
   renderTasks(payload.dailyTask,'dailyList');
   renderTasks(payload.weeklyTask,'weeklyList');
-  renderPI(payload.piData);
+  renderPI(payload.piData,payload.cumulative);
   renderWeeklyPI(payload.weeklyPiData);
   renderTaskDonuts(payload);
   computeAndRenderGauge(payload);
@@ -184,17 +195,24 @@ function renderTasks(list,containerId){
 }
 
 /* ---------- PI table + bar ---------- */
-function renderPI(piList){
+function renderPI(piList,cumData){
   const tbody=document.querySelector('#piTable tbody'); tbody.innerHTML='';
-  if(!piList||!piList.length){tbody.innerHTML='<tr><td colspan="2">No data</td></tr>'; if(charts.piBar)charts.piBar.destroy(); return;}
-  const labels=[],countedArr=[]; let totalCounted=0;
-  for(const r of piList){labels.push(r.Area); countedArr.push(r.CountedToday); totalCounted+=safeNum(r.CountedToday);}
+  const labels=[],countedArr=[],cumArr=[]; let totalCounted=0;
+  for(const area of AREAS){
+    const r=piList.find(a=>a.Area===area) || {CountedToday:0};
+    labels.push(area); 
+    const val=safeNum(r.CountedToday);
+    countedArr.push(val); 
+    const cumVal=safeNum(cumData[area]);
+    cumArr.push(cumVal);
+    totalCounted+=val;
+    tbody.insertAdjacentHTML('beforeend','<tr><td>'+escapeHtml(area)+'</td><td style="text-align:right">'+val+'</td><td style="text-align:right">'+cumVal+'</td></tr>');
+  }
   const remaining=Math.max(0,DAILY_TARGET-totalCounted);
-  countedArr.push(totalCounted); labels.push('Remaining');
-  countedArr.push(remaining);
+  labels.push('Remaining'); countedArr.push(remaining); cumArr.push('—');
   try{if(charts.piBar)charts.piBar.destroy();}catch(e){}
   const ctx=document.getElementById('piBar').getContext('2d');
-  charts.piBar=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Counted',data:countedArr,backgroundColor:['#7dd3fc','#f97316','#8b5cf6','#fbbf24']}]}});
+  charts.piBar=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Counted',data:countedArr,backgroundColor:['#7dd3fc','#f97316','#8b5cf6','#fbbf24','#f472b6','#999']}]},options:{plugins:{legend:{display:false}}}});
   document.getElementById('countHint').innerText='Total counted today: '+totalCounted+' / '+DAILY_TARGET;
 }
 
@@ -222,10 +240,12 @@ function renderTaskDonuts(payload){
   function renderDonut(id,done,not){
     try{if(charts[id])charts[id].destroy();}catch(e){}
     const ctx=document.getElementById(id).getContext('2d');
-    charts[id]=new Chart(ctx,{type:'doughnut',data:{labels:['Completed','Not started'],datasets:[{data:[done,not],backgroundColor:['#12b76a','#f97316']}]},options:{plugins:{donut3D:{depth:8},centerText:{text:done+'/'+(done+not)}}}});
+    charts[id]=new Chart(ctx,{type:'doughnut',data:{labels:['Completed','Not started'],datasets:[{data:[done,not],backgroundColor:['#12b76a','#f97316']}]},options:{plugins:{legend:{position:'bottom'},tooltip:{enabled:true}}}});
   }
   renderDonut('dailyDonut',dailyDone,dailyNot);
   renderDonut('weeklyDonut',weeklyDone,weeklyNot);
+  document.getElementById('dailyCountSmall').innerText=dailyDone+'/'+(dailyDone+dailyNot);
+  document.getElementById('weeklyCountSmall').innerText=weeklyDone+'/'+(weeklyDone+weeklyNot);
 }
 
 /* ---------- gauge ---------- */
@@ -233,13 +253,9 @@ function computeAndRenderGauge(payload){
   const totalCounted=(payload.piData||[]).reduce((s,r)=>s+safeNum(r.CountedToday),0);
   try{if(charts.gaugeMini)charts.gaugeMini.destroy();}catch(e){}
   const ctx=document.getElementById('gaugeMini').getContext('2d');
-  charts.gaugeMini=new Chart(ctx,{type:'doughnut',data:{labels:['Counted','Remaining'],datasets:[{data:[totalCounted,Math.max(0,DAILY_TARGET-totalCounted)],backgroundColor:['#7dd3fc','#f97316']}]},options:{rotation:-Math.PI,circumference:Math.PI,plugins:{centerText:{text:totalCounted+'/'+DAILY_TARGET}}}});
+  charts.gaugeMini=new Chart(ctx,{type:'doughnut',data:{labels:['Counted','Remaining'],datasets:[{data:[totalCounted,Math.max(0,DAILY_TARGET-totalCounted)],backgroundColor:['#7dd3fc','#f97316']}]},options:{rotation:-Math.PI,circumference:Math.PI,plugins:{legend:{display:false},tooltip:{enabled:true}}}});
   document.getElementById('gaugeCenterText').innerText=totalCounted+'/'+DAILY_TARGET;
   document.getElementById('gaugeBreakdown').innerText='Remaining: '+Math.max(0,DAILY_TARGET-totalCounted);
 }
 
-/* ---------- init ---------- */
-loadAndRender();
-</script>
-</body>
-</html>
+/* ----------*
