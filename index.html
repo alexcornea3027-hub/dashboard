@@ -3,322 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Team VCB | Management Console</title>
+    <title>Stock Team VCB | Executive Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --accent: #38bdf8;
+            --bg: #0a0f1e;
+            --card-bg: #161e31;
+            --accent: #0ea5e9;
             --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --text-main: #f1f5f9;
-            --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.05);
+            --danger: #f43f5e;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
+            background: var(--bg);
+            color: var(--text-primary);
             height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            padding: 12px;
+            padding: 10px;
         }
 
         /* --- HEADER --- */
         header {
+            height: 8vh;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--bg-card);
-            padding: 15px 25px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border);
+            padding: 0 25px;
+            margin-bottom: 10px;
         }
 
-        .brand h1 { font-size: 1.4rem; letter-spacing: -0.5px; color: var(--accent); font-weight: 700; }
+        .header-brand h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; }
+        .header-brand span { color: var(--accent); }
         
-        .date-time { text-align: right; }
-        #full-date { font-size: 0.85rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-        #live-clock { font-size: 1.6rem; font-weight: 600; font-family: monospace; color: #fff; }
+        .header-clock { text-align: right; }
+        #date-text { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; }
+        #time-text { font-size: 1.6rem; font-weight: 700; font-family: 'Courier New', monospace; color: #fff; line-height: 1; }
 
-        /* --- LAYOUT GRID --- */
-        .dashboard-grid {
+        /* --- GRID STRUCTURE --- */
+        .dashboard-main {
             flex: 1;
             display: grid;
-            grid-template-columns: 280px 1fr 1fr 300px;
+            grid-template-columns: 1fr 1.5fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
             min-height: 0;
         }
 
         .card {
-            background: var(--bg-card);
-            border-radius: 12px;
+            background: var(--card-bg);
             border: 1px solid var(--border);
-            padding: 15px;
+            border-radius: 15px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             min-height: 0;
+            position: relative;
         }
 
         .card-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-dim);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-secondary);
             text-transform: uppercase;
-            margin-bottom: 12px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
         }
 
-        /* --- CHART CONTAINERS --- */
-        .chart-box { flex: 1; position: relative; min-height: 0; }
+        /* --- CENTER AREA (GAUGE) --- */
+        .center-hero { grid-row: span 2; display: flex; flex-direction: column; justify-content: space-between; }
+        .gauge-wrap { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+        .gauge-data { position: absolute; text-align: center; transform: translateY(10px); }
+        .gauge-data h2 { font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--accent); }
+        
+        /* --- TASK LISTS & MINI CHARTS --- */
+        .task-container { flex: 1; display: flex; gap: 10px; min-height: 0; }
+        .list-side { flex: 1.5; overflow-y: auto; padding-right: 5px; }
+        .chart-side { flex: 1; position: relative; }
 
-        /* --- TASK LISTS --- */
-        .task-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        .task-scroll::-webkit-scrollbar { width: 4px; }
-        .task-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        /* Custom Scrollbar */
+        .list-side::-webkit-scrollbar { width: 3px; }
+        .list-side::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
-        .task-item {
-            font-size: 0.8rem;
-            padding: 8px 10px;
-            background: rgba(15, 23, 42, 0.3);
+        .task-row {
+            font-size: 0.75rem;
+            background: rgba(0,0,0,0.2);
+            padding: 6px 10px;
             border-radius: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 3px solid transparent;
+            border-left: 2px solid var(--border);
         }
-        .task-item.done { border-left-color: var(--success); }
-        .task-item.todo { border-left-color: var(--danger); }
-        
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .task-row.done { border-left-color: var(--success); opacity: 0.8; }
+        .task-row.todo { border-left-color: var(--danger); }
 
-        /* --- SPECIAL KPI --- */
-        .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .kpi-tile { background: var(--bg-main); padding: 10px; border-radius: 8px; text-align: center; }
-        .kpi-tile small { font-size: 0.65rem; color: var(--text-dim); display: block; }
-        .kpi-tile b { font-size: 1.1rem; color: var(--accent); }
+        .stat-pill {
+            background: rgba(0,0,0,0.3);
+            padding: 8px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+        }
+        .stat-pill span { display: block; font-size: 0.6rem; color: var(--text-secondary); }
+        .stat-pill b { font-size: 1rem; color: #fff; }
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="brand">
-            <h1>Stock Team <span style="color: #fff;">VCB</span></h1>
-            <p style="font-size: 0.7rem; color: var(--text-dim);">V3.5 | DATA RECONCILIATION</p>
+        <div class="header-brand">
+            <h1>STOCK TEAM <span>VCB</span></h1>
         </div>
-        
-        <div class="date-time">
-            <div id="full-date">Loading...</div>
-            <div id="live-clock">00:00:00</div>
+        <div class="header-clock">
+            <div id="date-text">Loading System...</div>
+            <div id="time-text">00:00:00</div>
         </div>
     </header>
 
-    <div class="dashboard-grid">
+    <main class="dashboard-main">
         
-        <div class="card" style="grid-row: span 2;">
-            <div class="card-label">Daily Tasks Details</div>
-            <div class="task-scroll" id="daily-list-container"></div>
-            <div class="kpi-row">
-                <div class="kpi-tile">
-                    <small>Completed</small><b id="d-task-count">0</b>
-                </div>
-                <div class="kpi-tile">
-                    <small>Pending</small><b id="d-task-pending" style="color: var(--danger);">0</b>
-                </div>
+        <div class="card">
+            <div class="card-label">Daily Volume by Area</div>
+            <div style="flex:1; position:relative;">
+                <canvas id="dailyBarChart"></canvas>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-label">Daily Volume by Area</div>
-            <div class="chart-box">
-                <canvas id="chart-daily-bars"></canvas>
+        <div class="card center-hero">
+            <div class="card-label">Total Inventory Cycle Progress</div>
+            <div class="gauge-wrap">
+                <canvas id="cycleGauge"></canvas>
+                <div class="gauge-data">
+                    <h2 id="cyclePerc">0%</h2>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">ACCURACY INDEX</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <div class="stat-pill"><span>Total Locs</span><b id="totalLocs">0</b></div>
+                <div class="stat-pill"><span>Counted</span><b id="totalCounted">0</b></div>
+                <div class="stat-pill"><span>Remaining</span><b id="totalRem" style="color:var(--danger)">0</b></div>
             </div>
         </div>
 
         <div class="card">
             <div class="card-label">Weekly Progress Trend</div>
-            <div class="chart-box">
-                <canvas id="chart-weekly-line"></canvas>
-            </div>
-        </div>
-
-        <div class="card" style="grid-row: span 2;">
-            <div class="card-label">Weekly Tasks Details</div>
-            <div class="task-scroll" id="weekly-list-container"></div>
-            <div class="kpi-row">
-                <div class="kpi-tile">
-                    <small>Done</small><b id="w-task-count">0</b>
-                </div>
-                <div class="kpi-tile">
-                    <small>Pending</small><b id="w-task-pending" style="color: var(--warning);">0</b>
-                </div>
+            <div style="flex:1; position:relative;">
+                <canvas id="weeklyLineChart"></canvas>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-label">Daily Task Completion Ratio</div>
-            <div class="chart-box">
-                <canvas id="chart-daily-tasks-pie"></canvas>
+            <div class="card-label">Daily Operations Status</div>
+            <div class="task-container">
+                <div class="list-side" id="dailyList"></div>
+                <div class="chart-side"><canvas id="dailyPie"></canvas></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-label">Weekly Task Completion Ratio</div>
-            <div class="chart-box">
-                <canvas id="chart-weekly-tasks-pie"></canvas>
+            <div class="card-header card-label">Weekly Compliance Status</div>
+            <div class="task-container">
+                <div class="list-side" id="weeklyList"></div>
+                <div class="chart-side"><canvas id="weeklyPie"></canvas></div>
             </div>
         </div>
 
-    </div>
+    </main>
 
     <script>
-        // --- 1. CLOCK & DATE ---
-        function updateClock() {
+        // --- 1. CLOCK ---
+        function runClock() {
             const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('full-date').textContent = now.toLocaleDateString('en-GB', options);
-            document.getElementById('live-clock').textContent = now.toLocaleTimeString('en-GB');
+            document.getElementById('date-text').textContent = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('time-text').textContent = now.toLocaleTimeString('en-GB');
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(runClock, 1000);
+        runClock();
 
-        // --- 2. DATA ENGINE ---
-        async function fetchData() {
+        // --- 2. DATA LOAD ---
+        async function loadDashboard() {
             try {
-                const response = await fetch('data/dashboard.json');
-                const data = await response.json();
-                renderDashboard(data);
-            } catch (err) {
-                console.error("Critical: dashboard.json not found.", err);
-            }
+                const res = await fetch('data/dashboard.json');
+                const data = await res.json();
+                renderAll(data);
+            } catch (e) { console.error("Data missing."); }
         }
 
-        function renderDashboard(data) {
-            const dailyTasks = data.dailyTask || [];
-            const weeklyTasks = data.weeklyTask || [];
-            const weeklyPiData = data.weeklyPiData || [];
+        function renderAll(data) {
+            const pi = data.piData || [];
+            const wPi = data.weeklyPiData || [];
+            
+            // Stats logic
+            let tLoc = 0, tCnt = 0;
+            pi.forEach(x => { tLoc += x["Total locations"]; tCnt += x.Counted; });
+            const cyclePerc = ((tCnt/tLoc)*100).toFixed(1);
+            
+            document.getElementById('cyclePerc').innerText = cyclePerc + "%";
+            document.getElementById('totalLocs').innerText = tLoc.toLocaleString();
+            document.getElementById('totalCounted').innerText = tCnt.toLocaleString();
+            document.getElementById('totalRem').innerText = (tLoc - tCnt).toLocaleString();
 
-            // 3. TASK LISTS RENDERING
-            populateTaskList('daily-list-container', dailyTasks, 'd-task-count', 'd-task-pending');
-            populateTaskList('weekly-list-container', weeklyTasks, 'w-task-count', 'w-task-pending');
-
-            // 4. CHARTS RENDERING
-            renderDailyBar(weeklyPiData);
-            renderWeeklyLine(weeklyPiData);
-            renderTaskPie('chart-daily-tasks-pie', dailyTasks, '#10b981');
-            renderTaskPie('chart-weekly-tasks-pie', weeklyTasks, '#38bdf8');
+            // Render Charts
+            initDailyBar(wPi);
+            initWeeklyLine(wPi);
+            initCycleGauge(tCnt, tLoc - tCnt);
+            initTaskView('dailyList', 'dailyPie', data.dailyTask, '#0ea5e9');
+            initTaskView('weeklyList', 'weeklyPie', data.weeklyTask, '#10b981');
         }
 
-        // --- 5. CHART CONSTRUCTORS ---
+        // --- 3. CHARTS ENGINE ---
 
-        function renderDailyBar(data) {
-            new Chart(document.getElementById('chart-daily-bars'), {
+        function initDailyBar(data) {
+            new Chart(document.getElementById('dailyBarChart'), {
                 type: 'bar',
                 data: {
                     labels: data.map(x => x.Area),
-                    datasets: [{
-                        label: 'Locations',
-                        data: data.map(x => x["Daily Qty"]),
-                        backgroundColor: '#38bdf8',
-                        borderRadius: 4
-                    }]
+                    datasets: [{ data: data.map(x => x["Daily Qty"]), backgroundColor: '#0ea5e9', borderRadius: 4 }]
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b' } },
-                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b', font: {size: 9} } },
+                             x: { grid: { display: false }, ticks: { color: '#64748b', font: {size: 9} } } } }
             });
         }
 
-        function renderWeeklyLine(data) {
+        function initWeeklyLine(data) {
             const sorted = [...data].sort((a,b) => a["Week No"] - b["Week No"]);
-            new Chart(document.getElementById('chart-weekly-line'), {
+            new Chart(document.getElementById('weeklyLineChart'), {
                 type: 'line',
                 data: {
                     labels: sorted.map(x => "Wk " + x["Week No"]),
-                    datasets: [{
-                        data: sorted.map(x => x["Weekly Qty"]),
-                        borderColor: '#10b981',
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true,
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)'
-                    }]
+                    datasets: [{ data: sorted.map(x => x["Weekly Qty"]), borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.4 }]
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b' } },
-                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b', font: {size: 9} } },
+                             x: { grid: { display: false }, ticks: { color: '#64748b', font: {size: 9} } } } }
             });
         }
 
-        function renderTaskPie(canvasId, tasks, color) {
-            const done = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
-            const pending = tasks.length - done;
-            
-            new Chart(document.getElementById(canvasId), {
+        function initCycleGauge(done, rem) {
+            new Chart(document.getElementById('cycleGauge'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['Completed', 'Pending'],
-                    datasets: [{
-                        data: [done, pending],
-                        backgroundColor: [color, 'rgba(255,255,255,0.05)'],
-                        borderWidth: 0
-                    }]
+                    datasets: [{ data: [done, rem], backgroundColor: ['#0ea5e9', 'rgba(255,255,255,0.05)'], borderWidth: 0, cutout: '85%' }]
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: { 
-                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: 270 }
             });
         }
 
-        function populateTaskList(containerId, tasks, countId, pendingId) {
-            const container = document.getElementById(containerId);
+        function initTaskView(listId, pieId, tasks, color) {
+            const listEl = document.getElementById(listId);
             const done = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
-            
-            document.getElementById(countId).innerText = done;
-            document.getElementById(pendingId).innerText = tasks.length - done;
+            const pending = tasks.length - done;
 
-            container.innerHTML = tasks.map(t => {
+            listEl.innerHTML = tasks.map(t => {
                 const isDone = t.Status.toLowerCase().includes('complete');
-                return `
-                    <div class="task-item ${isDone ? 'done' : 'todo'}">
-                        <span>${t.Task || t.TASK}</span>
-                        <div class="status-dot" style="background: ${isDone ? 'var(--success)' : 'var(--danger)'}"></div>
-                    </div>
-                `;
+                return `<div class="task-row ${isDone ? 'done' : 'todo'}">
+                    <span>${t.Task || t.TASK}</span>
+                    <b style="font-size: 0.6rem;">${isDone ? 'OK' : '...'}</b>
+                </div>`;
             }).join('');
+
+            new Chart(document.getElementById(pieId), {
+                type: 'pie',
+                data: {
+                    labels: ['Done', 'Pending'],
+                    datasets: [{ data: [done, pending], backgroundColor: [color, 'rgba(255,255,255,0.05)'], borderWidth: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
         }
 
-        fetchData();
+        loadDashboard();
     </script>
 </body>
 </html>
