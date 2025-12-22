@@ -1,195 +1,198 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>PI Dashboard</title>
+  <meta charset="UTF-8" />
+  <title>PI Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Chart.js -->
 
-<style>
-body {
-  margin: 0;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  background: #0e1117;
-  color: #e6edf3;
-}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-header {
-  padding: 20px;
-  background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
-  text-align: center;
-  font-size: 22px;
-  font-weight: 600;
-}
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent1: #38bdf8;
+      --accent2: #22c55e;
+      --accent3: #f97316;
+    }
 
-.container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-  gap: 30px;
-  padding: 30px;
-}
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top, #1e293b, #020617);
+      color: var(--text);
+    }
 
-.card {
-  background: #161b22;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 15px 30px rgba(0,0,0,.6);
-}
+    header {
+      padding: 24px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
 
-.card h3 {
-  margin: 0 0 15px 0;
-  font-weight: 500;
-  text-align: center;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
 
-canvas {
-  max-height: 320px;
-}
-</style>
+    .card {
+      background: linear-gradient(145deg, #020617, #020617);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      transform: translateY(0);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
+    }
+
+    h3 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    canvas {
+      max-height: 260px;
+    }
+
+    .kpi {
+      font-size: 44px;
+      font-weight: 700;
+      color: var(--accent1);
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+
 </head>
-
 <body>
 
-<header>📊 PI DAILY & WEEKLY DASHBOARD</header>
+<header>PI Operational Dashboard</header>
 
-<div class="container">
+<div class="grid">
   <div class="card">
-    <h3>Daily PI – Total Qty (All Areas)</h3>
+    <h3>Daily PI — Counted vs Remaining</h3>
     <canvas id="dailyDonut"></canvas>
+    <div class="kpi" id="dailyTotal"></div>
+    <div class="sub">Target: 1,193 locations</div>
   </div>
 
   <div class="card">
-    <h3>Weekly PI – Total Qty</h3>
+    <h3>Weekly PI — Counted vs Remaining</h3>
     <canvas id="weeklyDonut"></canvas>
+    <div class="kpi" id="weeklyTotal"></div>
+    <div class="sub">Weekly progress</div>
   </div>
 
   <div class="card">
-    <h3>Weekly PI — Series (by Area)</h3>
-    <canvas id="weeklySeries"></canvas>
+    <h3>Weekly PI — Series by Area</h3>
+    <canvas id="weeklyBar"></canvas>
   </div>
 </div>
 
 <script>
-/* ===================== SAFE HELPERS ===================== */
-function num(v) {
-  var n = Number(v);
-  return isNaN(n) ? 0 : n;
+/* =========================
+   EMBEDDED DATA (NO FETCH)
+   ========================= */
+const DATA = " + JSON.stringify({"piData":[],"dailyTask":[],"weeklyTask":[],"weeklyPiData":[]}) + ";
+
+/* =========================
+   LOGIC
+   ========================= */
+var TARGET_DAILY = 1193;
+
+function sum(arr, key) {
+  var t = 0;
+  for (var i = 0; i < arr.length; i++) t += Number(arr[i][key] || 0);
+  return t;
 }
 
-function todayStr() {
-  var d = new Date();
-  var dd = String(d.getDate()).padStart(2,'0');
-  var mm = String(d.getMonth()+1).padStart(2,'0');
-  var yy = d.getFullYear();
-  return dd + "." + mm + "." + yy;
-}
+// DAILY TOTAL
+var dailyTotal = sum(DATA.weeklyPiData, 'Daily Qty');
+var dailyRemaining = Math.max(TARGET_DAILY - dailyTotal, 0);
 
-/* ===================== LOAD DATA ===================== */
-fetch("data.json")
-.then(function(r){ return r.json(); })
-.then(function(data){
+document.getElementById('dailyTotal').innerText = dailyTotal;
 
-  var TODAY = todayStr();
-
-  /* ===================== DAILY TOTAL ===================== */
-  var dailyTotal = 0;
-
-  if (data.weeklyPiData && data.weeklyPiData.length) {
-    for (var i=0;i<data.weeklyPiData.length;i++){
-      var r = data.weeklyPiData[i];
-      if (r.Date === TODAY || r.DATE === TODAY) {
-        dailyTotal += num(r["Daily Qty"]);
-      }
-    }
+new Chart(document.getElementById('dailyDonut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Counted', 'Remaining'],
+    datasets: [{
+      data: [dailyTotal, dailyRemaining],
+      backgroundColor: ['#38bdf8', '#1e293b'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    cutout: '70%',
+    plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af' } } }
   }
-
-  /* ===================== WEEKLY TOTAL ===================== */
-  var weeklyTotal = 0;
-  for (var j=0;j<data.weeklyPiData.length;j++){
-    weeklyTotal += num(data.weeklyPiData[j]["Weekly Qty"]);
-  }
-
-  /* ===================== WEEKLY SERIES ===================== */
-  var areas = [];
-  var weeklyValues = [];
-
-  for (var k=0;k<data.weeklyPiData.length;k++){
-    areas.push(data.weeklyPiData[k].Area);
-    weeklyValues.push(num(data.weeklyPiData[k]["Weekly Qty"]));
-  }
-
-  /* ===================== COLORS ===================== */
-  var colors = [
-    "#4cc9f0","#4895ef","#4361ee","#3f37c9",
-    "#560bad","#7209b7","#b5179e","#f72585"
-  ];
-
-  /* ===================== DONUT STYLE ===================== */
-  var donutOpts = {
-    responsive:true,
-    cutout:"65%",
-    plugins:{
-      legend:{ position:"bottom", labels:{ color:"#e6edf3"} },
-      tooltip:{ enabled:true }
-    }
-  };
-
-  /* ===================== DAILY DONUT ===================== */
-  new Chart(document.getElementById("dailyDonut"),{
-    type:"doughnut",
-    data:{
-      labels:["Counted Today"],
-      datasets:[{
-        data:[dailyTotal],
-        backgroundColor:["#4cc9f0"],
-        hoverOffset:20
-      }]
-    },
-    options:donutOpts
-  });
-
-  /* ===================== WEEKLY DONUT ===================== */
-  new Chart(document.getElementById("weeklyDonut"),{
-    type:"doughnut",
-    data:{
-      labels:["Weekly Total"],
-      datasets:[{
-        data:[weeklyTotal],
-        backgroundColor:["#f72585"],
-        hoverOffset:20
-      }]
-    },
-    options:donutOpts
-  });
-
-  /* ===================== WEEKLY SERIES ===================== */
-  new Chart(document.getElementById("weeklySeries"),{
-    type:"bar",
-    data:{
-      labels:areas,
-      datasets:[{
-        label:"Weekly Qty",
-        data:weeklyValues,
-        backgroundColor:colors
-      }]
-    },
-    options:{
-      responsive:true,
-      plugins:{
-        legend:{ labels:{ color:"#e6edf3"} }
-      },
-      scales:{
-        x:{ ticks:{ color:"#e6edf3"} },
-        y:{ ticks:{ color:"#e6edf3"} }
-      }
-    }
-  });
-
-})
-.catch(function(err){
-  console.error("DATA LOAD ERROR:",err);
 });
-</script>
 
-</body>
-</html>
+// WEEKLY TOTAL
+var weeklyTotal = sum(DATA.weeklyPiData, 'Weekly Qty');
+document.getElementById('weeklyTotal').innerText = weeklyTotal;
+
+new Chart(document.getElementById('weeklyDonut'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Weekly Counted'],
+    datasets: [{
+      data: [weeklyTotal],
+      backgroundColor: ['#22c55e'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    cutout: '70%',
+    plugins: { legend: { display: false } }
+  }
+});
+
+// WEEKLY SERIES BY AREA
+var areas = [];
+var weeklySeries = [];
+for (var i = 0; i < DATA.weeklyPiData.length; i++) {
+  areas.push(DATA.weeklyPiData[i].Area);
+  weeklySeries.push(DATA.weeklyPiData[i]['Weekly Qty']);
+}
+
+new Chart(document.getElementById('weeklyBar'), {
+  type: 'bar',
+  data: {
+    labels: areas,
+    datasets: [{
+      label: 'Weekly Qty',
+      data: weeklySeries,
+      backgroundColor: '#f97316'
+    }]
+  },
+  options: {
+    plugins: { legend: { labels: { color: '#9ca3af' } } },
+    scales: {
+      x: { ticks: { color: '#9ca3af' } },
+      y: { ticks: { color: '#9ca3af' } }
+    }
+  }
+}); " + JSON.stringify({
+
