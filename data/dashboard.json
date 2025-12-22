@@ -2,15 +2,6 @@
   "piData": [
     {
       "Date": "22.12.2025",
-      "Area": "Area",
-      "Total locations": "Total locations",
-      "Counted": "Counted",
-      "Behind targe": "Locations behind the target",
-      "Above target": "Locations above the target",
-      "Behind %": "Behind the target %"
-    },
-    {
-      "Date": "22.12.2025",
       "Area": "MPR",
       "Total locations": 14622,
       "Counted": 3936,
@@ -116,15 +107,6 @@
       "Behind targe": 0,
       "Above target": 12.5238095238095,
       "Behind %": 0
-    },
-    {
-      "Date": "22.12.2025",
-      "Area": "Total:",
-      "Total locations": 137369,
-      "Counted": 37994,
-      "Behind targe": 237.714285714286,
-      "Above target": 3245.80952380952,
-      "Behind %": 0.00173047984417362
     }
   ],
   "dailyTask": [
