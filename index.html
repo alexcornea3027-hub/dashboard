@@ -2,163 +2,90 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Next Level Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  body { font-family: Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
-  h1 { text-align: center; }
-  .toggle { text-align: center; margin-bottom: 20px; }
-  .charts { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 20px; }
-  .chart-card { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; }
-  .tasks { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
-  .task-card { padding: 10px; border-radius: 10px; width: 200px; color: #fff; font-weight: bold; }
-  .completed { background-color: #28a745; }
-  .not-started { background-color: #dc3545; }
-  canvas { margin: auto; display: block; }
+  /* Basic Reset */
+  * { box-sizing: border-box; margin:0; padding:0; font-family:'Poppins',sans-serif; }
+  body { background: #0b1120; color:#eaf6ff; overflow-x:hidden; }
+
+  .container { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; padding:20px; height:100vh; }
+  .panel { background:rgba(255,255,255,0.02); border-radius:12px; padding:16px; backdrop-filter:blur(4px); display:flex; flex-direction:column; }
+  .panel h2 { font-size:16px; margin-bottom:12px; }
+
+  .taskCard { display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-bottom:8px; }
+  .badge.done { background:linear-gradient(90deg,#16a34a,#064e3b); color:white; padding:4px 8px; border-radius:8px; font-size:12px; }
+  .badge.todo { background:linear-gradient(90deg,#7f1d1d,#ef4444); color:white; padding:4px 8px; border-radius:8px; font-size:12px; }
+
+  canvas { width:100% !important; height:250px !important; }
+
 </style>
 </head>
 <body>
-
-<h1>Next Level PI Dashboard</h1>
-<div class="toggle">
-  <label for="typeSelect">Select View: </label>
-  <select id="typeSelect">
-    <option value="daily">Daily</option>
-    <option value="weekly">Weekly</option>
-    <option value="total">Total Cycle</option>
-  </select>
-</div>
-
-<div class="charts">
-  <div class="chart-card">
-    <canvas id="countedChart"></canvas>
+<div class="container">
+  <!-- LEFT PANEL -->
+  <div class="panel">
+    <h2>Tasks - Daily & Weekly</h2>
+    <div id="dailyTasks"></div>
+    <div id="weeklyTasks" style="margin-top:12px;"></div>
   </div>
-  <div class="chart-card">
-    <canvas id="weeklyChart"></canvas>
+
+  <!-- MIDDLE PANEL -->
+  <div class="panel">
+    <h2>Charts - 3D Doughnuts</h2>
+    <canvas id="dailyDonut"></canvas>
+    <canvas id="weeklyDonut" style="margin-top:16px;"></canvas>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel">
+    <h2>Weekly Gauge</h2>
+    <canvas id="weeklyGauge"></canvas>
+    <h2 style="margin-top:20px;">PI Area Chart</h2>
+    <canvas id="piAreaChart"></canvas>
   </div>
 </div>
-
-<h2>Tasks</h2>
-<div class="tasks" id="tasksContainer"></div>
 
 <script>
-const data = {
-  piData: [
-    { Date: '22.12.2025', Area: 'MPR', Total_locations: 14622, Counted: 3936 },
-    { Date: '22.12.2025', Area: 'PB1', Total_locations: 4329, Counted: 1189 },
-    { Date: '22.12.2025', Area: 'PB2', Total_locations: 795, Counted: 484 },
-    { Date: '22.12.2025', Area: 'PB3', Total_locations: 772, Counted: 0 },
-    { Date: '22.12.2025', Area: 'PB4', Total_locations: 164, Counted: 0 },
-    { Date: '22.12.2025', Area: 'PBSRES', Total_locations: 5197, Counted: 1374 },
-    { Date: '22.12.2025', Area: 'MP', Total_locations: 25612, Counted: 7409 },
-    { Date: '22.12.2025', Area: 'MIX', Total_locations: 33087, Counted: 8941 },
-    { Date: '22.12.2025', Area: 'MS', Total_locations: 21512, Counted: 5902 },
-    { Date: '22.12.2025', Area: 'MSX', Total_locations: 28798, Counted: 7984 },
-    { Date: '22.12.2025', Area: 'FM', Total_locations: 2308, Counted: 620 },
-    { Date: '22.12.2025', Area: 'HP', Total_locations: 561, Counted: 155 }
-  ],
-  weeklyPiData: [
-    { Date: '22.12.2025', Area: 'MPR', Daily_Qty: 127 },
-    { Date: '22.12.2025', Area: 'PB1', Daily_Qty: 38 },
-    { Date: '22.12.2025', Area: 'PB2', Daily_Qty: 15 },
-    { Date: '22.12.2025', Area: 'PB3', Daily_Qty: 0 },
-    { Date: '22.12.2025', Area: 'PB4', Daily_Qty: 0 },
-    { Date: '22.12.2025', Area: 'PBSRES', Daily_Qty: 45 },
-    { Date: '22.12.2025', Area: 'MP', Daily_Qty: 221 },
-    { Date: '22.12.2025', Area: 'MIX', Daily_Qty: 136 },
-    { Date: '22.12.2025', Area: 'MS', Daily_Qty: 61 },
-    { Date: '22.12.2025', Area: 'MSX', Daily_Qty: 249 },
-    { Date: '22.12.2025', Area: 'FM', Daily_Qty: 20 },
-    { Date: '22.12.2025', Area: 'HP', Daily_Qty: 5 }
-  ],
-  dailyTask: [
-    { Task: 'ADJUSTMENTS (Returns)', Status: 'Not started' },
-    { Task: 'Aged stock report 7AM', Status: 'Completed' },
-    { Task: 'PI 1st count', Status: 'Not started' }
-  ],
-  weeklyTask: [
-    { Task: '(Weekly) SLA', Status: 'Not started' },
-    { Task: '(once a month) Shrinkage for Period', Status: 'Completed' }
-  ]
-};
+  // Sample Data
+  const tasksDaily = [ {task:'Task A', done:true}, {task:'Task B', done:false} ];
+  const tasksWeekly = [ {task:'Task W1', done:true}, {task:'Task W2', done:false} ];
 
-const tasksContainer = document.getElementById('tasksContainer');
-const typeSelect = document.getElementById('typeSelect');
+  const dailyEl = document.getElementById('dailyTasks');
+  tasksDaily.forEach(t=>{ dailyEl.innerHTML += `<div class='taskCard'><span>${t.task}</span><span class='badge ${t.done?'done':'todo'}'>${t.done?'Done':'To do'}</span></div>`; });
 
-function renderTasks(type) {
-  tasksContainer.innerHTML = '';
-  const tasks = type === 'daily' ? data.dailyTask : data.weeklyTask;
-  tasks.forEach(t => {
-    const div = document.createElement('div');
-    div.className = `task-card ${t.Status === 'Completed' ? 'completed' : 'not-started'}`;
-    div.innerText = t.Task;
-    tasksContainer.appendChild(div);
-  });
-}
+  const weeklyEl = document.getElementById('weeklyTasks');
+  tasksWeekly.forEach(t=>{ weeklyEl.innerHTML += `<div class='taskCard'><span>${t.task}</span><span class='badge ${t.done?'done':'todo'}'>${t.done?'Done':'To do'}</span></div>`; });
 
-let countedChart, weeklyChart;
-
-function renderCharts(type) {
-  const ctx1 = document.getElementById('countedChart').getContext('2d');
-  const ctx2 = document.getElementById('weeklyChart').getContext('2d');
-  
-  const pi = data.piData;
-  const weekly = data.weeklyPiData;
-
-  const labels = pi.map(d => d.Area);
-  const counted = pi.map(d => d.Counted);
-  const remaining = pi.map(d => d.Total_locations - d.Counted);
-
-  if(countedChart) countedChart.destroy();
-  countedChart = new Chart(ctx1, {
-    type: 'doughnut',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Counted vs Remaining',
-        data: counted.map((c, i) => [c, remaining[i]]).flat(),
-        backgroundColor: ['#007bff','#ff7f0e'].flatMap(c => Array(labels.length).fill(c)),
-        borderWidth: 1
-      }]
-    },
-    options: {
-      plugins: { datalabels: { display: true, color: '#fff' } },
-      responsive: true
-    }
+  // Daily Donut
+  new Chart(document.getElementById('dailyDonut').getContext('2d'), {
+    type:'doughnut',
+    data:{ labels:['Done','Remaining'], datasets:[{ data:[5,3], backgroundColor:['#7dd3fc','#8b5cf6'] }]},
+    options:{ cutout:'60%', plugins:{ legend:{display:false} } }
   });
 
-  if(weeklyChart) weeklyChart.destroy();
-  weeklyChart = new Chart(ctx2, {
-    type: 'bar',
-    data: {
-      labels: weekly.map(d => d.Area),
-      datasets: [{
-        label: 'Daily Qty',
-        data: weekly.map(d => d.Daily_Qty),
-        backgroundColor: '#28a745'
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { datalabels: { anchor: 'end', align: 'top', color: '#000' } }
-    }
+  // Weekly Donut
+  new Chart(document.getElementById('weeklyDonut').getContext('2d'), {
+    type:'doughnut',
+    data:{ labels:['Done','Remaining'], datasets:[{ data:[8,2], backgroundColor:['#7dd3fc','#8b5cf6'] }]},
+    options:{ cutout:'60%', plugins:{ legend:{display:false} } }
   });
-}
 
-// Initial render
-renderTasks('daily');
-renderCharts('daily');
+  // Weekly Gauge
+  new Chart(document.getElementById('weeklyGauge').getContext('2d'), {
+    type:'doughnut',
+    data:{ labels:['Progress','Rest'], datasets:[{ data:[0.7,0.3], backgroundColor:['#7dd3fc','#ffffff33'] }]},
+    options:{ cutout:'80%', rotation:-90*Math.PI/180, circumference:180*Math.PI/180, plugins:{ legend:{display:false} } }
+  });
 
-// Toggle listener
-typeSelect.addEventListener('change', (e) => {
-  const type = e.target.value;
-  renderTasks(type);
-  renderCharts(type);
-});
-
+  // PI Area Chart
+  new Chart(document.getElementById('piAreaChart').getContext('2d'), {
+    type:'line',
+    data:{ labels:['W27','W28','W29','W30'], datasets:[{ data:[5103,6457,7494,6901], borderColor:'#7dd3fc', backgroundColor:'#7dd3fc22', fill:true, tension:0.3 }]},
+    options:{ responsive:true, plugins:{ legend:{display:false} }, scales:{ x:{ ticks:{color:'#cfeeff'} }, y:{ ticks:{color:'#cfeeff'}, beginAtZero:true } } }
+  });
 </script>
-
 </body>
 </html>
