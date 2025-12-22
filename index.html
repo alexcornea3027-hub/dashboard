@@ -3,280 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VCB Executive | Final Elite</title>
+    <title>VCB Stock Dashboard | Pro Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
 
         :root {
-            --bg: #020617;
-            --card: rgba(15, 23, 42, 0.8);
-            --cyan: #22d3ee;
+            --bg: #030712;
+            --card: rgba(17, 24, 39, 0.75);
+            --cyan: #06b6d4;
             --emerald: #10b981;
             --rose: #f43f5e;
-            --white: #ffffff;
+            --text-p: #f8fafc;
             --text-s: #94a3b8;
-            --shadow-3d: 0 20px 50px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #020617 100%);
-            color: var(--white);
+            background: radial-gradient(circle at top right, #111827, #020617);
+            color: var(--text-p);
             height: 100vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 12px;
+            padding: 10px;
         }
 
-        /* --- HEADER --- */
+        /* UI ELEMENTS */
+        #fs-btn {
+            position: fixed; bottom: 15px; right: 15px; z-index: 100;
+            background: var(--card); border: 1px solid var(--cyan);
+            color: var(--cyan); width: 35px; height: 35px; border-radius: 50%;
+            cursor: pointer; font-weight: 800; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #fs-btn:hover { background: var(--cyan); color: white; scale: 1.1; }
+
         header {
-            height: 12vh;
-            display: grid; grid-template-columns: 1fr 2.5fr 1fr;
-            gap: 15px; margin-bottom: 15px;
+            height: 10vh; display: grid; grid-template-columns: 1fr 2fr 1fr;
+            gap: 10px; margin-bottom: 10px;
         }
 
         .panel {
-            background: var(--card); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px; padding: 10px 25px;
-            box-shadow: var(--shadow-3d);
+            background: var(--card); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 15px; padding: 5px 15px;
             display: flex; flex-direction: column; justify-content: center;
         }
 
-        .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
-        .kpi-box h2 { font-size: 1.8rem; font-weight: 800; color: var(--cyan); line-height: 1; }
-        .kpi-box span { font-size: 0.65rem; text-transform: uppercase; color: var(--text-s); letter-spacing: 1.5px; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
+        .kpi-box h2 { font-size: 1.4rem; font-weight: 800; color: var(--cyan); }
+        .kpi-box span { font-size: 0.55rem; text-transform: uppercase; color: var(--text-s); }
 
-        /* --- MAIN GRID --- */
+        /* GRID SYSTEM */
         main {
             flex: 1;
             display: grid;
             grid-template-columns: 1.2fr 1fr 1fr;
-            grid-template-rows: repeat(2, 1fr);
-            gap: 15px;
+            grid-template-rows: 47% 47%; /* Prevents cutting off the bottom */
+            gap: 10px;
             min-height: 0;
         }
 
         .card {
-            background: var(--card); border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: var(--shadow-3d);
-            padding: 15px; display: flex; flex-direction: column;
-            position: relative;
+            background: var(--card); border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 10px; display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.5);
         }
 
         .card-title {
-            font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
-            color: var(--cyan); margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.6rem; font-weight: 800; text-transform: uppercase;
+            color: var(--cyan); margin-bottom: 5px;
+            display: flex; justify-content: space-between;
         }
 
         .chart-box { flex: 1; position: relative; min-height: 0; width: 100%; }
 
-        /* --- GOGOASE 3D (Doughnuts) --- */
-        .donut-inner {
+        .donut-val {
             position: absolute; top: 55%; left: 50%;
             transform: translate(-50%, -50%); text-align: center;
         }
-        .donut-inner h3 { font-size: 1.5rem; font-weight: 800; line-height: 1; }
-        .donut-inner p { font-size: 0.55rem; color: var(--text-s); }
+        .donut-val h3 { font-size: 1.1rem; font-weight: 800; }
+        .donut-val p { font-size: 0.5rem; color: var(--text-s); }
 
-        /* --- FS BUTTON --- */
-        #fs-toggle {
-            position: fixed; bottom: 20px; right: 20px; z-index: 999;
-            background: var(--cyan); border: none; width: 40px; height: 40px;
-            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 15px var(--cyan); opacity: 0.6; transition: 0.3s;
+        /* SCROLLER */
+        .scroller { overflow-y: auto; }
+        .scroller::-webkit-scrollbar { width: 3px; }
+        .scroller::-webkit-scrollbar-thumb { background: var(--cyan); }
+        .task {
+            background: rgba(255,255,255,0.02); padding: 5px 8px;
+            border-radius: 6px; margin-bottom: 3px; font-size: 0.65rem;
+            display: flex; justify-content: space-between;
         }
-        #fs-toggle:hover { opacity: 1; transform: scale(1.1); }
-
-        .list-wrap { overflow-y: auto; padding-right: 5px; }
-        .list-wrap::-webkit-scrollbar { width: 4px; }
-        .list-wrap::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 10px; }
-        .task-item {
-            background: rgba(255,255,255,0.03); margin-bottom: 5px;
-            padding: 8px 12px; border-radius: 12px; font-size: 0.75rem;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .status-pill { padding: 2px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 800; }
+        .tag-done { color: var(--emerald); font-weight: 800; }
     </style>
 </head>
 <body>
 
-    <button id="fs-toggle" onclick="toggleFull()">⛶</button>
+    <button id="fs-btn" onclick="toggleFS()">⛶</button>
 
     <header>
         <div class="panel">
-            <h2 id="clock" style="font-size: 1.5rem;">00:00:00</h2>
-            <p id="date" style="color: var(--cyan); font-weight: 600; font-size: 0.8rem;"></p>
+            <h2 id="clock" style="font-size: 1.2rem;">00:00:00</h2>
+            <p id="date" style="font-size: 0.65rem; color: var(--text-s);"></p>
         </div>
         <div class="panel">
-            <div class="kpi-row">
-                <div class="kpi-box"><span>Live Realized</span><h2 id="k-total">0</h2></div>
+            <div class="kpi-grid">
+                <div class="kpi-box"><span>Day Counts</span><h2 id="k-day">0</h2></div>
                 <div class="kpi-box"><span>Weekly Avg</span><h2 id="k-avg">0</h2></div>
-                <div class="kpi-box"><span>Target 1193</span><h2 id="k-delta">0</h2></div>
+                <div class="kpi-box"><span>vs Target</span><h2 id="k-delta">0</h2></div>
             </div>
         </div>
-        <div class="panel" style="align-items: flex-end; border-right: 4px solid var(--emerald);">
-            <span style="font-size: 0.6rem;">OPERATIONAL SCORE</span>
-            <h2 id="score" style="color: var(--emerald); font-size: 1.5rem;">0%</h2>
+        <div class="panel" style="align-items: flex-end;">
+            <span style="font-size: 0.55rem; color: var(--text-s);">OVERALL COMPLIANCE</span>
+            <h2 id="perf" style="color: var(--emerald); font-size: 1.2rem;">0%</h2>
         </div>
     </header>
 
     <main>
         <div class="card">
-            <div class="card-title">Today's Area Breakdown <span>Active</span></div>
+            <div class="card-title">Daily Area Output <span>Live</span></div>
             <div class="chart-box"><canvas id="dailyBar"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">Daily Compliance <span>Tasks</span></div>
+            <div class="card-title">Daily Tasks <span>Compliance</span></div>
             <div class="chart-box">
                 <canvas id="dailyDonut"></canvas>
-                <div class="donut-inner"><h3 id="d-perc">0%</h3><p>DONE</p></div>
+                <div class="donut-val"><h3 id="d-perc">0%</h3><p>DONE</p></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title">Weekly Compliance <span>Tasks</span></div>
+            <div class="card-title">Weekly Tasks <span>Compliance</span></div>
             <div class="chart-box">
                 <canvas id="weeklyDonut"></canvas>
-                <div class="donut-inner"><h3 id="w-perc">0%</h3><p>DONE</p></div>
+                <div class="donut-val"><h3 id="w-perc">0%</h3><p>DONE</p></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title" id="cur-week-title">Current Week Distribution <span>Area</span></div>
-            <div class="chart-box"><canvas id="currentWeekBar"></canvas></div>
+            <div class="card-title" id="current-week-lbl">Current Week Distribution <span>Area</span></div>
+            <div class="chart-box"><canvas id="weekDistBar"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">Weekly Count Progress <span>By Week No.</span></div>
-            <div class="chart-box"><canvas id="weeklyProgBar"></canvas></div>
+            <div class="card-title">Weekly Progression <span>Counts per Week</span></div>
+            <div class="chart-box"><canvas id="progBar"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">System Task Feed <span>Live</span></div>
-            <div class="list-wrap" id="taskFeed"></div>
+            <div class="card-title">Task Monitor <span>Recent</span></div>
+            <div class="scroller" id="taskFeed"></div>
         </div>
     </main>
 
     <script>
-        // Injecting the data from your request
-        const raw = {
-            "piData": [
-                { "Area": "MPR", "Counted": 3936 }, { "Area": "PB1", "Counted": 1189 }, { "Area": "PB2", "Counted": 484 },
-                { "Area": "PBSRES", "Counted": 1374 }, { "Area": "MP", "Counted": 7409 }, { "Area": "MIX", "Counted": 8941 },
-                { "Area": "MS", "Counted": 5902 }, { "Area": "MSX", "Counted": 7984 }, { "Area": "FM", "Counted": 620 }, { "Area": "HP", "Counted": 155 }
+        const rawData = {
+            "tasks": [
+                {"T": "Aged stock 7AM", "S": "Completed", "type": "D"},
+                {"T": "ADJUSTMENTS (Returns)", "S": "Not started", "type": "D"},
+                {"T": "LOCATIONS IN ERROR", "S": "Not started", "type": "D"},
+                {"T": "SLA update", "S": "Not started", "type": "D"},
+                {"T": "Shrinkage Period", "S": "Completed", "type": "W"},
+                {"T": "(Weekly) SLA", "S": "Not started", "type": "W"},
+                {"T": "(Weekly) SIS report", "S": "Not started", "type": "W"}
             ],
-            "dailyTask": [
-                {"Task": "Aged stock report 7AM", "Status": "Completed"},
-                {"Task": "ADJUSTMENTS (Returns)", "Status": "Not started"},
-                {"Task": "ADJUSTMENTS (Standard)", "Status": "Not started"},
-                {"Task": "Blackwells", "Status": "Not started"},
-                {"Task": "Internet returns", "Status": "Not started"},
-                {"Task": "PI 1st count", "Status": "Not started"},
-                {"Task": "SLA update", "Status": "Not started"}
-            ],
-            "weeklyTask": [
-                {"Task": "Shrinkage Period", "Status": "Completed"},
-                {"Task": "(Weekly) SLA", "Status": "Not started"},
-                {"Task": "(Weekly) SIS report", "Status": "Not started"},
-                {"Task": "RP split pack", "Status": "Not started"}
-            ],
-            "weeklyPiData": [
-                {"Area": "MPR", "Daily Qty": 127, "Week No": 27, "Weekly Qty": 5103},
-                {"Area": "PB1", "Daily Qty": 38, "Week No": 28, "Weekly Qty": 6457},
-                {"Area": "PB2", "Daily Qty": 15, "Week No": 29, "Weekly Qty": 7494},
-                {"Area": "PB3", "Daily Qty": 0, "Week No": 30, "Weekly Qty": 6901},
-                {"Area": "PB4", "Daily Qty": 0, "Week No": 31, "Weekly Qty": 5447},
-                {"Area": "PBSRES", "Daily Qty": 45, "Week No": 32, "Weekly Qty": 4524},
-                {"Area": "MP", "Daily Qty": 221, "Week No": 33, "Weekly Qty": 2068},
-                {"Area": "MIX", "Daily Qty": 136, "Week No": 34, "Weekly Qty": 0}
+            "stats": [
+                {"A": "MPR", "D": 127, "W": 34, "Qty": 5103},
+                {"A": "PB1", "D": 38, "W": 34, "Qty": 6457},
+                {"A": "PB2", "D": 15, "W": 34, "Qty": 7494},
+                {"A": "MP", "D": 221, "W": 33, "Qty": 4068},
+                {"A": "MIX", "D": 136, "W": 32, "Qty": 3900}
             ]
         };
 
-        const TARGET = 1193;
-
-        function toggleFull() {
+        function toggleFS() {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen();
             else document.exitFullscreen();
         }
 
         function updateTime() {
-            const n = new Date();
-            document.getElementById('clock').innerText = n.toLocaleTimeString('en-GB');
-            document.getElementById('date').innerText = n.toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'short'});
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB');
+            document.getElementById('date').innerText = now.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'});
         }
         setInterval(updateTime, 1000); updateTime();
 
         function render() {
-            const wData = raw.weeklyPiData;
+            // Filter only latest week for "Current Week Distribution"
+            const maxW = Math.max(...rawData.stats.map(x => x.W));
+            const currentWeekData = rawData.stats.filter(x => x.W === maxW);
+            document.getElementById('current-week-lbl').innerHTML = `Distribution <span>Week ${maxW}</span>`;
+
+            // Charts
+            new Chart(document.getElementById('dailyBar'), cfg('bar', rawData.stats.map(x=>x.A), rawData.stats.map(x=>x.D), '#06b6d4'));
+            new Chart(document.getElementById('weekDistBar'), cfg('bar', currentWeekData.map(x=>x.A), currentWeekData.map(x=>x.Qty), '#10b981'));
             
-            // Stats Header
-            const dailyTotal = wData.reduce((s, x) => s + x["Daily Qty"], 0);
-            const delta = dailyTotal - TARGET;
-            document.getElementById('k-total').innerText = dailyTotal;
-            document.getElementById('k-delta').innerText = (delta >= 0 ? "+" : "") + delta;
-            document.getElementById('k-delta').style.color = delta >= 0 ? 'var(--emerald)' : 'var(--rose)';
-            document.getElementById('k-avg').innerText = (wData.reduce((s,x)=> s + x["Weekly Qty"], 0) / wData.length).toFixed(0);
+            // Weekly Progression (W32, W33, W34)
+            const prog = {};
+            rawData.stats.forEach(s => { prog[s.W] = (prog[s.W] || 0) + s.Qty; });
+            new Chart(document.getElementById('progBar'), cfg('line', Object.keys(prog).map(k=>"W"+k), Object.values(prog), '#06b6d4', true));
 
-            // 1. Daily Bar
-            new Chart(document.getElementById('dailyBar'), getBarCfg(wData.map(x=>x.Area), wData.map(x=>x["Daily Qty"]), '#22d3ee'));
+            // Donut Compliance
+            const dP = setDonut('dailyDonut', 'd-perc', rawData.tasks.filter(t=>t.type==='D'), '#06b6d4');
+            const wP = setDonut('weeklyDonut', 'w-perc', rawData.tasks.filter(t=>t.type==='W'), '#10b981');
+            document.getElementById('perf').innerText = ((dP + wP) / 2).toFixed(1) + "%";
 
-            // 2. Current Week Distro (Filtering only the latest Week No)
-            const maxWeek = Math.max(...wData.map(x => x["Week No"]));
-            const latestWeekData = wData.filter(x => x["Week No"] === maxWeek);
-            document.getElementById('cur-week-title').innerHTML = `Current Week Distribution <span>Week ${maxWeek}</span>`;
-            new Chart(document.getElementById('currentWeekBar'), getBarCfg(latestWeekData.map(x=>x.Area), latestWeekData.map(x=>x["Weekly Qty"]), '#10b981'));
+            // KPI calculation
+            const dayTotal = rawData.stats.reduce((s,x)=>s+x.D, 0);
+            document.getElementById('k-day').innerText = dayTotal;
+            document.getElementById('k-delta').innerText = dayTotal - 1193;
+            document.getElementById('k-avg').innerText = (rawData.stats.reduce((s,x)=>s+x.Qty, 0) / 4).toFixed(0);
 
-            // 3. Weekly Progress (By Week Number)
-            new Chart(document.getElementById('weeklyProgBar'), {
-                type: 'line',
-                data: {
-                    labels: wData.map(x => "W" + x["Week No"]),
-                    datasets: [{
-                        data: wData.map(x => x["Weekly Qty"]),
-                        borderColor: '#22d3ee', tension: 0.4, fill: true,
-                        backgroundColor: 'rgba(34, 211, 238, 0.1)', borderWeight: 4, pointRadius: 4
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { ticks: { color: '#94a3b8' } } } }
-            });
-
-            // 4 & 5. Tasks Doughnuts
-            const dP = setDonut('dailyDonut', 'd-perc', raw.dailyTask, '#22d3ee');
-            const wP = setDonut('weeklyDonut', 'w-perc', raw.weeklyTask, '#10b981');
-            document.getElementById('score').innerText = ((dP + wP) / 2).toFixed(1) + "%";
-
-            // 6. Task List
-            const feed = document.getElementById('taskFeed');
-            feed.innerHTML = [...raw.dailyTask, ...raw.weeklyTask].map(t => `
-                <div class="task-item">
-                    <span>${t.Task}</span>
-                    <span class="status-pill" style="background:${t.Status==='Completed'?'var(--emerald)':'rgba(255,255,255,0.05)'}">${t.Status.toUpperCase()}</span>
-                </div>
+            // Task List
+            document.getElementById('taskFeed').innerHTML = rawData.tasks.map(t => `
+                <div class="task"><span>${t.T}</span><span class="${t.S==='Completed'?'tag-done':''}" style="font-size:0.5rem">${t.S.toUpperCase()}</span></div>
             `).join('');
         }
 
-        function getBarCfg(labels, data, color) {
+        function cfg(type, labels, data, color, fill=false) {
             return {
-                type: 'bar',
-                data: { labels: labels, datasets: [{ data: data, backgroundColor: color, borderRadius: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { display: false } } } }
+                type: type,
+                data: { labels, datasets: [{ data, backgroundColor: color, borderColor: color, fill: fill, tension: 0.4, borderRadius: 4 }] },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { display: false }, 
+                        x: { ticks: { font: { size: 7 }, color: '#64748b' }, grid: { display: false } } 
+                    } 
+                }
             };
         }
 
         function setDonut(id, txtId, tasks, color) {
-            const ok = tasks.filter(t => t.Status === 'Completed').length;
-            const p = ((ok / tasks.length) * 100).toFixed(0);
+            const done = tasks.filter(t => t.S === 'Completed').length;
+            const p = ((done / tasks.length) * 100).toFixed(0);
             document.getElementById(txtId).innerText = p + "%";
             new Chart(document.getElementById(id), {
                 type: 'doughnut',
-                data: { datasets: [{ data: [ok, tasks.length - ok], backgroundColor: [color, 'rgba(255,255,255,0.02)'], borderWidth: 0, cutout: '82%' }] },
+                data: { datasets: [{ data: [done, tasks.length - done], backgroundColor: [color, 'rgba(255,255,255,0.02)'], borderWidth: 0, cutout: '80%' }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false } } }
             });
             return parseFloat(p);
