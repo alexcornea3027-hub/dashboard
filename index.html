@@ -1,467 +1,195 @@
-<!doctype html>
-<html lang="ro">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>VCB Dashboard — Daily / Donuts 3D</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<meta charset="UTF-8">
+<title>PI Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
 <style>
-  :root{
-    --bg:#041226; --panel:#071227; --muted:#98a8bd;
-    --accentA:#7dd3fc; --accentB:#8b5cf6; --accentC:#60a5fa;
-    --good:#16a34a; --warn:#f97316;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial;background:linear-gradient(180deg,#021026,#05122a);color:#eaf6ff}
-  header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px}
-  h1{margin:0;font-size:20px}
-  .actions{display:flex;gap:8px;align-items:center}
-  button, select{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--accentA);cursor:pointer}
-  .layout{display:grid;grid-template-columns:320px 1fr 420px;gap:12px;height:calc(100vh - 72px);padding:12px}
-  .panel{background:var(--panel);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 18px 40px rgba(2,6,23,0.45);display:flex;flex-direction:column;min-height:0;overflow:hidden}
-  .taskList{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:6px}
-  .taskCard{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.04));border:1px solid rgba(255,255,255,0.02)}
-  .small{font-size:12px;color:var(--muted)}
-  .canvasWrap{height:320px}
-  canvas{width:100% !important;height:100% !important;display:block}
-  .donutRow{display:flex;gap:12px;align-items:flex-end;justify-content:center;margin-bottom:12px}
-  .donutCard{width:120px;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
-  table{width:100%;border-collapse:collapse;color:#eaf6ff;font-size:13px}
-  thead th{background:rgba(10,14,24,0.35);padding:8px;color:var(--muted);text-align:left}
-  td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}
-  #debug{margin-top:8px;background:#071427;color:#fff;padding:8px;border-radius:8px;font-size:13px;max-height:160px;overflow:auto}
-  @media(max-width:1100px){ .layout{grid-template-columns:1fr;grid-auto-rows:auto;height:calc(100vh - 72px)} body,html{overflow:auto} }
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background: #0e1117;
+  color: #e6edf3;
+}
+
+header {
+  padding: 20px;
+  background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 30px;
+  padding: 30px;
+}
+
+.card {
+  background: #161b22;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 15px 30px rgba(0,0,0,.6);
+}
+
+.card h3 {
+  margin: 0 0 15px 0;
+  font-weight: 500;
+  text-align: center;
+}
+
+canvas {
+  max-height: 320px;
+}
 </style>
 </head>
+
 <body>
-<header>
-  <div>
-    <h1>VCB Dashboard</h1>
-    <div class="small">Live • <span id="liveDate">—</span></div>
-  </div>
-  <div class="actions">
-    <select id="scaleMode" title="Scale mode">
-      <option value="auto">Auto</option>
-      <option value="raw">Raw</option>
-      <option value="log">Log</option>
-    </select>
-    <button id="refreshBtn">Refresh</button>
-    <button id="uploadBtn">Upload JSON</button>
-    <button id="pasteBtn">Paste JSON</button>
-  </div>
-</header>
 
-<div class="layout">
-  <!-- LEFT -->
-  <div class="panel">
-    <h3 style="margin:0 0 8px 0">Daily tasks</h3>
-    <div id="dailyList" class="taskList"></div>
-    <div style="height:10px"></div>
-    <h3 style="margin:8px 0 8px 0">Weekly tasks</h3>
-    <div id="weeklyList" class="taskList"></div>
+<header>📊 PI DAILY & WEEKLY DASHBOARD</header>
+
+<div class="container">
+  <div class="card">
+    <h3>Daily PI – Total Qty (All Areas)</h3>
+    <canvas id="dailyDonut"></canvas>
   </div>
 
-  <!-- CENTER: main charts -->
-  <div class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <h3 style="margin:0">Counted vs Remaining (by date)</h3>
-      <div class="small" id="countHint">—</div>
-    </div>
-
-    <div class="canvasWrap"><canvas id="piBar"></canvas></div>
-
-    <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center">
-      <h3 style="margin:0">Daily donuts (last 3 days)</h3>
-      <div class="small" id="donutHint">—</div>
-    </div>
-    <div class="donutRow" id="donutRow"></div>
-
-    <h3 style="margin-top:12px">Weekly PI — Series</h3>
-    <div class="canvasWrap" style="height:200px"><canvas id="weeklyLine"></canvas></div>
-
-    <div id="debug"></div>
+  <div class="card">
+    <h3>Weekly PI – Total Qty</h3>
+    <canvas id="weeklyDonut"></canvas>
   </div>
 
-  <!-- RIGHT: table + gauge -->
-  <div class="panel">
-    <h3 style="margin:0 0 8px 0">Daily totals (table)</h3>
-    <div style="flex:1;overflow:auto">
-      <table id="dailyTable"><thead><tr><th>Date</th><th style="text-align:right">Counted</th><th style="text-align:right">Remaining</th></tr></thead><tbody></tbody></table>
-    </div>
-
-    <div style="height:12px"></div>
-    <h3 style="margin:0 0 8px 0">Gauge (last day)</h3>
-    <div style="width:100%;height:160px"><canvas id="gaugeMini"></canvas></div>
+  <div class="card">
+    <h3>Weekly PI — Series (by Area)</h3>
+    <canvas id="weeklySeries"></canvas>
   </div>
 </div>
 
 <script>
-/* ---------- CONFIG ---------- */
-const DAILY_TARGET = 1193;
-const JSON_PATHS = ['data/dashboard.json','./data/dashboard.json','/data/dashboard.json'];
-const MAX_DONUTS = 3;
+/* ===================== SAFE HELPERS ===================== */
+function num(v) {
+  var n = Number(v);
+  return isNaN(n) ? 0 : n;
+}
 
-/* ---------- HELPERS ---------- */
-function dbg(msg){
-  const el = document.getElementById('debug');
-  const d = document.createElement('div');
-  d.textContent = (new Date()).toLocaleTimeString() + ' — ' + msg;
-  el.appendChild(d);
-  el.scrollTop = el.scrollHeight;
-  console.log(msg);
+function todayStr() {
+  var d = new Date();
+  var dd = String(d.getDate()).padStart(2,'0');
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  var yy = d.getFullYear();
+  return dd + "." + mm + "." + yy;
 }
-function safeNum(v){ if (v==null) return 0; if (typeof v === 'number') return isFinite(v) ? v : 0; const s = String(v).replace(/,/g,'').trim(); const n = Number(s); return isFinite(n) ? n : 0; }
-function findKey(obj, candidates){ if(!obj) return undefined; if(!Array.isArray(candidates)) candidates=[candidates]; const ks = Object.keys(obj||{}); for(const c of candidates){ for(const k of ks) if(k.trim().toLowerCase()===c.trim().toLowerCase()) return k; } for(const c of candidates){ for(const k of ks) if(k.trim().toLowerCase().indexOf(c.trim().toLowerCase())!==-1) return k; } return undefined; }
-function parseDateFlexible(s){
-  if(!s) return null;
-  const str = String(s).trim();
-  const m = str.match(/^(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{2,4})$/);
-  if(m){ const d=Number(m[1]), mo=Number(m[2]), y=Number(m[3]); return new Date(y,mo-1,d); }
-  const iso = new Date(str);
-  return isNaN(iso.getTime()) ? null : iso;
-}
-function formatDateShort(d){
-  if(!d) return '';
-  return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
-}
-function formatNumber(n){ n=Number(n)||0; if(Math.abs(n)>=1e6) return (n/1e6).toFixed(1)+'M'; if(Math.abs(n)>=1e3) return (n/1e3).toFixed(1)+'K'; return n.toLocaleString(); }
 
-/* ---------- Chart plugins (donut 3D + center text) ---------- */
-const donut3D = {
-  id: 'donut3D',
-  beforeDraw(chart, args, opts){
-    if(!opts || !opts.depth) return;
-    const ctx = chart.ctx;
-    const meta = chart.getDatasetMeta(0);
-    if(!meta) return;
-    const first = meta.data[0];
-    if(!first) return;
-    const cx = (chart.chartArea.left + chart.chartArea.right)/2;
-    const cy = (chart.chartArea.top + chart.chartArea.bottom)/2;
-    const outerR = first.outerRadius || Math.min(chart.width, chart.height)/2*0.9;
-    const innerR = first.innerRadius || outerR*0.6;
-    const depth = opts.depth;
-    const slices = chart.data.datasets[0].data;
-    const colors = chart.data.datasets[0].backgroundColor || [];
-    let startAngle = (chart.options.rotation || 0) - Math.PI/2;
-    const total = slices.reduce((s,v)=>s+Number(v||0),0) || 1;
-    const angles = [];
-    for(let i=0;i<slices.length;i++){
-      const a = (slices[i]/total) * (chart.options.circumference || (Math.PI*2));
-      angles.push({start:startAngle, end:startAngle+a});
-      startAngle += a;
-    }
-    const step = Math.max(2, Math.round(depth/6));
-    for(let layer = depth; layer>0; layer -= step){
-      const yOff = layer * 0.6;
-      for(let i=0;i<angles.length;i++){
-        const ainfo = angles[i];
-        ctx.beginPath();
-        ctx.fillStyle = shadeColor(colors[i] || 'rgba(255,255,255,0.08)', -0.12 - (layer/depth)*0.12);
-        ctx.moveTo(cx, cy + yOff);
-        ctx.arc(cx, cy + yOff, outerR, ainfo.start, ainfo.end);
-        ctx.arc(cx, cy + yOff, innerR, ainfo.end, ainfo.start, true);
-        ctx.closePath();
-        ctx.fill();
+/* ===================== LOAD DATA ===================== */
+fetch("data.json")
+.then(function(r){ return r.json(); })
+.then(function(data){
+
+  var TODAY = todayStr();
+
+  /* ===================== DAILY TOTAL ===================== */
+  var dailyTotal = 0;
+
+  if (data.weeklyPiData && data.weeklyPiData.length) {
+    for (var i=0;i<data.weeklyPiData.length;i++){
+      var r = data.weeklyPiData[i];
+      if (r.Date === TODAY || r.DATE === TODAY) {
+        dailyTotal += num(r["Daily Qty"]);
       }
     }
   }
-};
-const centerText = {
-  id: 'centerText',
-  afterDraw(chart, args, opts){
-    const cfg = chart && chart.config && chart.config.options && chart.config.options.plugins && chart.config.options.plugins.centerText;
-    if(!cfg) return;
-    const ctx = chart.ctx;
-    ctx.save();
-    const x = (chart.chartArea.left + chart.chartArea.right)/2;
-    const y = (chart.chartArea.top + chart.chartArea.bottom)/2;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = cfg.color || '#fff';
-    ctx.font = cfg.font || '700 14px Poppins';
-    ctx.fillText(cfg.text || '', x, y - 8);
-    if(cfg.subtext){
-      ctx.font = cfg.subFont || '400 11px Poppins';
-      ctx.fillStyle = cfg.subColor || 'rgba(255,255,255,0.7)';
-      ctx.fillText(cfg.subtext, x, y + 14);
+
+  /* ===================== WEEKLY TOTAL ===================== */
+  var weeklyTotal = 0;
+  for (var j=0;j<data.weeklyPiData.length;j++){
+    weeklyTotal += num(data.weeklyPiData[j]["Weekly Qty"]);
+  }
+
+  /* ===================== WEEKLY SERIES ===================== */
+  var areas = [];
+  var weeklyValues = [];
+
+  for (var k=0;k<data.weeklyPiData.length;k++){
+    areas.push(data.weeklyPiData[k].Area);
+    weeklyValues.push(num(data.weeklyPiData[k]["Weekly Qty"]));
+  }
+
+  /* ===================== COLORS ===================== */
+  var colors = [
+    "#4cc9f0","#4895ef","#4361ee","#3f37c9",
+    "#560bad","#7209b7","#b5179e","#f72585"
+  ];
+
+  /* ===================== DONUT STYLE ===================== */
+  var donutOpts = {
+    responsive:true,
+    cutout:"65%",
+    plugins:{
+      legend:{ position:"bottom", labels:{ color:"#e6edf3"} },
+      tooltip:{ enabled:true }
     }
-    ctx.restore();
-  }
-};
-function shadeColor(css, percent){
-  try{
-    if(css.indexOf('rgba')===0 || css.indexOf('rgb')===0){
-      const nums = css.replace(/rgba?\(|\)|\s/g,'').split(',').map(n=>Number(n));
-      const r = Math.round(nums[0]*(1+percent));
-      const g = Math.round(nums[1]*(1+percent));
-      const b = Math.round(nums[2]*(1+percent));
-      const a = nums.length>3?nums[3]:1;
-      return 'rgba('+clamp(r,0,255)+','+clamp(g,0,255)+','+clamp(b,0,255)+','+a+')';
-    }
-    if(css[0]==='#'){
-      let c = css.substring(1);
-      if(c.length===3){ c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2]; }
-      const num = parseInt(c,16);
-      const rr = (num>>16) + Math.round(255*percent);
-      const gg = ((num>>8)&0x00FF) + Math.round(255*percent);
-      const bb = (num & 0x0000FF) + Math.round(255*percent);
-      return 'rgba('+clamp(rr,0,255)+','+clamp(gg,0,255)+','+clamp(bb,0,255)+',1)';
-    }
-  }catch(e){}
-  return css;
-}
-function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
-Chart.register(donut3D, centerText);
+  };
 
-/* ---------- state ---------- */
-let payload = null;
-let charts = { piBar:null, weeklyLine:null, gauge:null, donuts:[] };
-
-/* ---------- load JSON robust ---------- */
-async function tryLoad(){
-  const ts = Date.now();
-  const candidates = JSON_PATHS.concat(JSON_PATHS.map(p => p + '?v=' + ts));
-  dbg('Trying ' + candidates.join(' , '));
-  for(const p of candidates){
-    try{
-      const r = await fetch(p, { cache:'no-store' });
-      if(!r.ok){ dbg('No: ' + p + ' → ' + r.status); continue; }
-      const j = await r.json();
-      dbg('Loaded: ' + p);
-      return j;
-    } catch(e){
-      dbg('Err loading ' + p + ' — ' + (e && e.message ? e.message : e));
-    }
-  }
-  return null;
-}
-
-/* ---------- logic: aggregate daily from weeklyPiData (Daily Qty) ---------- */
-function aggregateDailyFromWeeklyPi(weeklyPi){
-  const map = new Map(); // dateStr -> sum
-  if(!Array.isArray(weeklyPi)) return map;
-  const dailyKey = findKey(weeklyPi[0] || {}, ['Daily Qty','DailyQty','Daily']);
-  const dateKey = findKey(weeklyPi[0] || {}, ['Date','DATE','date']);
-  for(const r of weeklyPi){
-    if(!r) continue;
-    const rawDate = r[dateKey] ?? r['Date'] ?? r['DATE'] ?? r.date;
-    const d = parseDateFlexible(rawDate);
-    if(!d) continue;
-    const key = formatDateShort(d);
-    const qty = safeNum(r[dailyKey] ?? r['Daily Qty'] ?? r['DailyQty'] ?? r['Daily'] ?? 0);
-    map.set(key, (map.get(key) || 0) + qty);
-  }
-  return map;
-}
-
-/* ---------- fallback: build daily map from piData Counted + Date ---------- */
-function aggregateDailyFromPiData(piData){
-  const map = new Map();
-  if(!Array.isArray(piData)) return map;
-  const dateKey = findKey(piData[0] || {}, ['Date','DATE','date']);
-  const countedKey = findKey(piData[0] || {}, ['Counted','Counted ','CountedToday']);
-  for(const r of piData){
-    if(!r) continue;
-    const rawDate = r[dateKey] ?? r['Date'] ?? r['DATE'] ?? r.date;
-    const d = parseDateFlexible(rawDate);
-    const key = d ? formatDateShort(d) : 'unknown';
-    const qty = safeNum(r[countedKey] ?? r['Counted'] ?? 0);
-    map.set(key, (map.get(key) || 0) + qty);
-  }
-  return map;
-}
-
-/* ---------- render main: daily bars (from weeklyPiData preferred) ---------- */
-function renderDailyBars(){
-  // prefer weeklyPiData -> Daily Qty, else fallback to piData -> Counted
-  const weekly = payload && payload.weeklyPiData;
-  let map = aggregateDailyFromWeeklyPi(weekly);
-  if(map.size === 0){
-    dbg('No weeklyPiData with Daily Qty found, falling back to piData Counted');
-    map = aggregateDailyFromPiData(payload && payload.piData);
-  }
-  if(map.size === 0){
-    dbg('No daily data found in payload');
-    // clear
-    try{ if(charts.piBar) charts.piBar.destroy(); }catch(e){}
-    document.getElementById('countHint').innerText = 'No daily data';
-    return;
-  }
-
-  // sort by date
-  const items = Array.from(map.entries()).map(([dateStr, qty])=>{
-    const d = parseDateFlexible(dateStr) || parseDateFlexible(mapDateGuess(dateStr));
-    return { dateStr, qty: safeNum(qty), d: d || new Date(dateStr) };
-  }).sort((a,b)=> a.d - b.d);
-
-  const labels = items.map(i=>i.dateStr);
-  const counted = items.map(i=>i.qty);
-  const remaining = items.map(i=>Math.max(0, DAILY_TARGET - i.qty));
-
-  // populate table
-  const tbody = document.querySelector('#dailyTable tbody'); tbody.innerHTML = '';
-  for(let i=0;i<items.length;i++){
-    tbody.insertAdjacentHTML('beforeend', `<tr><td>${labels[i]}</td><td style="text-align:right">${formatNumber(counted[i])}</td><td style="text-align:right">${formatNumber(remaining[i])}</td></tr>`);
-  }
-
-  // chart
-  try{ if(charts.piBar) charts.piBar.destroy(); }catch(e){}
-  const ctx = document.getElementById('piBar').getContext('2d');
-  charts.piBar = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Counted (Daily Qty)', data: counted, backgroundColor: '#7dd3fc' },
-        { label: 'Remaining to 1,193', data: remaining, backgroundColor: '#f97316' }
-      ]
+  /* ===================== DAILY DONUT ===================== */
+  new Chart(document.getElementById("dailyDonut"),{
+    type:"doughnut",
+    data:{
+      labels:["Counted Today"],
+      datasets:[{
+        data:[dailyTotal],
+        backgroundColor:["#4cc9f0"],
+        hoverOffset:20
+      }]
     },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins: {
-        legend: { position:'top' },
-        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + formatNumber(ctx.parsed.y) } },
-        targetLine: { value: DAILY_TARGET, color: 'rgba(255,255,255,0.12)' }
+    options:donutOpts
+  });
+
+  /* ===================== WEEKLY DONUT ===================== */
+  new Chart(document.getElementById("weeklyDonut"),{
+    type:"doughnut",
+    data:{
+      labels:["Weekly Total"],
+      datasets:[{
+        data:[weeklyTotal],
+        backgroundColor:["#f72585"],
+        hoverOffset:20
+      }]
+    },
+    options:donutOpts
+  });
+
+  /* ===================== WEEKLY SERIES ===================== */
+  new Chart(document.getElementById("weeklySeries"),{
+    type:"bar",
+    data:{
+      labels:areas,
+      datasets:[{
+        label:"Weekly Qty",
+        data:weeklyValues,
+        backgroundColor:colors
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{ labels:{ color:"#e6edf3"} }
       },
-      scales: { y: { beginAtZero:true, ticks:{ callback: v=> v>=1000 ? (v/1000).toFixed(1)+'K' : v } } }
+      scales:{
+        x:{ ticks:{ color:"#e6edf3"} },
+        y:{ ticks:{ color:"#e6edf3"} }
+      }
     }
   });
 
-  // update hint
-  const last = items[items.length-1];
-  document.getElementById('countHint').innerText = `${labels.length} day(s) • Last: ${labels[labels.length-1]} • Last counted: ${formatNumber(last.qty)}`;
-
-  // draw donuts for last 3 days
-  renderDonutsForLastDays(items.slice(-MAX_DONUTS));
-  // gauge for last day
-  renderGaugeForValue(last.qty);
-}
-
-/* ---------- small helper: try parse ambiguous date string by swapping separators ---------- */
-function mapDateGuess(s){
-  if(!s) return null;
-  const t = String(s).trim();
-  if(t.indexOf('.')>-1 && t.split('.').length===3) return t;
-  return t;
-}
-
-/* ---------- render donuts (3D-ish) for last N days ---------- */
-function renderDonutsForLastDays(items){
-  const container = document.getElementById('donutRow');
-  container.innerHTML = '';
-  // destroy previous donut charts
-  try{ charts.donuts.forEach(c=>c.destroy()); } catch(e){}
-  charts.donuts = [];
-
-  const show = items.length ? items.slice(-MAX_DONUTS) : [];
-  if(show.length===0){
-    document.getElementById('donutHint').innerText = '—';
-    return;
-  }
-  document.getElementById('donutHint').innerText = `Last ${show.length} day(s)`;
-  for(const it of show){
-    const wrap = document.createElement('div'); wrap.className='donutCard';
-    const canvas = document.createElement('canvas'); canvas.style.width='120px'; canvas.style.height='120px';
-    wrap.appendChild(canvas);
-    const lbl = document.createElement('div'); lbl.style.fontSize='12px'; lbl.style.marginTop='6px'; lbl.style.textAlign='center';
-    lbl.innerText = it.dateStr;
-    wrap.appendChild(lbl);
-    container.appendChild(wrap);
-
-    const counted = it.qty;
-    const rem = Math.max(0, DAILY_TARGET - counted);
-    const ctx = canvas.getContext('2d');
-
-    const donut = new Chart(ctx, {
-      type:'doughnut',
-      data:{ labels:['Counted','Remaining'], datasets:[{ data:[counted, rem], backgroundColor:['#7dd3fc','#f97316'] }]},
-      options:{
-        responsive:false, maintainAspectRatio:false,
-        cutout:'60%',
-        plugins:{
-          donut3D:{ depth:12 },
-          centerText:{ text: formatNumber(counted), subtext: 'Counted' },
-          legend:{ display:false }
-        }
-      }
-    });
-    charts.donuts.push(donut);
-  }
-}
-
-/* ---------- gauge (half donut) ---------- */
-function renderGaugeForValue(value){
-  try{ if(charts.gauge) charts.gauge.destroy(); }catch(e){}
-  const ctx = document.getElementById('gaugeMini').getContext('2d');
-  const rem = Math.max(0, DAILY_TARGET - value);
-  charts.gauge = new Chart(ctx, {
-    type:'doughnut',
-    data:{ labels:['Counted','Remaining'], datasets:[{ data:[value, rem], backgroundColor:['#7dd3fc','#f97316'] }]},
-    options:{ rotation:-Math.PI, circumference:Math.PI, responsive:false, maintainAspectRatio:false, plugins:{ legend:{ display:false }, centerText:{ text: formatNumber(value), subtext: 'Last' } } }
-  });
-}
-
-/* ---------- weekly series (existing) ---------- */
-function renderWeeklySeries(){
-  const weekly = payload && payload.weeklyPiData;
-  if(!Array.isArray(weekly) || weekly.length===0){ try{ if(charts.weeklyLine) charts.weeklyLine.destroy(); }catch(e){} document.getElementById('weekHint')?.innerText='—'; return;}
-  const wkKey = findKey(weekly[0], ['Week No','WeekNo','Week']);
-  const wqKey = findKey(weekly[0], ['Weekly Qty','WeeklyQty',' Weekly Qty']);
-  const agg = {}; const labelsSet = new Set();
-  for(const r of weekly){
-    if(!r) continue;
-    const wk = r[wkKey] ?? r['Week No'] ?? r['WeekNo'] ?? r.WeekNo ?? '';
-    if(!wk) continue;
-    const qty = safeNum(r[wqKey] ?? r['Weekly Qty'] ?? r['WeeklyQty'] ?? 0);
-    agg[wk] = (agg[wk]||0) + qty;
-    labelsSet.add(String(wk));
-  }
-  const labels = Array.from(labelsSet).sort((a,b)=> (isFinite(Number(a))&&isFinite(Number(b))) ? Number(a)-Number(b) : String(a).localeCompare(String(b)));
-  const vals = labels.map(l=>agg[l]||0);
-  try{ if(charts.weeklyLine) charts.weeklyLine.destroy(); }catch(e){}
-  const ctx = document.getElementById('weeklyLine').getContext('2d');
-  charts.weeklyLine = new Chart(ctx, { type:'line', data:{ labels, datasets:[{ label:'Weekly qty', data:vals, borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.08)', fill:true }]}, options:{ responsive:true, maintainAspectRatio:false } });
-  document.getElementById('donutHint').innerText += ` • Weeks: ${labels.length}`;
-}
-
-/* ---------- UI wiring: load / upload / paste ---------- */
-document.getElementById('refreshBtn').addEventListener('click', async ()=>{
-  dbg('Manual refresh requested');
-  try{
-    const j = await tryLoad();
-    if(!j) { dbg('No JSON loaded'); return; }
-    payload = j;
-    document.getElementById('liveDate').innerText = (new Date()).toLocaleDateString();
-    renderWeeklySeries();
-    renderDailyBars();
-  } catch(e){ dbg('Refresh error: ' + (e && e.message ? e.message : e)); }
+})
+.catch(function(err){
+  console.error("DATA LOAD ERROR:",err);
 });
-document.getElementById('uploadBtn').addEventListener('click', ()=>{
-  const input = document.createElement('input'); input.type='file'; input.accept='application/json';
-  input.onchange = e => { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = ev => { try{ payload = JSON.parse(ev.target.result); dbg('Uploaded JSON parsed'); renderWeeklySeries(); renderDailyBars(); }catch(err){ dbg('Upload parse error: '+err.message); alert('Invalid JSON'); } }; r.readAsText(f); };
-  input.click();
-});
-document.getElementById('pasteBtn').addEventListener('click', ()=>{
-  const txt = prompt('Paste dashboard JSON here');
-  if(!txt) return;
-  try{ payload = JSON.parse(txt); dbg('Pasted JSON parsed'); renderWeeklySeries(); renderDailyBars(); } catch(e){ dbg('Paste parse error: '+(e && e.message?e.message:e)); alert('Invalid JSON'); }
-});
-
-/* ---------- initial load ---------- */
-(async ()=>{
-  try{
-    const j = await tryLoad();
-    if(!j){ dbg('No JSON found in standard paths — use Upload/Paste'); return; }
-    payload = j;
-    document.getElementById('liveDate').innerText = (new Date()).toLocaleDateString();
-    renderWeeklySeries();
-    renderDailyBars();
-  } catch(e){
-    dbg('Startup error: ' + (e && e.message ? e.message : e));
-  }
-})();
 </script>
+
 </body>
 </html>
