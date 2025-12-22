@@ -3,138 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VCB Executive | Compact Elite</title>
+    <title>VCB Executive | Final Elite</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
 
         :root {
-            --bg: #030712;
-            --card: rgba(17, 24, 39, 0.7);
-            --cyan: #06b6d4;
+            --bg: #020617;
+            --card: rgba(15, 23, 42, 0.8);
+            --cyan: #22d3ee;
             --emerald: #10b981;
             --rose: #f43f5e;
-            --text-p: #f8fafc;
-            --text-s: #64748b;
-            --shadow-3d: 0 15px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+            --white: #ffffff;
+            --text-s: #94a3b8;
+            --shadow-3d: 0 20px 50px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at top right, #111827, #030712);
-            color: var(--text-p);
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #020617 100%);
+            color: var(--white);
             height: 100vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 10px 15px;
+            padding: 12px;
         }
-
-        /* --- UI UTILS --- */
-        #fs-btn {
-            position: fixed; top: 15px; right: 15px; z-index: 100;
-            background: var(--card); border: 1px solid var(--cyan);
-            color: var(--cyan); padding: 5px 12px; border-radius: 8px;
-            cursor: pointer; font-size: 0.7rem; font-weight: 800;
-            transition: 0.3s;
-        }
-        #fs-btn:hover { background: var(--cyan); color: white; }
 
         /* --- HEADER --- */
         header {
             height: 12vh;
-            display: grid; grid-template-columns: 1fr 2fr 1fr;
-            gap: 12px; margin-bottom: 12px;
+            display: grid; grid-template-columns: 1fr 2.5fr 1fr;
+            gap: 15px; margin-bottom: 15px;
         }
 
         .panel {
-            background: var(--card); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 16px; padding: 8px 20px;
+            background: var(--card); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px; padding: 10px 25px;
             box-shadow: var(--shadow-3d);
             display: flex; flex-direction: column; justify-content: center;
         }
 
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
-        .kpi-box h2 { font-size: 1.5rem; font-weight: 800; color: var(--cyan); line-height: 1; }
-        .kpi-box span { font-size: 0.6rem; text-transform: uppercase; color: var(--text-s); letter-spacing: 1px; }
+        .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
+        .kpi-box h2 { font-size: 1.8rem; font-weight: 800; color: var(--cyan); line-height: 1; }
+        .kpi-box span { font-size: 0.65rem; text-transform: uppercase; color: var(--text-s); letter-spacing: 1.5px; }
 
         /* --- MAIN GRID --- */
         main {
             flex: 1;
             display: grid;
             grid-template-columns: 1.2fr 1fr 1fr;
-            grid-template-rows: 48% 48%; /* Fixes the cut-off issue */
-            gap: 12px;
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15px;
             min-height: 0;
         }
 
         .card {
-            background: var(--card); border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
+            background: var(--card); border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
             box-shadow: var(--shadow-3d);
-            padding: 12px; display: flex; flex-direction: column;
-            position: relative; overflow: hidden;
+            padding: 15px; display: flex; flex-direction: column;
+            position: relative;
         }
 
         .card-title {
-            font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
-            color: var(--cyan); margin-bottom: 8px;
+            font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+            color: var(--cyan); margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
         }
 
         .chart-box { flex: 1; position: relative; min-height: 0; width: 100%; }
 
-        /* --- DOUGHNUT OVERLAY --- */
-        .donut-val {
+        /* --- GOGOASE 3D (Doughnuts) --- */
+        .donut-inner {
             position: absolute; top: 55%; left: 50%;
             transform: translate(-50%, -50%); text-align: center;
         }
-        .donut-val h3 { font-size: 1.3rem; font-weight: 800; line-height: 1; }
-        .donut-val p { font-size: 0.5rem; color: var(--text-s); }
+        .donut-inner h3 { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+        .donut-inner p { font-size: 0.55rem; color: var(--text-s); }
 
-        /* --- TASK LIST COMPACT --- */
-        .scroller { overflow-y: auto; padding-right: 4px; }
-        .scroller::-webkit-scrollbar { width: 3px; }
-        .scroller::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 10px; }
-
-        .item {
-            background: rgba(255,255,255,0.02);
-            padding: 6px 10px; border-radius: 8px; margin-bottom: 4px;
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 0.7rem; border-left: 3px solid rgba(255,255,255,0.1);
+        /* --- FS BUTTON --- */
+        #fs-toggle {
+            position: fixed; bottom: 20px; right: 20px; z-index: 999;
+            background: var(--cyan); border: none; width: 40px; height: 40px;
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 15px var(--cyan); opacity: 0.6; transition: 0.3s;
         }
-        .item.done { border-left-color: var(--emerald); }
-        .tag { font-size: 0.55rem; font-weight: 800; opacity: 0.8; }
+        #fs-toggle:hover { opacity: 1; transform: scale(1.1); }
+
+        .list-wrap { overflow-y: auto; padding-right: 5px; }
+        .list-wrap::-webkit-scrollbar { width: 4px; }
+        .list-wrap::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 10px; }
+        .task-item {
+            background: rgba(255,255,255,0.03); margin-bottom: 5px;
+            padding: 8px 12px; border-radius: 12px; font-size: 0.75rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .status-pill { padding: 2px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 800; }
     </style>
 </head>
 <body>
 
-    <button id="fs-btn" onclick="toggleFS()">FULL SCREEN</button>
+    <button id="fs-toggle" onclick="toggleFull()">⛶</button>
 
     <header>
         <div class="panel">
-            <h2 id="clock" style="font-size: 1.4rem;">00:00:00</h2>
-            <p id="date" style="font-size: 0.75rem; color: var(--text-s);"></p>
+            <h2 id="clock" style="font-size: 1.5rem;">00:00:00</h2>
+            <p id="date" style="color: var(--cyan); font-weight: 600; font-size: 0.8rem;"></p>
         </div>
         <div class="panel">
-            <div class="kpi-grid">
-                <div class="kpi-box"><span>Day Realized</span><h2 id="kpi-day">0</h2></div>
-                <div class="kpi-box"><span>Day Avg</span><h2 id="kpi-avg">0</h2></div>
-                <div class="kpi-box"><span>vs Target</span><h2 id="kpi-delta">0</h2></div>
+            <div class="kpi-row">
+                <div class="kpi-box"><span>Live Realized</span><h2 id="k-total">0</h2></div>
+                <div class="kpi-box"><span>Weekly Avg</span><h2 id="k-avg">0</h2></div>
+                <div class="kpi-box"><span>Target 1193</span><h2 id="k-delta">0</h2></div>
             </div>
         </div>
-        <div class="panel" style="align-items: flex-end;">
-            <span style="font-size: 0.6rem; color: var(--text-s);">SQUAD PERFORMANCE</span>
-            <h2 id="perf-score" style="color: var(--emerald); font-size: 1.3rem;">0%</h2>
+        <div class="panel" style="align-items: flex-end; border-right: 4px solid var(--emerald);">
+            <span style="font-size: 0.6rem;">OPERATIONAL SCORE</span>
+            <h2 id="score" style="color: var(--emerald); font-size: 1.5rem;">0%</h2>
         </div>
     </header>
 
     <main>
         <div class="card">
-            <div class="card-title">Daily Area Output <span>Live</span></div>
+            <div class="card-title">Today's Area Breakdown <span>Active</span></div>
             <div class="chart-box"><canvas id="dailyBar"></canvas></div>
         </div>
 
@@ -142,7 +136,7 @@
             <div class="card-title">Daily Compliance <span>Tasks</span></div>
             <div class="chart-box">
                 <canvas id="dailyDonut"></canvas>
-                <div class="donut-val"><h3 id="d-perc">0%</h3><p>DONE</p></div>
+                <div class="donut-inner"><h3 id="d-perc">0%</h3><p>DONE</p></div>
             </div>
         </div>
 
@@ -150,114 +144,139 @@
             <div class="card-title">Weekly Compliance <span>Tasks</span></div>
             <div class="chart-box">
                 <canvas id="weeklyDonut"></canvas>
-                <div class="donut-val"><h3 id="w-perc">0%</h3><p>DONE</p></div>
+                <div class="donut-inner"><h3 id="w-perc">0%</h3><p>DONE</p></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title">Weekly Distribution <span>Area</span></div>
-            <div class="chart-box"><canvas id="weeklyBar"></canvas></div>
+            <div class="card-title" id="cur-week-title">Current Week Distribution <span>Area</span></div>
+            <div class="chart-box"><canvas id="currentWeekBar"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">Efficiency Trend <span>History</span></div>
-            <div class="chart-box"><canvas id="trendLine"></canvas></div>
+            <div class="card-title">Weekly Count Progress <span>By Week No.</span></div>
+            <div class="chart-box"><canvas id="weeklyProgBar"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">Task Monitor <span>Top 15</span></div>
-            <div class="scroller" id="taskFeed"></div>
+            <div class="card-title">System Task Feed <span>Live</span></div>
+            <div class="list-wrap" id="taskFeed"></div>
         </div>
     </main>
 
     <script>
-        const data = {
-            "pi": [
-                { "Area": "MPR", "C": 3936 }, { "Area": "PB1", "C": 1189 }, { "Area": "PB2", "C": 484 },
-                { "Area": "PBSRES", "C": 1374 }, { "Area": "MP", "C": 7409 }, { "Area": "MIX", "C": 8941 },
-                { "Area": "MS", "C": 5902 }, { "Area": "MSX", "C": 7984 }, { "Area": "FM", "C": 620 }
+        // Injecting the data from your request
+        const raw = {
+            "piData": [
+                { "Area": "MPR", "Counted": 3936 }, { "Area": "PB1", "Counted": 1189 }, { "Area": "PB2", "Counted": 484 },
+                { "Area": "PBSRES", "Counted": 1374 }, { "Area": "MP", "Counted": 7409 }, { "Area": "MIX", "Counted": 8941 },
+                { "Area": "MS", "Counted": 5902 }, { "Area": "MSX", "Counted": 7984 }, { "Area": "FM", "Counted": 620 }, { "Area": "HP", "Counted": 155 }
             ],
-            "dTasks": [
-                {"T": "ADJUSTMENTS (Returns)", "S": "Not started"}, {"T": "ADJUSTMENTS (Standard)", "S": "Not started"},
-                {"T": "Aged stock report 7AM", "S": "Completed"}, {"T": "Blackwells", "S": "Not started"},
-                {"T": "LOCATIONS IN ERROR", "S": "Not started"}, {"T": "PI Investigation", "S": "Not started"},
-                {"T": "Manual location checks", "S": "Not started"}, {"T": "SLA update", "S": "Not started"}
+            "dailyTask": [
+                {"Task": "Aged stock report 7AM", "Status": "Completed"},
+                {"Task": "ADJUSTMENTS (Returns)", "Status": "Not started"},
+                {"Task": "ADJUSTMENTS (Standard)", "Status": "Not started"},
+                {"Task": "Blackwells", "Status": "Not started"},
+                {"Task": "Internet returns", "Status": "Not started"},
+                {"Task": "PI 1st count", "Status": "Not started"},
+                {"Task": "SLA update", "Status": "Not started"}
             ],
-            "wTasks": [
-                {"T": "(Weekly) SLA", "S": "Not started"}, {"T": "(Weekly) SIS report", "S": "Not started"},
-                {"T": "(Weekly) ORM", "S": "Not started"}, {"T": "RP split pack", "S": "Not started"},
-                {"T": "Price checker", "S": "Not started"}, {"T": "Shrinkage Period", "S": "Completed"}
+            "weeklyTask": [
+                {"Task": "Shrinkage Period", "Status": "Completed"},
+                {"Task": "(Weekly) SLA", "Status": "Not started"},
+                {"Task": "(Weekly) SIS report", "Status": "Not started"},
+                {"Task": "RP split pack", "Status": "Not started"}
             ],
-            "wPi": [
-                {"A": "MPR", "D": 127, "W": 5103}, {"A": "PB1", "D": 38, "W": 6457},
-                {"A": "PB2", "D": 15, "W": 7494}, {"A": "PBSRES", "D": 45, "W": 4524},
-                {"A": "MP", "D": 221, "W": 2068}, {"A": "MIX", "D": 136, "W": 0},
-                {"A": "MS", "D": 61, "W": 0}, {"A": "MSX", "D": 249, "W": 0},
-                {"A": "FM", "D": 20, "W": 0}
+            "weeklyPiData": [
+                {"Area": "MPR", "Daily Qty": 127, "Week No": 27, "Weekly Qty": 5103},
+                {"Area": "PB1", "Daily Qty": 38, "Week No": 28, "Weekly Qty": 6457},
+                {"Area": "PB2", "Daily Qty": 15, "Week No": 29, "Weekly Qty": 7494},
+                {"Area": "PB3", "Daily Qty": 0, "Week No": 30, "Weekly Qty": 6901},
+                {"Area": "PB4", "Daily Qty": 0, "Week No": 31, "Weekly Qty": 5447},
+                {"Area": "PBSRES", "Daily Qty": 45, "Week No": 32, "Weekly Qty": 4524},
+                {"Area": "MP", "Daily Qty": 221, "Week No": 33, "Weekly Qty": 2068},
+                {"Area": "MIX", "Daily Qty": 136, "Week No": 34, "Weekly Qty": 0}
             ]
         };
 
-        const GOAL = 1193;
+        const TARGET = 1193;
 
-        function toggleFS() {
+        function toggleFull() {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen();
             else document.exitFullscreen();
         }
 
-        function updateUI() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB');
-            document.getElementById('date').innerText = now.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        function updateTime() {
+            const n = new Date();
+            document.getElementById('clock').innerText = n.toLocaleTimeString('en-GB');
+            document.getElementById('date').innerText = n.toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'short'});
         }
-        setInterval(updateUI, 1000); updateUI();
+        setInterval(updateTime, 1000); updateTime();
 
         function render() {
-            const totalD = data.wPi.reduce((s, x) => s + x.D, 0);
-            const delta = totalD - GOAL;
+            const wData = raw.weeklyPiData;
             
-            document.getElementById('kpi-day').innerText = totalD;
-            document.getElementById('kpi-avg').innerText = (totalD / data.wPi.length).toFixed(0);
-            document.getElementById('kpi-delta').innerText = (delta >= 0 ? "+" : "") + delta;
-            document.getElementById('kpi-delta').style.color = delta >= 0 ? 'var(--emerald)' : 'var(--rose)';
+            // Stats Header
+            const dailyTotal = wData.reduce((s, x) => s + x["Daily Qty"], 0);
+            const delta = dailyTotal - TARGET;
+            document.getElementById('k-total').innerText = dailyTotal;
+            document.getElementById('k-delta').innerText = (delta >= 0 ? "+" : "") + delta;
+            document.getElementById('k-delta').style.color = delta >= 0 ? 'var(--emerald)' : 'var(--rose)';
+            document.getElementById('k-avg').innerText = (wData.reduce((s,x)=> s + x["Weekly Qty"], 0) / wData.length).toFixed(0);
 
-            // Charts
-            new Chart(document.getElementById('dailyBar'), createCfg('bar', data.wPi.map(x=>x.A), data.wPi.map(x=>x.D), '#06b6d4'));
-            new Chart(document.getElementById('weeklyBar'), createCfg('bar', data.wPi.map(x=>x.A), data.wPi.map(x=>x.W), '#10b981'));
-            
-            new Chart(document.getElementById('trendLine'), {
+            // 1. Daily Bar
+            new Chart(document.getElementById('dailyBar'), getBarCfg(wData.map(x=>x.Area), wData.map(x=>x["Daily Qty"]), '#22d3ee'));
+
+            // 2. Current Week Distro (Filtering only the latest Week No)
+            const maxWeek = Math.max(...wData.map(x => x["Week No"]));
+            const latestWeekData = wData.filter(x => x["Week No"] === maxWeek);
+            document.getElementById('cur-week-title').innerHTML = `Current Week Distribution <span>Week ${maxWeek}</span>`;
+            new Chart(document.getElementById('currentWeekBar'), getBarCfg(latestWeekData.map(x=>x.Area), latestWeekData.map(x=>x["Weekly Qty"]), '#10b981'));
+
+            // 3. Weekly Progress (By Week Number)
+            new Chart(document.getElementById('weeklyProgBar'), {
                 type: 'line',
-                data: { labels: data.wPi.map(x=>x.A), datasets: [{ data: data.wPi.map(x=>x.D), borderColor: '#06b6d4', fill: true, backgroundColor: 'rgba(6,182,212,0.05)', tension: 0.4, pointRadius: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+                data: {
+                    labels: wData.map(x => "W" + x["Week No"]),
+                    datasets: [{
+                        data: wData.map(x => x["Weekly Qty"]),
+                        borderColor: '#22d3ee', tension: 0.4, fill: true,
+                        backgroundColor: 'rgba(34, 211, 238, 0.1)', borderWeight: 4, pointRadius: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { ticks: { color: '#94a3b8' } } } }
             });
 
-            const dP = renderDonut('dailyDonut', 'd-perc', data.dTasks, '#06b6d4');
-            const wP = renderDonut('weeklyDonut', 'w-perc', data.wTasks, '#10b981');
-            document.getElementById('perf-score').innerText = ((dP + wP) / 2).toFixed(1) + "%";
+            // 4 & 5. Tasks Doughnuts
+            const dP = setDonut('dailyDonut', 'd-perc', raw.dailyTask, '#22d3ee');
+            const wP = setDonut('weeklyDonut', 'w-perc', raw.weeklyTask, '#10b981');
+            document.getElementById('score').innerText = ((dP + wP) / 2).toFixed(1) + "%";
 
+            // 6. Task List
             const feed = document.getElementById('taskFeed');
-            feed.innerHTML = [...data.dTasks, ...data.wTasks].map(t => `
-                <div class="item ${t.S==='Completed'?'done':''}">
-                    <span>${t.T}</span>
-                    <span class="tag" style="color:${t.S==='Completed'?'var(--emerald)':'var(--text-s)'}">${t.S.toUpperCase()}</span>
+            feed.innerHTML = [...raw.dailyTask, ...raw.weeklyTask].map(t => `
+                <div class="task-item">
+                    <span>${t.Task}</span>
+                    <span class="status-pill" style="background:${t.Status==='Completed'?'var(--emerald)':'rgba(255,255,255,0.05)'}">${t.Status.toUpperCase()}</span>
                 </div>
             `).join('');
         }
 
-        function createCfg(type, labels, vals, color) {
+        function getBarCfg(labels, data, color) {
             return {
-                type: type,
-                data: { labels: labels, datasets: [{ data: vals, backgroundColor: color, borderRadius: 5 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { ticks: { font: { size: 8 }, color: '#64748b' }, grid: { display: false } } } }
+                type: 'bar',
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: color, borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { display: false } } } }
             };
         }
 
-        function renderDonut(id, txtId, tasks, color) {
-            const done = tasks.filter(t => t.S === 'Completed').length;
-            const p = ((done / tasks.length) * 100).toFixed(0);
+        function setDonut(id, txtId, tasks, color) {
+            const ok = tasks.filter(t => t.Status === 'Completed').length;
+            const p = ((ok / tasks.length) * 100).toFixed(0);
             document.getElementById(txtId).innerText = p + "%";
             new Chart(document.getElementById(id), {
                 type: 'doughnut',
-                data: { datasets: [{ data: [done, tasks.length - done], backgroundColor: [color, 'rgba(255,255,255,0.02)'], borderWidth: 0, cutout: '82%' }] },
+                data: { datasets: [{ data: [ok, tasks.length - ok], backgroundColor: [color, 'rgba(255,255,255,0.02)'], borderWidth: 0, cutout: '82%' }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false } } }
             });
             return parseFloat(p);
