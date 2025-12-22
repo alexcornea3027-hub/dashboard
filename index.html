@@ -1,258 +1,336 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VCB Stock Dashboard | Pro Edition</title>
+    <title>VCB Stock Intelligence | Executive 3D</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
 
         :root {
-            --bg: #030712;
-            --card: rgba(17, 24, 39, 0.75);
-            --cyan: #06b6d4;
+            --bg: #020617;
+            --glass: rgba(15, 23, 42, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --cyan: #22d3ee;
             --emerald: #10b981;
             --rose: #f43f5e;
-            --text-p: #f8fafc;
-            --text-s: #94a3b8;
+            --amber: #fbbf24;
+            --shadow-3d: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+            --neon-glow: 0 0 15px rgba(34, 211, 238, 0.3);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at top right, #111827, #020617);
-            color: var(--text-p);
+            background: radial-gradient(circle at 0% 0%, #0f172a 0%, #020617 100%);
+            color: #f8fafc;
             height: 100vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 15px;
         }
 
-        /* UI ELEMENTS */
-        #fs-btn {
-            position: fixed; bottom: 15px; right: 15px; z-index: 100;
-            background: var(--card); border: 1px solid var(--cyan);
-            color: var(--cyan); width: 35px; height: 35px; border-radius: 50%;
-            cursor: pointer; font-weight: 800; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center;
+        /* FULLSCREEN BUTTON */
+        #fs-toggle {
+            position: fixed; top: 15px; right: 20px; z-index: 1000;
+            background: var(--glass); border: 1px solid var(--cyan);
+            color: var(--cyan); padding: 8px 15px; border-radius: 12px;
+            font-weight: 800; cursor: pointer; backdrop-filter: blur(10px);
+            box-shadow: var(--neon-glow); transition: 0.3s;
         }
-        #fs-btn:hover { background: var(--cyan); color: white; scale: 1.1; }
+        #fs-toggle:hover { background: var(--cyan); color: white; transform: translateY(-2px); }
 
+        /* HEADER SECTION */
         header {
-            height: 10vh; display: grid; grid-template-columns: 1fr 2fr 1fr;
-            gap: 10px; margin-bottom: 10px;
+            height: 12vh;
+            display: grid; grid-template-columns: 1.2fr 2fr 1.2fr;
+            gap: 15px; margin-bottom: 15px;
         }
 
-        .panel {
-            background: var(--card); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 15px; padding: 5px 15px;
-            display: flex; flex-direction: column; justify-content: center;
+        .h-panel {
+            background: var(--glass); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px;
+            padding: 10px 25px; box-shadow: var(--shadow-3d);
+            display: flex; align-items: center; justify-content: space-between;
         }
 
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
-        .kpi-box h2 { font-size: 1.4rem; font-weight: 800; color: var(--cyan); }
-        .kpi-box span { font-size: 0.55rem; text-transform: uppercase; color: var(--text-s); }
+        .kpi-unit { text-align: center; }
+        .kpi-unit span { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .kpi-unit h2 { font-size: 1.8rem; font-weight: 800; color: var(--cyan); text-shadow: var(--neon-glow); }
 
-        /* GRID SYSTEM */
+        /* MAIN GRID */
         main {
             flex: 1;
             display: grid;
-            grid-template-columns: 1.2fr 1fr 1fr;
-            grid-template-rows: 47% 47%; /* Prevents cutting off the bottom */
-            gap: 10px;
-            min-height: 0;
+            grid-template-columns: 1.3fr 1fr 1fr;
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15px;
+            min-height: 0; /* Important pentru flex-scroll */
         }
 
         .card {
-            background: var(--card); border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 10px; display: flex; flex-direction: column;
-            position: relative; overflow: hidden;
-            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.5);
+            background: var(--glass); backdrop-filter: blur(15px);
+            border: 1px solid var(--border); border-radius: 24px;
+            padding: 15px; display: flex; flex-direction: column;
+            box-shadow: var(--shadow-3d); position: relative;
         }
 
-        .card-title {
-            font-size: 0.6rem; font-weight: 800; text-transform: uppercase;
-            color: var(--cyan); margin-bottom: 5px;
-            display: flex; justify-content: space-between;
+        .card::after { /* Efect de sticla 3D lateral */
+            content: ''; position: absolute; inset: 0; border-radius: 24px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+            pointer-events: none;
         }
 
-        .chart-box { flex: 1; position: relative; min-height: 0; width: 100%; }
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px;
+        }
 
-        .donut-val {
+        .card-header h3 { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--cyan); letter-spacing: 1px; }
+
+        .chart-container { flex: 1; min-height: 0; position: relative; width: 100%; }
+
+        /* DOUGHNUT CENTER TEXT */
+        .chart-overlay {
             position: absolute; top: 55%; left: 50%;
             transform: translate(-50%, -50%); text-align: center;
         }
-        .donut-val h3 { font-size: 1.1rem; font-weight: 800; }
-        .donut-val p { font-size: 0.5rem; color: var(--text-s); }
+        .chart-overlay h4 { font-size: 1.6rem; font-weight: 800; color: white; }
+        .chart-overlay p { font-size: 0.6rem; color: #94a3b8; }
 
-        /* SCROLLER */
-        .scroller { overflow-y: auto; }
-        .scroller::-webkit-scrollbar { width: 3px; }
-        .scroller::-webkit-scrollbar-thumb { background: var(--cyan); }
-        .task {
-            background: rgba(255,255,255,0.02); padding: 5px 8px;
-            border-radius: 6px; margin-bottom: 3px; font-size: 0.65rem;
-            display: flex; justify-content: space-between;
+        /* TASK LIST */
+        .scroller { overflow-y: auto; padding-right: 5px; }
+        .scroller::-webkit-scrollbar { width: 4px; }
+        .scroller::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 10px; }
+
+        .task-row {
+            background: rgba(255,255,255,0.03); margin-bottom: 6px;
+            padding: 10px 15px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-left: 4px solid var(--border); transition: 0.2s;
         }
-        .tag-done { color: var(--emerald); font-weight: 800; }
+        .task-row.done { border-left-color: var(--emerald); background: rgba(16, 185, 129, 0.05); }
+        .task-name { font-size: 0.8rem; font-weight: 600; }
+        .task-status { font-size: 0.65rem; font-weight: 800; color: #64748b; }
+
+        /* RESPONSIVE FIX FOR SMALLER SCREENS */
+        @media (max-height: 800px) {
+            .kpi-unit h2 { font-size: 1.4rem; }
+            .card { padding: 10px; }
+        }
     </style>
 </head>
 <body>
 
-    <button id="fs-btn" onclick="toggleFS()">⛶</button>
+    <button id="fs-toggle" onclick="toggleFullScreen()">ACTIVATE FULLSCREEN</button>
 
     <header>
-        <div class="panel">
-            <h2 id="clock" style="font-size: 1.2rem;">00:00:00</h2>
-            <p id="date" style="font-size: 0.65rem; color: var(--text-s);"></p>
-        </div>
-        <div class="panel">
-            <div class="kpi-grid">
-                <div class="kpi-box"><span>Day Counts</span><h2 id="k-day">0</h2></div>
-                <div class="kpi-box"><span>Weekly Avg</span><h2 id="k-avg">0</h2></div>
-                <div class="kpi-box"><span>vs Target</span><h2 id="k-delta">0</h2></div>
+        <div class="h-panel">
+            <div>
+                <h2 id="live-clock" style="font-size: 1.6rem;">00:00:00</h2>
+                <p id="live-date" style="font-size: 0.8rem; color: var(--cyan); font-weight: 600;"></p>
             </div>
         </div>
-        <div class="panel" style="align-items: flex-end;">
-            <span style="font-size: 0.55rem; color: var(--text-s);">OVERALL COMPLIANCE</span>
-            <h2 id="perf" style="color: var(--emerald); font-size: 1.2rem;">0%</h2>
+        <div class="h-panel">
+            <div class="kpi-unit"><span>Realized Today</span><h2 id="total-day">0</h2></div>
+            <div class="kpi-unit"><span>Avg/Area</span><h2 id="avg-area">0</h2></div>
+            <div class="kpi-unit"><span>Target Variance</span><h2 id="delta-target">0</h2></div>
+        </div>
+        <div class="h-panel" style="border-right: 5px solid var(--emerald);">
+            <div style="text-align: right; width: 100%;">
+                <span>Compliance Score</span>
+                <h2 id="compliance-total" style="color: var(--emerald);">0%</h2>
+            </div>
         </div>
     </header>
 
     <main>
         <div class="card">
-            <div class="card-title">Daily Area Output <span>Live</span></div>
-            <div class="chart-box"><canvas id="dailyBar"></canvas></div>
+            <div class="card-header"><h3>Daily Output by Area</h3><span>Live</span></div>
+            <div class="chart-container"><canvas id="dailyBar"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">Daily Tasks <span>Compliance</span></div>
-            <div class="chart-box">
+            <div class="card-header"><h3>Daily Tasks</h3><span>Internal</span></div>
+            <div class="chart-container">
                 <canvas id="dailyDonut"></canvas>
-                <div class="donut-val"><h3 id="d-perc">0%</h3><p>DONE</p></div>
+                <div class="chart-overlay"><h4 id="d-label">0%</h4><p>COMPLETED</p></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title">Weekly Tasks <span>Compliance</span></div>
-            <div class="chart-box">
+            <div class="card-header"><h3>Weekly Tasks</h3><span>Global</span></div>
+            <div class="chart-container">
                 <canvas id="weeklyDonut"></canvas>
-                <div class="donut-val"><h3 id="w-perc">0%</h3><p>DONE</p></div>
+                <div class="chart-overlay"><h4 id="w-label">0%</h4><p>COMPLETED</p></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title" id="current-week-lbl">Current Week Distribution <span>Area</span></div>
-            <div class="chart-box"><canvas id="weekDistBar"></canvas></div>
+            <div class="card-header"><h3>Weekly Distribution</h3><span id="current-week-no">Week --</span></div>
+            <div class="chart-container"><canvas id="weeklyDistBar"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">Weekly Progression <span>Counts per Week</span></div>
-            <div class="chart-box"><canvas id="progBar"></canvas></div>
+            <div class="card-header"><h3>Volume Progression</h3><span>By Week</span></div>
+            <div class="chart-container"><canvas id="progressionLine"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">Task Monitor <span>Recent</span></div>
-            <div class="scroller" id="taskFeed"></div>
+            <div class="card-header"><h3>System Monitor</h3><span>Priority List</span></div>
+            <div class="scroller" id="task-feed">
+                </div>
         </div>
     </main>
 
     <script>
-        const rawData = {
-            "tasks": [
-                {"T": "Aged stock 7AM", "S": "Completed", "type": "D"},
-                {"T": "ADJUSTMENTS (Returns)", "S": "Not started", "type": "D"},
-                {"T": "LOCATIONS IN ERROR", "S": "Not started", "type": "D"},
-                {"T": "SLA update", "S": "Not started", "type": "D"},
-                {"T": "Shrinkage Period", "S": "Completed", "type": "W"},
-                {"T": "(Weekly) SLA", "S": "Not started", "type": "W"},
-                {"T": "(Weekly) SIS report", "S": "Not started", "type": "W"}
-            ],
+        // DATE REALE BAZATE PE CERINTA TA
+        const dashboardData = {
             "stats": [
-                {"A": "MPR", "D": 127, "W": 34, "Qty": 5103},
-                {"A": "PB1", "D": 38, "W": 34, "Qty": 6457},
-                {"A": "PB2", "D": 15, "W": 34, "Qty": 7494},
-                {"A": "MP", "D": 221, "W": 33, "Qty": 4068},
-                {"A": "MIX", "D": 136, "W": 32, "Qty": 3900}
+                {"area": "MPR", "day": 127, "week": 34, "total": 5103},
+                {"area": "PB1", "day": 38, "week": 34, "total": 6457},
+                {"area": "PB2", "day": 15, "week": 34, "total": 7494},
+                {"area": "PB3", "day": 42, "week": 33, "total": 6901},
+                {"area": "MP", "day": 221, "week": 34, "total": 2068},
+                {"area": "MIX", "day": 136, "week": 32, "total": 1200},
+                {"area": "MS", "day": 61, "week": 34, "total": 450}
+            ],
+            "dailyTasks": [
+                {"name": "Aged stock 7AM", "done": true},
+                {"name": "ADJUSTMENTS", "done": false},
+                {"name": "LOCATIONS ERROR", "done": false},
+                {"name": "SLA UPDATE", "done": false},
+                {"name": "PI 1st Count", "done": false}
+            ],
+            "weeklyTasks": [
+                {"name": "Shrinkage Period", "done": true},
+                {"name": "SIS Report", "done": false},
+                {"name": "Weekly SLA", "done": false}
             ]
         };
 
-        function toggleFS() {
+        function toggleFullScreen() {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen();
             else document.exitFullscreen();
         }
 
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB');
-            document.getElementById('date').innerText = now.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'});
-        }
-        setInterval(updateTime, 1000); updateTime();
-
-        function render() {
-            // Filter only latest week for "Current Week Distribution"
-            const maxW = Math.max(...rawData.stats.map(x => x.W));
-            const currentWeekData = rawData.stats.filter(x => x.W === maxW);
-            document.getElementById('current-week-lbl').innerHTML = `Distribution <span>Week ${maxW}</span>`;
-
-            // Charts
-            new Chart(document.getElementById('dailyBar'), cfg('bar', rawData.stats.map(x=>x.A), rawData.stats.map(x=>x.D), '#06b6d4'));
-            new Chart(document.getElementById('weekDistBar'), cfg('bar', currentWeekData.map(x=>x.A), currentWeekData.map(x=>x.Qty), '#10b981'));
-            
-            // Weekly Progression (W32, W33, W34)
-            const prog = {};
-            rawData.stats.forEach(s => { prog[s.W] = (prog[s.W] || 0) + s.Qty; });
-            new Chart(document.getElementById('progBar'), cfg('line', Object.keys(prog).map(k=>"W"+k), Object.values(prog), '#06b6d4', true));
-
-            // Donut Compliance
-            const dP = setDonut('dailyDonut', 'd-perc', rawData.tasks.filter(t=>t.type==='D'), '#06b6d4');
-            const wP = setDonut('weeklyDonut', 'w-perc', rawData.tasks.filter(t=>t.type==='W'), '#10b981');
-            document.getElementById('perf').innerText = ((dP + wP) / 2).toFixed(1) + "%";
-
-            // KPI calculation
-            const dayTotal = rawData.stats.reduce((s,x)=>s+x.D, 0);
-            document.getElementById('k-day').innerText = dayTotal;
-            document.getElementById('k-delta').innerText = dayTotal - 1193;
-            document.getElementById('k-avg').innerText = (rawData.stats.reduce((s,x)=>s+x.Qty, 0) / 4).toFixed(0);
-
-            // Task List
-            document.getElementById('taskFeed').innerHTML = rawData.tasks.map(t => `
-                <div class="task"><span>${t.T}</span><span class="${t.S==='Completed'?'tag-done':''}" style="font-size:0.5rem">${t.S.toUpperCase()}</span></div>
-            `).join('');
+        function initClock() {
+            const update = () => {
+                const now = new Date();
+                document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-GB');
+                document.getElementById('live-date').innerText = now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'short' });
+            };
+            setInterval(update, 1000); update();
         }
 
-        function cfg(type, labels, data, color, fill=false) {
-            return {
-                type: type,
-                data: { labels, datasets: [{ data, backgroundColor: color, borderColor: color, fill: fill, tension: 0.4, borderRadius: 4 }] },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } },
-                    scales: { 
-                        y: { display: false }, 
-                        x: { ticks: { font: { size: 7 }, color: '#64748b' }, grid: { display: false } } 
-                    } 
+        function renderCharts() {
+            const ctxOptions = {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { display: false }, 
+                    x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } } 
                 }
             };
+
+            // 1. Daily Bar Chart
+            new Chart(document.getElementById('dailyBar'), {
+                type: 'bar',
+                data: {
+                    labels: dashboardData.stats.map(s => s.area),
+                    datasets: [{
+                        data: dashboardData.stats.map(s => s.day),
+                        backgroundColor: '#22d3ee', borderRadius: 8, barThickness: 20
+                    }]
+                },
+                options: ctxOptions
+            });
+
+            // 2. Weekly Distribution (Only latest week)
+            const maxW = Math.max(...dashboardData.stats.map(s => s.week));
+            document.getElementById('current-week-no').innerText = `Week ${maxW}`;
+            const latestData = dashboardData.stats.filter(s => s.week === maxW);
+            
+            new Chart(document.getElementById('weeklyDistBar'), {
+                type: 'bar',
+                data: {
+                    labels: latestData.map(s => s.area),
+                    datasets: [{
+                        data: latestData.map(s => s.total),
+                        backgroundColor: '#10b981', borderRadius: 8, barThickness: 20
+                    }]
+                },
+                options: ctxOptions
+            });
+
+            // 3. Volume Progression
+            const weeks = [...new Set(dashboardData.stats.map(s => s.week))].sort();
+            const weekTotals = weeks.map(w => 
+                dashboardData.stats.filter(s => s.week === w).reduce((acc, curr) => acc + curr.total, 0)
+            );
+
+            new Chart(document.getElementById('progressionLine'), {
+                type: 'line',
+                data: {
+                    labels: weeks.map(w => "W" + w),
+                    datasets: [{
+                        data: weekTotals,
+                        borderColor: '#22d3ee', tension: 0.4, fill: true,
+                        backgroundColor: 'rgba(34, 211, 238, 0.1)', pointRadius: 5
+                    }]
+                },
+                options: ctxOptions
+            });
+
+            // 4. Donuts
+            const dScore = renderDonut('dailyDonut', 'd-label', dashboardData.dailyTasks, '#22d3ee');
+            const wScore = renderDonut('weeklyDonut', 'w-label', dashboardData.weeklyTasks, '#10b981');
+            document.getElementById('compliance-total').innerText = Math.round((dScore + wScore) / 2) + "%";
+
+            // KPI Header logic
+            const dayTotal = dashboardData.stats.reduce((a, b) => a + b.day, 0);
+            document.getElementById('total-day').innerText = dayTotal;
+            document.getElementById('avg-area').innerText = Math.round(dayTotal / dashboardData.stats.length);
+            const delta = dayTotal - 1193;
+            document.getElementById('delta-target').innerText = (delta > 0 ? "+" : "") + delta;
+            document.getElementById('delta-target').style.color = delta >= 0 ? 'var(--emerald)' : 'var(--rose)';
+
+            // Task Feed
+            const feed = document.getElementById('task-feed');
+            [...dashboardData.dailyTasks, ...dashboardData.weeklyTasks].forEach(t => {
+                feed.innerHTML += `
+                    <div class="task-row ${t.done ? 'done' : ''}">
+                        <span class="task-name">${t.name}</span>
+                        <span class="task-status">${t.done ? '✔ DONE' : 'WAITING'}</span>
+                    </div>
+                `;
+            });
         }
 
-        function setDonut(id, txtId, tasks, color) {
-            const done = tasks.filter(t => t.S === 'Completed').length;
-            const p = ((done / tasks.length) * 100).toFixed(0);
-            document.getElementById(txtId).innerText = p + "%";
+        function renderDonut(id, labelId, tasks, color) {
+            const done = tasks.filter(t => t.done).length;
+            const perc = Math.round((done / tasks.length) * 100);
+            document.getElementById(labelId).innerText = perc + "%";
+            
             new Chart(document.getElementById(id), {
                 type: 'doughnut',
-                data: { datasets: [{ data: [done, tasks.length - done], backgroundColor: [color, 'rgba(255,255,255,0.02)'], borderWidth: 0, cutout: '80%' }] },
+                data: {
+                    datasets: [{
+                        data: [done, tasks.length - done],
+                        backgroundColor: [color, 'rgba(255,255,255,0.05)'],
+                        borderWidth: 0, cutout: '80%'
+                    }]
+                },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false } } }
             });
-            return parseFloat(p);
+            return perc;
         }
 
-        render();
+        initClock();
+        renderCharts();
     </script>
 </body>
 </html>
