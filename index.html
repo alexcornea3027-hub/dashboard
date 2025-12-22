@@ -226,32 +226,48 @@
         });
       }
 
-      function renderWeeklyChart(areaSet){
+            function renderWeeklyChart(areaSet){
         try{
-          const labels = areaSet && areaSet.size? Array.from(areaSet) : (DATA.weeklyPiData||[]).map(w=>w.Area);
-          const mapping = new Map((DATA.weeklyPiData||[]).map(w=>[w.Area, Number(w['Weekly Qty'])||0]));
-          const data = labels.map(a=>mapping.get(a) || 0);
-          const ctx = document.getElementById('weeklyChart').getContext('2d'); if(weeklyChart) weeklyChart.destroy();
-          weeklyChart = new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Weekly Qty',data,backgroundColor:labels.map((l,i)=>colors[i%colors.length] + 'cc')}]},options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}});
-          document.getElementById('weeklyNote').textContent = 'Weekly chart uses weeklyPiData -> Weekly Qty (only).';
+          // WEEKLY = strictly weeklyPiData -> Weekly Qty
+          const rows = (DATA.weeklyPiData||[]);
+          const labels = rows.map(w=>w.Area);
+          const data = rows.map(w=>Number(w['Weekly Qty'])||0);
+
+          const ctx = document.getElementById('weeklyChart').getContext('2d');
+          if(weeklyChart) weeklyChart.destroy();
+          weeklyChart = new Chart(ctx,{
+            type:'bar',
+            data:{labels,datasets:[{label:'Weekly Qty',data,backgroundColor:labels.map((_,i)=>colors[i%colors.length]+'cc')}]},
+            options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}
+          });
+          document.getElementById('weeklyNote').textContent = 'Weekly values come ONLY from weeklyPiData → Weekly Qty.';
         }catch(e){console.error('weekly err',e)}
       }
+      }
 
-      function renderDailyChart(){
+            function renderDailyChart(){
         try{
-          // daily-type areas are those in weeklyPiData with Daily Qty > 0
-          const dailyAreas = (DATA.weeklyPiData||[]).filter(w=>Number(w['Daily Qty'])>0).map(w=>w.Area);
-          const dailyValues = dailyAreas.map(a=>{ const rec = (DATA.piData||[]).find(r=>r.Area===a); return rec?Number(rec.Counted)||0:0; });
-          const sumAll = dailyValues.reduce((s,x)=>s+x,0);
-          const avg = dailyValues.length? Math.round(sumAll/dailyValues.length) : 0;
-          const ctx = document.getElementById('dailyChart').getContext('2d'); if(dailyChart) dailyChart.destroy();
-          dailyChart = new Chart(ctx,{type:'bar',data:{labels:dailyAreas.length?dailyAreas:['No daily-type areas'],datasets:[{label:'Daily counted (per area)',data:dailyValues,backgroundColor:dailyValues.map(v=> v >= target ? colors[0] : colors[3])}]},options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}});
+          // DAILY = strictly weeklyPiData -> Daily Qty (true daily values)
+          const dailyRows = (DATA.weeklyPiData||[]).filter(w=>Number(w['Daily Qty'])>0);
+          const labels = dailyRows.map(w=>w.Area);
+          const values = dailyRows.map(w=>Number(w['Daily Qty'])||0);
 
-          // show sum vs target (user wanted summed across areas)
+          const sumAll = values.reduce((s,x)=>s+x,0);
+          const avg = values.length ? Math.round(sumAll / values.length) : 0;
+
+          const ctx = document.getElementById('dailyChart').getContext('2d');
+          if(dailyChart) dailyChart.destroy();
+          dailyChart = new Chart(ctx,{
+            type:'bar',
+            data:{labels,datasets:[{label:'Daily Qty (today)',data:values,backgroundColor:values.map(v=> v>=target ? colors[0] : colors[3])}]},
+            options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}
+          });
+
           const overTarget = sumAll >= target;
-          document.getElementById('targetStatus').innerHTML = `<div class='small'>Target (sum): <strong>${formatNumber(target)}</strong></div><div style='font-weight:700;color:${overTarget? 'var(--good)':'var(--bad)'}'>${overTarget? 'OVER target':'BELOW target'} • ${formatNumber(sumAll)}</div>`;
-          document.getElementById('dailyNote').textContent = `Daily-type areas: ${dailyAreas.length} • Average per area: ${formatNumber(avg)} • Sum (all daily-type areas): ${formatNumber(sumAll)}.`;
+          document.getElementById('targetStatus').innerHTML = `<div class='small'>Daily target (sum): <strong>${formatNumber(target)}</strong></div><div style='font-weight:700;color:${overTarget?'var(--good)':'var(--bad)'}'>${overTarget?'OVER target':'BELOW target'} • ${formatNumber(sumAll)}</div>`;
+          document.getElementById('dailyNote').textContent = `Daily areas: ${labels.length} • Average per area: ${formatNumber(avg)} • Total today: ${formatNumber(sumAll)}.`;
         }catch(e){console.error('daily err',e)}
+      }
       }
 
       function renderMetrics(filtered){
@@ -303,10 +319,15 @@
       areaFilter.onchange = renderAll;
 
       document.getElementById('downloadJson').onclick = ()=>{ const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='data.json'; a.click(); URL.revokeObjectURL(url); };
-      document.getElementById('exportCSV').onclick = ()=>{ const rows=[['Date','Area','Total locations','Counted','Above target','Behind %']]; (DATA.piData||[]).forEach(r=>rows.push([r.Date,r.Area,r['Total locations'],r.Counted,r['Above target'],r['Behind %']])); const csv = rows
-  .map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','))
-  .join('\n');
- const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='piData.csv'; a.click(); URL.revokeObjectURL(url); };
+            document.getElementById('exportCSV').onclick = ()=>{
+        const rows=[['Date','Area','Total locations','Counted','Above target','Behind %']];
+        (DATA.piData||[]).forEach(r=>rows.push([r.Date,r.Area,r['Total locations'],r.Counted,r['Above target'],r['Behind %']]));
+        const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob=new Blob([csv],{type:'text/csv'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a'); a.href=url; a.download='piData.csv'; a.click(); URL.revokeObjectURL(url);
+      }; (DATA.piData||[]).forEach(r=>rows.push([r.Date,r.Area,r['Total locations'],r.Counted,r['Above target'],r['Behind %']])); const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('
+'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='piData.csv'; a.click(); URL.revokeObjectURL(url); };
 
       // initial render
       renderAll();
