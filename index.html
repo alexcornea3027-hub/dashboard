@@ -1,20 +1,19 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Team VCB | Supreme Command Center</title>
+    <title>Stock Team VCB | Performance Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg: #020617;
-            --card: #0f172a;
-            --accent: #38bdf8;
+            --bg: #0b0f19;
+            --card: #151c2c;
+            --accent: #0ea5e9;
             --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
+            --danger: #f43f5e;
             --text: #f8fafc;
-            --text-dim: #64748b;
+            --text-dim: #94a3b8;
             --border: rgba(255, 255, 255, 0.05);
         }
 
@@ -27,262 +26,273 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            padding: 12px;
         }
 
-        /* --- HEADER & TARGET TRACKER --- */
+        /* --- HEADER & LIVE PERFORMANCE --- */
         header {
-            height: 10vh;
+            height: 12vh;
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            align-items: center;
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 20px;
+            margin-bottom: 12px;
+        }
+
+        .header-box {
             background: var(--card);
-            padding: 0 20px;
-            border-radius: 15px;
-            margin-bottom: 10px;
             border: 1px solid var(--border);
-        }
-
-        .brand h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -1px; }
-        .brand span { color: var(--accent); }
-
-        .target-monitor {
-            background: rgba(0,0,0,0.3);
-            padding: 10px 20px;
             border-radius: 12px;
-            text-align: center;
-            border: 1px solid var(--border);
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-        .target-val { font-size: 1.5rem; font-weight: 700; line-height: 1; }
-        .target-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim); }
 
-        .clock-section { text-align: right; }
-        #time { font-size: 1.6rem; font-weight: 700; font-family: monospace; }
-        #date { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; }
+        .performance-panel {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.1);
+        }
 
-        /* --- DASHBOARD GRID --- */
-        .grid {
+        .kpi-unit { text-align: center; }
+        .kpi-unit big { font-size: 2rem; font-weight: 800; display: block; line-height: 1; }
+        .kpi-unit small { font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; }
+
+        #delta-pill {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        /* --- MAIN DASHBOARD GRID --- */
+        .dashboard-grid {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr 1.4fr 1fr;
+            grid-template-columns: 1fr 1.2fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 10px;
+            gap: 12px;
             min-height: 0;
         }
 
         .card {
             background: var(--card);
-            border-radius: 15px;
             border: 1px solid var(--border);
+            border-radius: 15px;
             padding: 15px;
             display: flex;
             flex-direction: column;
             min-height: 0;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
 
-        .card-label {
-            font-size: 0.7rem;
+        .card-title {
+            font-size: 0.75rem;
             font-weight: 700;
             color: var(--accent);
             text-transform: uppercase;
             margin-bottom: 10px;
-            letter-spacing: 1px;
+            border-left: 3px solid var(--accent);
+            padding-left: 10px;
         }
 
-        /* --- CENTER SECTION --- */
-        .center-hero { grid-row: span 2; justify-content: space-around; }
-        .gauge-container { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
-        .gauge-info { position: absolute; text-align: center; transform: translateY(15px); }
-        .gauge-info b { font-size: 3.5rem; display: block; line-height: 1; }
+        /* --- CENTER SECTION (3D CYCLE) --- */
+        .center-card { grid-row: span 2; justify-content: space-around; }
+        .gauge-box { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+        .gauge-label { position: absolute; text-align: center; transform: translateY(15px); }
+        .gauge-label h2 { font-size: 3.5rem; font-weight: 900; }
 
-        /* --- TASKS WITH PIE CHART --- */
-        .task-layout { flex: 1; display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; min-height: 0; }
+        /* --- TASK LAYOUT --- */
+        .task-layout { flex: 1; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 10px; min-height: 0; }
         .task-list { overflow-y: auto; padding-right: 5px; }
         .task-list::-webkit-scrollbar { width: 3px; }
-        .task-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 5px; }
+        .task-list::-webkit-scrollbar-thumb { background: var(--accent); }
 
         .task-row {
-            background: rgba(255,255,255,0.03);
-            margin-bottom: 5px;
-            padding: 8px;
-            border-radius: 8px;
+            background: rgba(0,0,0,0.2);
+            padding: 7px 10px;
+            border-radius: 6px;
+            margin-bottom: 4px;
             font-size: 0.75rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .dot { width: 6px; height: 6px; border-radius: 50%; }
-
-        /* PULSING EFFECT FOR TARGET */
-        .pulse-red { animation: pulseR 2s infinite; }
-        @keyframes pulseR {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
+        .status-indicator { width: 6px; height: 6px; border-radius: 50%; }
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="brand">
-            <h1>STOCK TEAM <span>VCB</span></h1>
+        <div class="header-box">
+            <h1 style="font-size: 1.2rem; font-weight: 800;">STOCK <span style="color:var(--accent)">VCB</span></h1>
+            <p id="full-date" style="font-size: 0.7rem; color: var(--text-dim);"></p>
+            <p id="live-time" style="font-size: 1.1rem; font-weight: bold;"></p>
         </div>
-        <div class="target-monitor" id="target-container">
-            <div class="target-val" id="target-status">0 / 1193</div>
-            <div class="target-label" id="target-msg">Daily Goal Progress</div>
+
+        <div class="header-box performance-panel">
+            <div class="kpi-unit">
+                <small>Combined Total</small>
+                <big id="total-daily">0</big>
+            </div>
+            <div style="height: 40px; width: 1px; background: var(--border);"></div>
+            <div class="kpi-unit">
+                <small>Status vs Target</small>
+                <div id="delta-pill">0</div>
+            </div>
+            <div style="height: 40px; width: 1px; background: var(--border);"></div>
+            <div class="kpi-unit">
+                <small>Daily Target</small>
+                <big>1193</big>
+            </div>
         </div>
-        <div class="clock-section">
-            <div id="time">00:00:00</div>
-            <div id="date">Așteptare date...</div>
+
+        <div class="header-box" style="text-align: right;">
+            <small style="color:var(--text-dim)">INVENTORY INTEGRITY</small>
+            <h2 id="accuracy-perc" style="color: var(--success); font-size: 1.8rem;">0%</h2>
         </div>
     </header>
 
-    <main class="grid">
+    <main class="dashboard-grid">
         <div class="card">
-            <div class="card-label">Daily Performance / Area</div>
-            <div style="flex:1; position:relative;"><canvas id="dailyBars"></canvas></div>
+            <div class="card-title">Daily Area Distribution</div>
+            <div style="flex:1; position:relative;"><canvas id="chartArea"></canvas></div>
         </div>
 
-        <div class="card center-hero">
-            <div class="card-label" style="text-align: center;">Total Cycle Completion Status</div>
-            <div class="gauge-container">
-                <canvas id="cycleGauge"></canvas>
-                <div class="gauge-info">
-                    <b id="perc-val">0%</b>
-                    <span style="font-size: 0.7rem; color: var(--text-dim);">TOTAL ACCURACY</span>
+        <div class="card center-card">
+            <div class="card-title" style="text-align: center;">Total Inventory Cycle</div>
+            <div class="gauge-box">
+                <canvas id="chartCycle"></canvas>
+                <div class="gauge-label">
+                    <h2 id="gauge-val">0%</h2>
+                    <p style="font-size: 0.7rem; color: var(--text-dim);">COMPLETED</p>
                 </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px;">
-                    <small style="color:var(--text-dim); font-size: 0.6rem;">COUNTED</small>
-                    <div id="c-counted" style="font-weight: bold;">0</div>
+            <div style="display: flex; gap: 10px;">
+                <div style="flex:1; background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; text-align:center;">
+                    <small style="display:block; font-size:0.6rem; color:var(--text-dim);">COUNTED</small>
+                    <b id="val-counted">0</b>
                 </div>
-                <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px;">
-                    <small style="color:var(--text-dim); font-size: 0.6rem;">REMAINING</small>
-                    <div id="c-rem" style="font-weight: bold; color: var(--danger);">0</div>
+                <div style="flex:1; background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; text-align:center;">
+                    <small style="display:block; font-size:0.6rem; color:var(--text-dim);">REMAINING</small>
+                    <b id="val-rem" style="color:var(--danger)">0</b>
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-label">Weekly Progress Trend</div>
-            <div style="flex:1; position:relative;"><canvas id="weeklyLine"></canvas></div>
+            <div class="card-title">Weekly Productivity Trend</div>
+            <div style="flex:1; position:relative;"><canvas id="chartWeekly"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-label">Daily Task Status</div>
+            <div class="card-title">Daily Operations Status</div>
             <div class="task-layout">
-                <div class="task-list" id="dailyTaskList"></div>
+                <div class="task-list" id="dailyTasks"></div>
                 <div style="position:relative;"><canvas id="dailyPie"></canvas></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-label">Weekly Task Status</div>
+            <div class="card-title">Weekly Master Tasks</div>
             <div class="task-layout">
-                <div class="task-list" id="weeklyTaskList"></div>
+                <div class="task-list" id="weeklyTasks"></div>
                 <div style="position:relative;"><canvas id="weeklyPie"></canvas></div>
             </div>
         </div>
     </main>
 
     <script>
-        const DAILY_TARGET = 1193;
+        const TARGET = 1193;
 
-        // --- CEAS ---
-        function updateClock() {
-            const acum = new Date();
-            document.getElementById('time').innerText = acum.toLocaleTimeString('ro-RO');
-            document.getElementById('date').innerText = acum.toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long' });
+        // --- TIME ENGINE ---
+        function runClock() {
+            const now = new Date();
+            document.getElementById('full-date').innerText = now.toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long' });
+            document.getElementById('live-time').innerText = now.toLocaleTimeString('en-GB');
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(runClock, 1000); runClock();
 
-        // --- DATA ---
-        async function load() {
+        // --- DATA ENGINE ---
+        async function init() {
             try {
                 const res = await fetch('data/dashboard.json');
-                const d = await res.json();
-                render(d);
-            } catch (e) { console.error("Eroare incarcare JSON"); }
+                const data = await res.json();
+                process(data);
+            } catch (e) { console.error("Data Load Error"); }
         }
 
-        function render(data) {
-            const pi = data.piData || [];
+        function process(data) {
             const wPi = data.weeklyPiData || [];
-            
-            // 1. Target Tracking Logic
-            const dailySum = wPi.reduce((a, b) => a + (b["Daily Qty"] || 0), 0);
-            const targetEl = document.getElementById('target-status');
-            const targetCont = document.getElementById('target-container');
-            targetEl.innerText = `${dailySum} / ${DAILY_TARGET}`;
-            
-            if(dailySum < DAILY_TARGET) {
-                targetEl.style.color = 'var(--danger)';
-                targetCont.classList.add('pulse-red');
-                document.getElementById('target-msg').innerText = `Needs ${DAILY_TARGET - dailySum} more`;
-            } else {
-                targetEl.style.color = 'var(--success)';
-                targetCont.classList.remove('pulse-red');
-                document.getElementById('target-msg').innerText = "Target Reached!";
-            }
+            const pi = data.piData || [];
 
-            // 2. Cycle Stats
-            let tLoc = 0, tCnt = 0;
-            pi.forEach(x => { tLoc += x["Total locations"]; tCnt += x.Counted; });
-            document.getElementById('perc-val').innerText = ((tCnt/tLoc)*100).toFixed(1) + "%";
-            document.getElementById('c-counted').innerText = tCnt.toLocaleString();
-            document.getElementById('c-rem').innerText = (tLoc - tCnt).toLocaleString();
+            // 1. COMBINED DAILY CALCULATION
+            const dailyCombined = wPi.reduce((s, x) => s + (x["Daily Qty"] || 0), 0);
+            const delta = dailyCombined - TARGET;
+            
+            document.getElementById('total-daily').innerText = dailyCombined.toLocaleString();
+            const deltaPill = document.getElementById('delta-pill');
+            deltaPill.innerText = (delta >= 0 ? "+" : "") + delta + " vs Target";
+            deltaPill.style.background = delta >= 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)';
+            deltaPill.style.color = delta >= 0 ? 'var(--success)' : 'var(--danger)';
 
-            // 3. Charts
-            initBars(wPi);
-            initLine(wPi);
-            initCycle(tCnt, tLoc - tCnt);
-            initTasks('dailyTaskList', 'dailyPie', data.dailyTask, '#38bdf8');
-            initTasks('weeklyTaskList', 'weeklyPie', data.weeklyTask, '#10b981');
+            // 2. CYCLE CALCULATION
+            let tL = 0, tC = 0;
+            pi.forEach(x => { tL += x["Total locations"]; tC += x.Counted; });
+            const p = ((tC/tL)*100).toFixed(1);
+            document.getElementById('gauge-val').innerText = p + "%";
+            document.getElementById('accuracy-perc').innerText = p + "%";
+            document.getElementById('val-counted').innerText = tC.toLocaleString();
+            document.getElementById('val-rem').innerText = (tL - tC).toLocaleString();
+
+            // 3. RENDER CHARTS
+            renderDailyBars(wPi);
+            renderWeeklyLine(wPi);
+            renderCycleGauge(tC, tL - tC);
+            renderTaskSystem('dailyTasks', 'dailyPie', data.dailyTask, '#0ea5e9');
+            renderTaskSystem('weeklyTasks', 'weeklyPie', data.weeklyTask, '#10b981');
         }
 
-        function initBars(data) {
-            new Chart(document.getElementById('dailyBars'), {
+        function renderDailyBars(data) {
+            new Chart(document.getElementById('chartArea'), {
                 type: 'bar',
                 data: {
                     labels: data.map(x => x.Area),
-                    datasets: [{ data: data.map(x => x["Daily Qty"]), backgroundColor: '#38bdf8', borderRadius: 5 }]
+                    datasets: [{ data: data.map(x => x["Daily Qty"]), backgroundColor: '#0ea5e9', borderRadius: 4 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
-                             x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font:{size:10} } },
+                             x: { grid: { display: false }, ticks: { color: '#64748b', font:{size:10} } } } }
             });
         }
 
-        function initLine(data) {
+        function renderWeeklyLine(data) {
             const sorted = [...data].sort((a,b) => a["Week No"] - b["Week No"]);
-            new Chart(document.getElementById('weeklyLine'), {
+            new Chart(document.getElementById('chartWeekly'), {
                 type: 'line',
                 data: {
                     labels: sorted.map(x => "Wk " + x["Week No"]),
                     datasets: [{ data: sorted.map(x => x["Weekly Qty"]), borderColor: '#10b981', tension: 0.4, fill: true, backgroundColor: 'rgba(16, 185, 129, 0.1)' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
-                             x: { grid: { display: false }, ticks: { color: '#64748b' } } } }
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font:{size:10} } },
+                             x: { grid: { display: false }, ticks: { color: '#64748b', font:{size:10} } } } }
             });
         }
 
-        function initCycle(c, r) {
-            new Chart(document.getElementById('cycleGauge'), {
+        function renderCycleGauge(c, r) {
+            new Chart(document.getElementById('chartCycle'), {
                 type: 'doughnut',
                 data: {
-                    datasets: [{ data: [c, r], backgroundColor: ['#38bdf8', 'rgba(255,255,255,0.05)'], borderWidth: 0, cutout: '85%' }]
+                    datasets: [{ data: [c, r], backgroundColor: ['#0ea5e9', 'rgba(255,255,255,0.05)'], borderWidth: 0, cutout: '85%' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: 270 }
             });
         }
 
-        function initTasks(listId, pieId, tasks, color) {
+        function renderTaskSystem(listId, pieId, tasks, color) {
             const list = document.getElementById(listId);
             const done = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
             const pending = tasks.length - done;
@@ -290,8 +300,8 @@
             list.innerHTML = tasks.map(t => {
                 const isDone = t.Status.toLowerCase().includes('complete');
                 return `<div class="task-row">
-                    <span style="color: ${isDone ? '#fff' : '#94a3b8'}">${t.Task || t.TASK}</span>
-                    <div class="dot" style="background: ${isDone ? 'var(--success)' : 'var(--danger)'}"></div>
+                    <span>${t.Task || t.TASK}</span>
+                    <div class="status-indicator" style="background: ${isDone ? 'var(--success)' : 'var(--danger)'}"></div>
                 </div>`;
             }).join('');
 
@@ -299,13 +309,13 @@
                 type: 'pie',
                 data: {
                     labels: ['Done', 'Pending'],
-                    datasets: [{ data: [done, pending], backgroundColor: [color, 'rgba(255,255,255,0.05)'], borderWidth: 0 }]
+                    datasets: [{ data: [done, pending], backgroundColor: [color, 'rgba(255,255,255,0.03)'], borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
-        load();
+        init();
     </script>
 </body>
 </html>
