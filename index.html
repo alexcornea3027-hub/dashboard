@@ -1,198 +1,164 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>PI Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Chart.js -->
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #111827;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent1: #38bdf8;
-      --accent2: #22c55e;
-      --accent3: #f97316;
-    }
-
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: radial-gradient(circle at top, #1e293b, #020617);
-      color: var(--text);
-    }
-
-    header {
-      padding: 24px;
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .card {
-      background: linear-gradient(145deg, #020617, #020617);
-      border-radius: 18px;
-      padding: 20px;
-      box-shadow:
-        0 30px 60px rgba(0, 0, 0, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04);
-      transform: translateY(0);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
-    }
-
-    h3 {
-      margin: 0 0 12px 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    canvas {
-      max-height: 260px;
-    }
-
-    .kpi {
-      font-size: 44px;
-      font-weight: 700;
-      color: var(--accent1);
-      text-align: center;
-      margin-top: 30px;
-    }
-
-    .sub {
-      text-align: center;
-      color: var(--muted);
-      font-size: 14px;
-    }
-  </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Level Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<style>
+  body { font-family: Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+  h1 { text-align: center; }
+  .toggle { text-align: center; margin-bottom: 20px; }
+  .charts { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 20px; }
+  .chart-card { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; }
+  .tasks { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+  .task-card { padding: 10px; border-radius: 10px; width: 200px; color: #fff; font-weight: bold; }
+  .completed { background-color: #28a745; }
+  .not-started { background-color: #dc3545; }
+  canvas { margin: auto; display: block; }
+</style>
 </head>
 <body>
 
-<header>PI Operational Dashboard</header>
+<h1>Next Level PI Dashboard</h1>
+<div class="toggle">
+  <label for="typeSelect">Select View: </label>
+  <select id="typeSelect">
+    <option value="daily">Daily</option>
+    <option value="weekly">Weekly</option>
+    <option value="total">Total Cycle</option>
+  </select>
+</div>
 
-<div class="grid">
-  <div class="card">
-    <h3>Daily PI — Counted vs Remaining</h3>
-    <canvas id="dailyDonut"></canvas>
-    <div class="kpi" id="dailyTotal"></div>
-    <div class="sub">Target: 1,193 locations</div>
+<div class="charts">
+  <div class="chart-card">
+    <canvas id="countedChart"></canvas>
   </div>
-
-  <div class="card">
-    <h3>Weekly PI — Counted vs Remaining</h3>
-    <canvas id="weeklyDonut"></canvas>
-    <div class="kpi" id="weeklyTotal"></div>
-    <div class="sub">Weekly progress</div>
-  </div>
-
-  <div class="card">
-    <h3>Weekly PI — Series by Area</h3>
-    <canvas id="weeklyBar"></canvas>
+  <div class="chart-card">
+    <canvas id="weeklyChart"></canvas>
   </div>
 </div>
 
+<h2>Tasks</h2>
+<div class="tasks" id="tasksContainer"></div>
+
 <script>
-/* =========================
-   EMBEDDED DATA (NO FETCH)
-   ========================= */
-const DATA = " + JSON.stringify({"piData":[],"dailyTask":[],"weeklyTask":[],"weeklyPiData":[]}) + ";
+const data = {
+  piData: [
+    { Date: '22.12.2025', Area: 'MPR', Total_locations: 14622, Counted: 3936 },
+    { Date: '22.12.2025', Area: 'PB1', Total_locations: 4329, Counted: 1189 },
+    { Date: '22.12.2025', Area: 'PB2', Total_locations: 795, Counted: 484 },
+    { Date: '22.12.2025', Area: 'PB3', Total_locations: 772, Counted: 0 },
+    { Date: '22.12.2025', Area: 'PB4', Total_locations: 164, Counted: 0 },
+    { Date: '22.12.2025', Area: 'PBSRES', Total_locations: 5197, Counted: 1374 },
+    { Date: '22.12.2025', Area: 'MP', Total_locations: 25612, Counted: 7409 },
+    { Date: '22.12.2025', Area: 'MIX', Total_locations: 33087, Counted: 8941 },
+    { Date: '22.12.2025', Area: 'MS', Total_locations: 21512, Counted: 5902 },
+    { Date: '22.12.2025', Area: 'MSX', Total_locations: 28798, Counted: 7984 },
+    { Date: '22.12.2025', Area: 'FM', Total_locations: 2308, Counted: 620 },
+    { Date: '22.12.2025', Area: 'HP', Total_locations: 561, Counted: 155 }
+  ],
+  weeklyPiData: [
+    { Date: '22.12.2025', Area: 'MPR', Daily_Qty: 127 },
+    { Date: '22.12.2025', Area: 'PB1', Daily_Qty: 38 },
+    { Date: '22.12.2025', Area: 'PB2', Daily_Qty: 15 },
+    { Date: '22.12.2025', Area: 'PB3', Daily_Qty: 0 },
+    { Date: '22.12.2025', Area: 'PB4', Daily_Qty: 0 },
+    { Date: '22.12.2025', Area: 'PBSRES', Daily_Qty: 45 },
+    { Date: '22.12.2025', Area: 'MP', Daily_Qty: 221 },
+    { Date: '22.12.2025', Area: 'MIX', Daily_Qty: 136 },
+    { Date: '22.12.2025', Area: 'MS', Daily_Qty: 61 },
+    { Date: '22.12.2025', Area: 'MSX', Daily_Qty: 249 },
+    { Date: '22.12.2025', Area: 'FM', Daily_Qty: 20 },
+    { Date: '22.12.2025', Area: 'HP', Daily_Qty: 5 }
+  ],
+  dailyTask: [
+    { Task: 'ADJUSTMENTS (Returns)', Status: 'Not started' },
+    { Task: 'Aged stock report 7AM', Status: 'Completed' },
+    { Task: 'PI 1st count', Status: 'Not started' }
+  ],
+  weeklyTask: [
+    { Task: '(Weekly) SLA', Status: 'Not started' },
+    { Task: '(once a month) Shrinkage for Period', Status: 'Completed' }
+  ]
+};
 
-/* =========================
-   LOGIC
-   ========================= */
-var TARGET_DAILY = 1193;
+const tasksContainer = document.getElementById('tasksContainer');
+const typeSelect = document.getElementById('typeSelect');
 
-function sum(arr, key) {
-  var t = 0;
-  for (var i = 0; i < arr.length; i++) t += Number(arr[i][key] || 0);
-  return t;
+function renderTasks(type) {
+  tasksContainer.innerHTML = '';
+  const tasks = type === 'daily' ? data.dailyTask : data.weeklyTask;
+  tasks.forEach(t => {
+    const div = document.createElement('div');
+    div.className = `task-card ${t.Status === 'Completed' ? 'completed' : 'not-started'}`;
+    div.innerText = t.Task;
+    tasksContainer.appendChild(div);
+  });
 }
 
-// DAILY TOTAL
-var dailyTotal = sum(DATA.weeklyPiData, 'Daily Qty');
-var dailyRemaining = Math.max(TARGET_DAILY - dailyTotal, 0);
+let countedChart, weeklyChart;
 
-document.getElementById('dailyTotal').innerText = dailyTotal;
+function renderCharts(type) {
+  const ctx1 = document.getElementById('countedChart').getContext('2d');
+  const ctx2 = document.getElementById('weeklyChart').getContext('2d');
+  
+  const pi = data.piData;
+  const weekly = data.weeklyPiData;
 
-new Chart(document.getElementById('dailyDonut'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Counted', 'Remaining'],
-    datasets: [{
-      data: [dailyTotal, dailyRemaining],
-      backgroundColor: ['#38bdf8', '#1e293b'],
-      borderWidth: 0
-    }]
-  },
-  options: {
-    cutout: '70%',
-    plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af' } } }
-  }
-});
+  const labels = pi.map(d => d.Area);
+  const counted = pi.map(d => d.Counted);
+  const remaining = pi.map(d => d.Total_locations - d.Counted);
 
-// WEEKLY TOTAL
-var weeklyTotal = sum(DATA.weeklyPiData, 'Weekly Qty');
-document.getElementById('weeklyTotal').innerText = weeklyTotal;
-
-new Chart(document.getElementById('weeklyDonut'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Weekly Counted'],
-    datasets: [{
-      data: [weeklyTotal],
-      backgroundColor: ['#22c55e'],
-      borderWidth: 0
-    }]
-  },
-  options: {
-    cutout: '70%',
-    plugins: { legend: { display: false } }
-  }
-});
-
-// WEEKLY SERIES BY AREA
-var areas = [];
-var weeklySeries = [];
-for (var i = 0; i < DATA.weeklyPiData.length; i++) {
-  areas.push(DATA.weeklyPiData[i].Area);
-  weeklySeries.push(DATA.weeklyPiData[i]['Weekly Qty']);
-}
-
-new Chart(document.getElementById('weeklyBar'), {
-  type: 'bar',
-  data: {
-    labels: areas,
-    datasets: [{
-      label: 'Weekly Qty',
-      data: weeklySeries,
-      backgroundColor: '#f97316'
-    }]
-  },
-  options: {
-    plugins: { legend: { labels: { color: '#9ca3af' } } },
-    scales: {
-      x: { ticks: { color: '#9ca3af' } },
-      y: { ticks: { color: '#9ca3af' } }
+  if(countedChart) countedChart.destroy();
+  countedChart = new Chart(ctx1, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Counted vs Remaining',
+        data: counted.map((c, i) => [c, remaining[i]]).flat(),
+        backgroundColor: ['#007bff','#ff7f0e'].flatMap(c => Array(labels.length).fill(c)),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      plugins: { datalabels: { display: true, color: '#fff' } },
+      responsive: true
     }
-  }
-}); " + JSON.stringify({
+  });
 
+  if(weeklyChart) weeklyChart.destroy();
+  weeklyChart = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: weekly.map(d => d.Area),
+      datasets: [{
+        label: 'Daily Qty',
+        data: weekly.map(d => d.Daily_Qty),
+        backgroundColor: '#28a745'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { datalabels: { anchor: 'end', align: 'top', color: '#000' } }
+    }
+  });
+}
+
+// Initial render
+renderTasks('daily');
+renderCharts('daily');
+
+// Toggle listener
+typeSelect.addEventListener('change', (e) => {
+  const type = e.target.value;
+  renderTasks(type);
+  renderCharts(type);
+});
+
+</script>
+
+</body>
+</html>
