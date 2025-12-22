@@ -3,308 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock VCB | Floating Dashboard</title>
+    <title>VCB Supreme Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
 
         :root {
-            --bg-color: #f0f2f5;
-            --card-white: #ffffff;
-            --navy: #1e293b;
-            --sky: #0ea5e9;
-            --emerald: #10b981;
-            --rose: #f43f5e;
-            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --bg: #060b19;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --cyan: #22d3ee;
+            --green: #4ade80;
+            --rose: #fb7185;
+            --text: #f8fafc;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--navy);
+            background: radial-gradient(circle at top right, #0c1427, #060b19);
+            color: var(--text);
             height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 25px;
-            overflow: hidden;
+            padding: 20px;
         }
 
-        /* --- FLOATING HEADER --- */
+        /* --- HEADER --- */
         header {
             height: 12vh;
             display: grid;
             grid-template-columns: 1fr 1.5fr 1fr;
             gap: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .float-panel {
-            background: var(--card-white);
+        .h-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
             border-radius: 20px;
-            padding: 15px 25px;
-            box-shadow: var(--shadow);
+            padding: 15px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: var(--shadow);
         }
 
-        .target-display {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            color: white;
-            text-align: center;
+        .target-center {
             flex-direction: row;
             justify-content: space-around;
             align-items: center;
+            border-bottom: 2px solid var(--cyan);
         }
 
-        .kpi-num { font-size: 1.8rem; font-weight: 800; display: block; }
-        .kpi-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+        .kpi-val { font-size: 2rem; font-weight: 800; display: block; line-height: 1; color: var(--cyan); }
+        .kpi-lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.6; }
 
-        /* --- MAIN CONTENT AREA --- */
-        main {
+        /* --- GRID --- */
+        .main-grid {
             flex: 1;
             display: grid;
             grid-template-columns: 1fr 1.2fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 25px;
+            gap: 20px;
             min-height: 0;
         }
 
-        .float-card {
-            background: var(--card-white);
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
             border-radius: 24px;
             padding: 20px;
-            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
+            box-shadow: var(--shadow);
             position: relative;
-            transition: transform 0.3s ease;
         }
-
-        .float-card:hover { transform: translateY(-5px); }
 
         .card-title {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 800;
-            color: var(--sky);
             text-transform: uppercase;
+            letter-spacing: 1px;
             margin-bottom: 15px;
-            letter-spacing: 0.5px;
+            color: var(--cyan);
+            display: flex;
+            justify-content: space-between;
         }
 
-        /* --- CHART CONTAINERS --- */
-        .chart-container { flex: 1; position: relative; min-height: 0; }
+        /* --- CHART WRAPPERS --- */
+        .chart-box { flex: 1; position: relative; min-height: 0; width: 100%; }
 
-        .cycle-hero { grid-row: span 2; justify-content: space-between; align-items: center; }
-
-        .gauge-text {
+        .cycle-hero { grid-row: span 2; }
+        .gauge-overlay {
             position: absolute;
-            top: 55%;
-            left: 50%;
+            top: 55%; left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
         }
-        .gauge-text h1 { font-size: 3rem; font-weight: 800; color: var(--navy); }
+        .gauge-overlay h1 { font-size: 3.5rem; font-weight: 800; text-shadow: 0 0 20px var(--cyan); }
 
-        /* --- TASK SYSTEM --- */
-        .task-split { display: grid; grid-template-columns: 1.4fr 0.6fr; gap: 15px; flex: 1; min-height: 0; }
-        
-        .scroller { overflow-y: auto; padding-right: 8px; }
-        .scroller::-webkit-scrollbar { width: 5px; }
-        .scroller::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        /* --- LISTS --- */
+        .split-view { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 10px; flex: 1; min-height: 0; }
+        .scroller { overflow-y: auto; padding-right: 5px; }
+        .scroller::-webkit-scrollbar { width: 3px; }
+        .scroller::-webkit-scrollbar-thumb { background: var(--cyan); }
 
-        .t-item {
-            background: #f8fafc;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 8px;
+        .item {
+            background: rgba(255,255,255,0.03);
+            margin-bottom: 6px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid #f1f5f9;
         }
-
-        .tag {
-            font-size: 0.6rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
+        .status { width: 8px; height: 8px; border-radius: 50%; }
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="float-panel">
-            <h2 id="clock-time" style="font-size: 1.5rem; font-weight: 800;">00:00:00</h2>
-            <p id="clock-date" style="color: var(--sky); font-size: 0.85rem; font-weight: 600;"></p>
+        <div class="h-card">
+            <h2 id="time" style="font-size: 1.8rem;">00:00:00</h2>
+            <p id="date" style="color: var(--cyan); font-weight: 600;"></p>
         </div>
-
-        <div class="float-panel target-display">
-            <div>
-                <span class="kpi-label">Daily Combined</span>
-                <span class="kpi-num" id="kpi-total">0</span>
+        <div class="h-card target-center">
+            <div style="text-align:center">
+                <span class="kpi-lbl">Live Combined</span>
+                <span class="kpi-val" id="total-val">0</span>
             </div>
-            <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1);"></div>
-            <div>
-                <span class="kpi-label">Target Goal</span>
-                <span class="kpi-num">1193</span>
+            <div style="text-align:center">
+                <span class="kpi-lbl">Target vs Reality</span>
+                <span class="kpi-val" id="delta-val" style="color: var(--green);">0</span>
             </div>
-            <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1);"></div>
-            <div>
-                <span class="kpi-label">Status</span>
-                <span class="kpi-num" id="kpi-delta">0</span>
+            <div style="text-align:center">
+                <span class="kpi-lbl">Daily Goal</span>
+                <span class="kpi-val">1193</span>
             </div>
         </div>
-
-        <div class="float-panel" style="align-items: flex-end;">
-            <span class="kpi-label">Total Cycle Accuracy</span>
-            <h2 id="kpi-accuracy" style="color: var(--emerald); font-size: 1.8rem; font-weight: 800;">0%</h2>
+        <div class="h-card" style="align-items: flex-end;">
+            <span class="kpi-lbl">Global Accuracy</span>
+            <h2 id="acc-val" style="color: var(--green); font-size: 2rem;">0%</h2>
         </div>
     </header>
 
-    <main>
-        <div class="float-card">
-            <div class="card-title">Daily Area Volume</div>
-            <div class="chart-container"><canvas id="chartDaily"></canvas></div>
+    <main class="main-grid">
+        <div class="card">
+            <div class="card-title">Daily Area Output</div>
+            <div class="chart-box"><canvas id="dailyBar"></canvas></div>
         </div>
 
-        <div class="float-card cycle-hero">
-            <div class="card-title">Main Inventory Cycle</div>
-            <div class="chart-container" style="width: 100%;">
-                <canvas id="chartCycle"></canvas>
-                <div class="gauge-text">
-                    <h1 id="gauge-val">0%</h1>
-                    <span class="kpi-label">Progress</span>
+        <div class="card cycle-hero">
+            <div class="card-title" style="justify-content: center;">Inventory Cycle Integrity</div>
+            <div class="chart-box">
+                <canvas id="cycleChart"></canvas>
+                <div class="gauge-overlay">
+                    <h1 id="perc-txt">0%</h1>
+                    <span class="kpi-lbl">Complete</span>
                 </div>
             </div>
-            <div style="width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
-                <div style="background: #f8fafc; padding: 15px; border-radius: 15px; text-align: center;">
-                    <span class="kpi-label">Counted</span>
-                    <b id="stat-counted" style="display: block; font-size: 1.2rem;">0</b>
+            <div style="display: flex; gap: 15px; margin-top: 10px;">
+                <div class="h-card" style="flex:1; background: rgba(255,255,255,0.02); text-align: center;">
+                    <span class="kpi-lbl">Counted</span>
+                    <b id="cnt-val" style="font-size: 1.2rem;">0</b>
                 </div>
-                <div style="background: #f8fafc; padding: 15px; border-radius: 15px; text-align: center;">
-                    <span class="kpi-label" style="color: var(--rose);">Remaining</span>
-                    <b id="stat-rem" style="display: block; font-size: 1.2rem; color: var(--rose);">0</b>
+                <div class="h-card" style="flex:1; background: rgba(255,255,255,0.02); text-align: center;">
+                    <span class="kpi-lbl">Remaining</span>
+                    <b id="rem-val" style="font-size: 1.2rem; color: var(--rose);">0</b>
                 </div>
             </div>
         </div>
 
-        <div class="float-card">
+        <div class="card">
             <div class="card-title">Weekly Trend Analysis</div>
-            <div class="chart-container"><canvas id="chartWeekly"></canvas></div>
+            <div class="chart-box"><canvas id="weeklyLine"></canvas></div>
         </div>
 
-        <div class="float-card">
+        <div class="card">
             <div class="card-title">Daily Operations</div>
-            <div class="task-split">
+            <div class="split-view">
                 <div class="scroller" id="dailyList"></div>
-                <div class="chart-container"><canvas id="dailyPie"></canvas></div>
+                <div class="chart-box"><canvas id="dailyPie"></canvas></div>
             </div>
         </div>
 
-        <div class="float-card">
-            <div class="card-title">Weekly Master Tasks</div>
-            <div class="task-split" style="grid-template-columns: 1fr;">
+        <div class="card">
+            <div class="card-title">Weekly Compliance</div>
+            <div class="split-view">
                 <div class="scroller" id="weeklyList"></div>
+                <div class="chart-box"><canvas id="weeklyPie"></canvas></div>
             </div>
         </div>
     </main>
 
     <script>
-        const TARGET = 1193;
+        const GOAL = 1193;
 
-        function runClock() {
+        function updateTime() {
             const now = new Date();
-            document.getElementById('clock-time').innerText = now.toLocaleTimeString('en-GB');
-            document.getElementById('clock-date').innerText = now.toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'long'});
+            document.getElementById('time').innerText = now.toLocaleTimeString('en-GB');
+            document.getElementById('date').innerText = now.toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'long'});
         }
-        setInterval(runClock, 1000); runClock();
+        setInterval(updateTime, 1000); updateTime();
 
-        async function start() {
+        async function loadData() {
             try {
-                const res = await fetch('data/dashboard.json');
-                const data = await res.json();
-                render(data);
-            } catch (e) { console.error("Data Load Error"); }
+                const r = await fetch('data/dashboard.json');
+                const d = await r.json();
+                render(d);
+            } catch(e) { console.error("Data Error"); }
         }
 
         function render(data) {
-            const wPi = data.weeklyPiData || [];
-            const pi = data.piData || [];
+            const w = data.weeklyPiData || [];
+            const p = data.piData || [];
 
-            // Combined Logic
-            const totalD = wPi.reduce((s, x) => s + (x["Daily Qty"] || 0), 0);
-            const delta = totalD - TARGET;
-            document.getElementById('kpi-total').innerText = totalD.toLocaleString();
-            document.getElementById('kpi-delta').innerText = (delta >= 0 ? "+" : "") + delta;
-            document.getElementById('kpi-delta').style.color = delta >= 0 ? 'var(--emerald)' : '#fda4af';
+            // Stats
+            const totalAzi = w.reduce((s, x) => s + (x["Daily Qty"] || 0), 0);
+            const delta = totalAzi - GOAL;
+            document.getElementById('total-val').innerText = totalAzi.toLocaleString();
+            document.getElementById('delta-val').innerText = (delta >= 0 ? "+" : "") + delta;
+            document.getElementById('delta-val').style.color = delta >= 0 ? 'var(--green)' : 'var(--rose)';
 
-            // Cycle Logic
             let tL = 0, tC = 0;
-            pi.forEach(x => { tL += x["Total locations"]; tC += x.Counted; });
-            const p = ((tC/tL)*100).toFixed(1);
-            document.getElementById('kpi-accuracy').innerText = p + "%";
-            document.getElementById('gauge-val').innerText = p + "%";
-            document.getElementById('stat-counted').innerText = tC.toLocaleString();
-            document.getElementById('stat-rem').innerText = (tL - tC).toLocaleString();
+            p.forEach(x => { tL += x["Total locations"]; tC += x.Counted; });
+            const acc = ((tC/tL)*100).toFixed(1);
+            document.getElementById('acc-val').innerText = acc + "%";
+            document.getElementById('perc-txt').innerText = acc + "%";
+            document.getElementById('cnt-val').innerText = tC.toLocaleString();
+            document.getElementById('rem-val').innerText = (tL - tC).toLocaleString();
 
             // Charts
-            new Chart(document.getElementById('chartDaily'), {
+            new Chart(document.getElementById('dailyBar'), {
                 type: 'bar',
-                data: {
-                    labels: wPi.map(x => x.Area),
-                    datasets: [{ data: wPi.map(x => x["Daily Qty"]), backgroundColor: '#0ea5e9', borderRadius: 10 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                data: { labels: w.map(x => x.Area), datasets: [{ data: w.map(x => x["Daily Qty"]), backgroundColor: '#22d3ee', borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } } } }
             });
 
-            new Chart(document.getElementById('chartWeekly'), {
+            new Chart(document.getElementById('weeklyLine'), {
                 type: 'line',
-                data: {
-                    labels: wPi.map(x => "WK" + x["Week No"]),
-                    datasets: [{ data: wPi.map(x => x["Weekly Qty"]), borderColor: '#10b981', tension: 0.4, fill: true, backgroundColor: 'rgba(16, 185, 129, 0.05)' }]
-                },
+                data: { labels: w.map(x => "W" + x["Week No"]), datasets: [{ data: w.map(x => x["Weekly Qty"]), borderColor: '#4ade80', tension: 0.4, fill: true, backgroundColor: 'rgba(74, 222, 128, 0.05)' }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
-            new Chart(document.getElementById('chartCycle'), {
+            new Chart(document.getElementById('cycleChart'), {
                 type: 'doughnut',
-                data: { datasets: [{ data: [tC, tL-tC], backgroundColor: ['#1e293b', '#f1f5f9'], borderWidth: 0, cutout: '88%' }] },
+                data: { datasets: [{ data: [tC, tL-tC], backgroundColor: ['#22d3ee', 'rgba(255,255,255,0.02)'], borderWidth: 0, cutout: '85%' }] },
                 options: { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: 270 }
             });
 
-            renderTaskList('dailyList', 'dailyPie', data.dailyTask, '#0ea5e9');
-            renderTaskList('weeklyList', null, data.weeklyTask, '#10b981');
+            setupTasks('dailyList', 'dailyPie', data.dailyTask, '#22d3ee');
+            setupTasks('weeklyList', 'weeklyPie', data.weeklyTask, '#4ade80');
         }
 
-        function renderTaskList(listId, pieId, tasks, color) {
-            const listEl = document.getElementById(listId);
-            const done = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
-            
-            listEl.innerHTML = tasks.map(t => {
+        function setupTasks(listId, pieId, tasks, color) {
+            const list = document.getElementById(listId);
+            const ok = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
+            list.innerHTML = tasks.map(t => {
                 const isD = t.Status.toLowerCase().includes('complete');
-                return `<div class="t-item">
-                    <span style="font-size: 0.85rem; font-weight: 600;">${t.Task || t.TASK}</span>
-                    <span class="tag" style="background:${isD ? '#dcfce7':'#fee2e2'}; color:${isD ? '#166534':'#9f1239'}">${isD ? 'OK':'Pending'}</span>
-                </div>`;
+                return `<div class="item"><span>${t.Task || t.TASK}</span><div class="status" style="background:${isD?'var(--green)':'var(--rose)'}"></div></div>`;
             }).join('');
 
-            if(pieId) {
-                new Chart(document.getElementById(pieId), {
-                    type: 'pie',
-                    data: { datasets: [{ data: [done, tasks.length-done], backgroundColor: [color, '#f1f5f9'], borderWidth: 0 }] },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-            }
+            new Chart(document.getElementById(pieId), {
+                type: 'pie',
+                data: { datasets: [{ data: [ok, tasks.length-ok], backgroundColor: [color, 'rgba(255,255,255,0.02)'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
         }
 
-        start();
+        loadData();
     </script>
 </body>
 </html>
