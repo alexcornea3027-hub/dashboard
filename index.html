@@ -3,245 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Team VCB | Professional Dashboard</title>
+    <title>Stock VCB | Floating Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
         :root {
-            --bg: #f8fafc; /* Fundal deschis, curat */
-            --card: #ffffff;
-            --accent: #0f172a; /* Navy Blue Profund */
-            --blue-light: #38bdf8;
-            --success: #10b981;
-            --danger: #ef4444;
-            --border: #e2e8f0;
-            --text-main: #1e293b;
-            --text-sub: #64748b;
+            --bg-color: #f0f2f5;
+            --card-white: #ffffff;
+            --navy: #1e293b;
+            --sky: #0ea5e9;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f1f5f9;
-            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--navy);
             height: 100vh;
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 25px;
             overflow: hidden;
         }
 
-        /* --- HEADER --- */
+        /* --- FLOATING HEADER --- */
         header {
-            height: 80px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card);
-            padding: 0 30px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-        }
-
-        .header-info h1 { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
-        .header-info p { font-size: 0.85rem; color: var(--text-sub); }
-
-        .target-stats {
-            display: flex;
-            gap: 40px;
-            text-align: center;
-        }
-        .stat-group b { font-size: 1.4rem; display: block; }
-        .stat-group small { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; font-weight: 600; }
-
-        /* --- GRID LAYOUT --- */
-        .dashboard-grid {
-            flex: 1;
+            height: 12vh;
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            grid-template-rows: 1.2fr 1fr;
+            grid-template-columns: 1fr 1.5fr 1fr;
             gap: 20px;
-            min-height: 0;
+            margin-bottom: 25px;
         }
 
-        .card {
-            background: var(--card);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 20px;
+        .float-panel {
+            background: var(--card-white);
+            border-radius: 20px;
+            padding: 15px 25px;
+            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            min-height: 0;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.8);
         }
 
-        .card-label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* --- CHART STYLES --- */
-        .chart-box { flex: 1; position: relative; min-height: 0; }
-
-        /* --- TASK LISTS --- */
-        .task-container {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 15px;
-            flex: 1;
-            min-height: 0;
-        }
-        .task-scroll { overflow-y: auto; padding-right: 5px; }
-        .task-scroll::-webkit-scrollbar { width: 4px; }
-        .task-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        .task-item {
-            font-size: 0.8rem;
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
+        .target-display {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            text-align: center;
+            flex-direction: row;
+            justify-content: space-around;
             align-items: center;
         }
-        .status-pill {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 700;
+
+        .kpi-num { font-size: 1.8rem; font-weight: 800; display: block; }
+        .kpi-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+
+        /* --- MAIN CONTENT AREA --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 25px;
+            min-height: 0;
         }
 
-        .gauge-center {
+        .float-card {
+            background: var(--card-white);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .float-card:hover { transform: translateY(-5px); }
+
+        .card-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--sky);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- CHART CONTAINERS --- */
+        .chart-container { flex: 1; position: relative; min-height: 0; }
+
+        .cycle-hero { grid-row: span 2; justify-content: space-between; align-items: center; }
+
+        .gauge-text {
             position: absolute;
-            top: 60%;
+            top: 55%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
         }
-        .gauge-center h2 { font-size: 2rem; color: var(--accent); }
+        .gauge-text h1 { font-size: 3rem; font-weight: 800; color: var(--navy); }
+
+        /* --- TASK SYSTEM --- */
+        .task-split { display: grid; grid-template-columns: 1.4fr 0.6fr; gap: 15px; flex: 1; min-height: 0; }
+        
+        .scroller { overflow-y: auto; padding-right: 8px; }
+        .scroller::-webkit-scrollbar { width: 5px; }
+        .scroller::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+        .t-item {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #f1f5f9;
+        }
+
+        .tag {
+            font-size: 0.6rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="header-info">
-            <h1 id="live-time">00:00:00</h1>
-            <p id="live-date">...</p>
+        <div class="float-panel">
+            <h2 id="clock-time" style="font-size: 1.5rem; font-weight: 800;">00:00:00</h2>
+            <p id="clock-date" style="color: var(--sky); font-size: 0.85rem; font-weight: 600;"></p>
         </div>
 
-        <div class="target-stats">
-            <div class="stat-group">
-                <small>Daily Combined</small>
-                <b id="kpi-total">0</b>
+        <div class="float-panel target-display">
+            <div>
+                <span class="kpi-label">Daily Combined</span>
+                <span class="kpi-num" id="kpi-total">0</span>
             </div>
-            <div class="stat-group">
-                <small>Status vs Target</small>
-                <b id="kpi-delta" style="color: var(--blue-light);">0</b>
+            <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1);"></div>
+            <div>
+                <span class="kpi-label">Target Goal</span>
+                <span class="kpi-num">1193</span>
             </div>
-            <div class="stat-group">
-                <small>Daily Target</small>
-                <b>1193</b>
+            <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1);"></div>
+            <div>
+                <span class="kpi-label">Status</span>
+                <span class="kpi-num" id="kpi-delta">0</span>
             </div>
         </div>
 
-        <div style="text-align: right;">
-            <p style="font-size: 0.7rem; color: var(--text-sub); font-weight: 700;">INVENTORY STATUS</p>
-            <h2 id="kpi-accuracy" style="color: var(--success);">0%</h2>
+        <div class="float-panel" style="align-items: flex-end;">
+            <span class="kpi-label">Total Cycle Accuracy</span>
+            <h2 id="kpi-accuracy" style="color: var(--emerald); font-size: 1.8rem; font-weight: 800;">0%</h2>
         </div>
     </header>
 
-    <main class="dashboard-grid">
-        <div class="card">
-            <div class="card-label">Daily Performance by Area</div>
-            <div class="chart-box"><canvas id="chartDaily"></canvas></div>
+    <main>
+        <div class="float-card">
+            <div class="card-title">Daily Area Volume</div>
+            <div class="chart-container"><canvas id="chartDaily"></canvas></div>
         </div>
 
-        <div class="card" style="position: relative;">
-            <div class="card-label">Total Inventory Cycle</div>
-            <div class="chart-box">
-                <canvas id="chartGauge"></canvas>
-                <div class="gauge-center">
-                    <h2 id="gauge-perc">0%</h2>
-                    <small style="color:var(--text-sub); font-weight:700;">COMPLETE</small>
+        <div class="float-card cycle-hero">
+            <div class="card-title">Main Inventory Cycle</div>
+            <div class="chart-container" style="width: 100%;">
+                <canvas id="chartCycle"></canvas>
+                <div class="gauge-text">
+                    <h1 id="gauge-val">0%</h1>
+                    <span class="kpi-label">Progress</span>
                 </div>
             </div>
-            <div style="display: flex; justify-content: space-around; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px;">
-                <div class="stat-group"><small>Counted</small><b id="val-counted" style="font-size: 1rem;">0</b></div>
-                <div class="stat-group"><small>Remaining</small><b id="val-rem" style="font-size: 1rem; color: var(--danger);">0</b></div>
+            <div style="width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                <div style="background: #f8fafc; padding: 15px; border-radius: 15px; text-align: center;">
+                    <span class="kpi-label">Counted</span>
+                    <b id="stat-counted" style="display: block; font-size: 1.2rem;">0</b>
+                </div>
+                <div style="background: #f8fafc; padding: 15px; border-radius: 15px; text-align: center;">
+                    <span class="kpi-label" style="color: var(--rose);">Remaining</span>
+                    <b id="stat-rem" style="display: block; font-size: 1.2rem; color: var(--rose);">0</b>
+                </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-label">Weekly Trend (Locations Counted)</div>
-            <div class="chart-box"><canvas id="chartWeekly"></canvas></div>
+        <div class="float-card">
+            <div class="card-title">Weekly Trend Analysis</div>
+            <div class="chart-container"><canvas id="chartWeekly"></canvas></div>
         </div>
 
-        <div class="card" style="grid-column: span 2;">
-            <div class="card-label">Operational Status (Daily Tasks)</div>
-            <div class="task-container">
-                <div class="task-scroll" id="listDaily"></div>
-                <div class="chart-box"><canvas id="pieDaily"></canvas></div>
+        <div class="float-card">
+            <div class="card-title">Daily Operations</div>
+            <div class="task-split">
+                <div class="scroller" id="dailyList"></div>
+                <div class="chart-container"><canvas id="dailyPie"></canvas></div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-label">Weekly Compliance Tasks</div>
-            <div class="task-container" style="grid-template-columns: 1fr;">
-                <div class="task-scroll" id="listWeekly"></div>
+        <div class="float-card">
+            <div class="card-title">Weekly Master Tasks</div>
+            <div class="task-split" style="grid-template-columns: 1fr;">
+                <div class="scroller" id="weeklyList"></div>
             </div>
         </div>
     </main>
 
     <script>
-        const GOAL = 1193;
+        const TARGET = 1193;
 
-        function updateClock() {
+        function runClock() {
             const now = new Date();
-            document.getElementById('live-time').innerText = now.toLocaleTimeString('en-GB', {hour12: false});
-            document.getElementById('live-date').innerText = now.toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'long'});
+            document.getElementById('clock-time').innerText = now.toLocaleTimeString('en-GB');
+            document.getElementById('clock-date').innerText = now.toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'long'});
         }
-        setInterval(updateClock, 1000); updateClock();
+        setInterval(runClock, 1000); runClock();
 
-        async function init() {
+        async function start() {
             try {
                 const res = await fetch('data/dashboard.json');
-                const d = await res.json();
-                render(d);
-            } catch (e) { console.error("JSON fail"); }
+                const data = await res.json();
+                render(data);
+            } catch (e) { console.error("Data Load Error"); }
         }
 
         function render(data) {
             const wPi = data.weeklyPiData || [];
             const pi = data.piData || [];
 
-            // 1. Calculations
-            const dailySum = wPi.reduce((a, b) => a + (b["Daily Qty"] || 0), 0);
-            const delta = dailySum - GOAL;
-            document.getElementById('kpi-total').innerText = dailySum.toLocaleString();
+            // Combined Logic
+            const totalD = wPi.reduce((s, x) => s + (x["Daily Qty"] || 0), 0);
+            const delta = totalD - TARGET;
+            document.getElementById('kpi-total').innerText = totalD.toLocaleString();
             document.getElementById('kpi-delta').innerText = (delta >= 0 ? "+" : "") + delta;
-            document.getElementById('kpi-delta').style.color = delta >= 0 ? 'var(--success)' : 'var(--danger)';
+            document.getElementById('kpi-delta').style.color = delta >= 0 ? 'var(--emerald)' : '#fda4af';
 
+            // Cycle Logic
             let tL = 0, tC = 0;
             pi.forEach(x => { tL += x["Total locations"]; tC += x.Counted; });
-            const acc = ((tC/tL)*100).toFixed(1);
-            document.getElementById('kpi-accuracy').innerText = acc + "%";
-            document.getElementById('gauge-perc').innerText = acc + "%";
-            document.getElementById('val-counted').innerText = tC.toLocaleString();
-            document.getElementById('val-rem').innerText = (tL - tC).toLocaleString();
+            const p = ((tC/tL)*100).toFixed(1);
+            document.getElementById('kpi-accuracy').innerText = p + "%";
+            document.getElementById('gauge-val').innerText = p + "%";
+            document.getElementById('stat-counted').innerText = tC.toLocaleString();
+            document.getElementById('stat-rem').innerText = (tL - tC).toLocaleString();
 
-            // 2. Charts
+            // Charts
             new Chart(document.getElementById('chartDaily'), {
                 type: 'bar',
                 data: {
                     labels: wPi.map(x => x.Area),
-                    datasets: [{ data: wPi.map(x => x["Daily Qty"]), backgroundColor: '#0f172a', borderRadius: 4 }]
+                    datasets: [{ data: wPi.map(x => x["Daily Qty"]), backgroundColor: '#0ea5e9', borderRadius: 10 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
@@ -250,43 +268,43 @@
                 type: 'line',
                 data: {
                     labels: wPi.map(x => "WK" + x["Week No"]),
-                    datasets: [{ data: wPi.map(x => x["Weekly Qty"]), borderColor: '#10b981', tension: 0.3, fill: false }]
+                    datasets: [{ data: wPi.map(x => x["Weekly Qty"]), borderColor: '#10b981', tension: 0.4, fill: true, backgroundColor: 'rgba(16, 185, 129, 0.05)' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
-            new Chart(document.getElementById('chartGauge'), {
+            new Chart(document.getElementById('chartCycle'), {
                 type: 'doughnut',
-                data: { datasets: [{ data: [tC, tL-tC], backgroundColor: ['#0f172a', '#e2e8f0'], borderWidth: 0, cutout: '85%' }] },
+                data: { datasets: [{ data: [tC, tL-tC], backgroundColor: ['#1e293b', '#f1f5f9'], borderWidth: 0, cutout: '88%' }] },
                 options: { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: 270 }
             });
 
-            renderTasks('listDaily', 'pieDaily', data.dailyTask, '#0f172a');
-            renderTasks('listWeekly', null, data.weeklyTask, '#10b981');
+            renderTaskList('dailyList', 'dailyPie', data.dailyTask, '#0ea5e9');
+            renderTaskList('weeklyList', null, data.weeklyTask, '#10b981');
         }
 
-        function renderTasks(listId, pieId, tasks, color) {
+        function renderTaskList(listId, pieId, tasks, color) {
             const listEl = document.getElementById(listId);
             const done = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
             
             listEl.innerHTML = tasks.map(t => {
-                const ok = t.Status.toLowerCase().includes('complete');
-                return `<div class="task-item">
-                    <span>${t.Task || t.TASK}</span>
-                    <span class="status-pill" style="background:${ok ? '#dcfce7':'#fee2e2'}; color:${ok ? '#166534':'#991b1b'}">${ok ? 'Done':'Pending'}</span>
+                const isD = t.Status.toLowerCase().includes('complete');
+                return `<div class="t-item">
+                    <span style="font-size: 0.85rem; font-weight: 600;">${t.Task || t.TASK}</span>
+                    <span class="tag" style="background:${isD ? '#dcfce7':'#fee2e2'}; color:${isD ? '#166534':'#9f1239'}">${isD ? 'OK':'Pending'}</span>
                 </div>`;
             }).join('');
 
             if(pieId) {
                 new Chart(document.getElementById(pieId), {
                     type: 'pie',
-                    data: { datasets: [{ data: [done, tasks.length-done], backgroundColor: [color, '#e2e8f0'], borderWidth: 0 }] },
+                    data: { datasets: [{ data: [done, tasks.length-done], backgroundColor: [color, '#f1f5f9'], borderWidth: 0 }] },
                     options: { responsive: true, maintainAspectRatio: false }
                 });
             }
         }
 
-        init();
+        start();
     </script>
 </body>
 </html>
