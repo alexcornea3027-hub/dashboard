@@ -3,329 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Team VCB | Command Center v4.0</title>
+    <title>VCB | NEURAL COMMAND CENTER</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
 
         :root {
-            --bg: #030712;
-            --card: #111827;
-            --accent: #0ea5e9;
-            --success: #10b981;
-            --danger: #f43f5e;
-            --text-p: #f8fafc;
-            --text-s: #94a3b8;
-            --border: rgba(255, 255, 255, 0.08);
-            --shadow-3d: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+            --bg: #02040a;
+            --glass: rgba(15, 23, 42, 0.8);
+            --accent: #00d2ff;
+            --glow: #00d2ff33;
+            --success: #00ff9d;
+            --danger: #ff0055;
+            --text: #e2e8f0;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text-p);
+            font-family: 'Rajdhani', sans-serif;
+            background: radial-gradient(circle at center, #0a192f 0%, #02040a 100%);
+            color: var(--text);
             height: 100vh;
-            width: 100vw;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 12px;
+            padding: 20px;
         }
 
-        /* --- HEADER SECTION --- */
+        /* --- FUTURISTIC HEADER --- */
         header {
-            height: 10vh;
+            height: 15vh;
             display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr;
-            gap: 12px;
-            margin-bottom: 12px;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
         }
 
-        .h-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 10px 20px;
+        .panel {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            box-shadow: var(--shadow-3d);
         }
 
-        .target-box {
-            border: 2px solid var(--accent);
-            flex-direction: row;
-            justify-content: space-around;
-            align-items: center;
+        .target-center {
+            border-top: 3px solid var(--accent);
+            text-align: center;
+            background: linear-gradient(180deg, rgba(0, 210, 255, 0.05) 0%, transparent 100%);
         }
 
-        .kpi-data { text-align: center; }
-        .kpi-label { font-size: 0.65rem; color: var(--text-s); text-transform: uppercase; font-weight: 800; }
-        .kpi-value { font-size: 1.8rem; font-weight: 800; display: block; line-height: 1; }
+        .glitch-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--glow);
+        }
 
-        #delta-pill { padding: 4px 12px; border-radius: 6px; font-weight: 800; font-size: 1.1rem; }
+        .big-kpi {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1;
+            margin: 5px 0;
+        }
 
-        /* --- MAIN DASHBOARD GRID --- */
-        .dashboard-grid {
+        /* --- GRID SYSTEM --- */
+        .grid-container {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr 1.2fr 1fr;
+            grid-template-columns: 1fr 1.5fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 12px;
+            gap: 20px;
             min-height: 0;
         }
 
         .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 15px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            box-shadow: var(--shadow-3d);
-            min-height: 0;
+            transition: transform 0.3s ease;
         }
 
-        .card-header {
-            font-size: 0.75rem;
-            font-weight: 800;
+        .card:hover { border-color: var(--accent); }
+
+        .label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
             color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             margin-bottom: 15px;
-            border-left: 4px solid var(--accent);
-            padding-left: 10px;
+            text-transform: uppercase;
         }
 
-        /* --- CENTER 3D GAUGE --- */
-        .center-hero { grid-row: span 2; position: relative; }
-        .gauge-container { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
-        .gauge-overlay { position: absolute; text-align: center; transform: translateY(20px); }
-        .gauge-overlay big { font-size: 4rem; font-weight: 800; display: block; line-height: 1; }
+        /* --- CHART & LISTS --- */
+        .chart-wrap { flex: 1; position: relative; min-height: 0; }
+        
+        .hero-gauge { grid-row: span 2; display: flex; flex-direction: column; align-items: center; justify-content: space-around; }
 
-        /* --- TASK SECTION --- */
-        .task-layout { flex: 1; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 10px; min-height: 0; }
-        .list-wrapper { overflow-y: auto; padding-right: 5px; }
-        .list-wrapper::-webkit-scrollbar { width: 3px; }
-        .list-wrapper::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        .hero-value {
+            position: absolute;
+            top: 55%;
+            text-align: center;
+        }
+        .hero-value h1 { font-family: 'Orbitron', sans-serif; font-size: 4.5rem; color: #fff; text-shadow: 0 0 30px var(--glow); }
 
-        .task-item {
+        .task-box { flex: 1; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 15px; min-height: 0; }
+        
+        .scroller { overflow-y: auto; padding-right: 8px; }
+        .scroller::-webkit-scrollbar { width: 4px; }
+        .scroller::-webkit-scrollbar-thumb { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+        .t-row {
             background: rgba(255,255,255,0.03);
-            margin-bottom: 6px;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid rgba(255,255,255,0.05);
+            font-weight: 500;
         }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
 
-        .chart-side { position: relative; min-height: 0; }
+        .t-row.complete { border-left: 4px solid var(--success); }
+        .t-row.pending { border-left: 4px solid var(--danger); }
 
+        .pulse { animation: pulse-glow 2s infinite; }
+        @keyframes pulse-glow {
+            0% { text-shadow: 0 0 10px var(--glow); }
+            50% { text-shadow: 0 0 30px var(--accent); }
+            100% { text-shadow: 0 0 10px var(--glow); }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="h-box">
-            <h1 style="font-size: 1.4rem; font-weight: 800;">STOCK TEAM <span style="color:var(--accent)">VCB</span></h1>
-            <p id="clock-date" style="font-size: 0.75rem; color: var(--text-s); text-transform: uppercase;"></p>
-            <p id="clock-time" style="font-size: 1.4rem; font-weight: 800; color: #fff;"></p>
+        <div class="panel">
+            <div class="glitch-title">VCB_CORE</div>
+            <div id="date-label" style="font-size: 1rem; color: var(--text);">...</div>
+            <div id="time-label" style="font-size: 1.8rem; font-weight: 700; font-family: 'Orbitron';">00:00:00</div>
         </div>
 
-        <div class="h-box target-box">
-            <div class="kpi-data">
-                <span class="kpi-label">Daily Combined</span>
-                <span class="kpi-value" id="val-combined">0</span>
-            </div>
-            <div class="kpi-data">
-                <span class="kpi-label">Performance</span>
-                <div id="delta-pill">0</div>
-            </div>
-            <div class="kpi-data">
-                <span class="kpi-label">Daily Goal</span>
-                <span class="kpi-value">1193</span>
-            </div>
+        <div class="panel target-center">
+            <span class="label" style="margin:0">Live Combined Production</span>
+            <div class="big-kpi pulse" id="kpi-total">0</div>
+            <div id="kpi-delta" style="font-weight: 700; font-size: 1.2rem;">CALCULATING...</div>
         </div>
 
-        <div class="h-box" style="align-items: flex-end;">
-            <span class="kpi-label">Cycle Accuracy</span>
-            <span id="val-accuracy" style="font-size: 2.2rem; font-weight: 800; color: var(--success);">0%</span>
+        <div class="panel" style="align-items: flex-end;">
+            <span class="label">System Accuracy</span>
+            <div class="big-kpi" id="kpi-accuracy" style="color: var(--success);">0%</div>
+            <span style="font-size: 0.8rem; opacity: 0.6;">PHASE: INVENTORY_CYCLE</span>
         </div>
     </header>
 
-    <main class="dashboard-grid">
+    <main class="grid-container">
         <div class="card">
-            <div class="card-header">Daily Output by Area</div>
-            <div class="chart-side"><canvas id="chartDaily"></canvas></div>
+            <div class="label">Area Output Analysis</div>
+            <div class="chart-wrap"><canvas id="chartDaily"></canvas></div>
         </div>
 
-        <div class="card center-hero">
-            <div class="card-header" style="text-align: center;">Inventory Cycle Integrity</div>
-            <div class="gauge-container">
-                <canvas id="chartCycle"></canvas>
-                <div class="gauge-overlay">
-                    <big id="gauge-perc">0%</big>
-                    <span style="color: var(--text-s); font-size: 0.8rem; font-weight: 600;">COMPLETED</span>
+        <div class="card hero-gauge">
+            <div class="label">Global Cycle Progress</div>
+            <div class="chart-wrap" style="width: 100%; display: flex; justify-content: center;">
+                <canvas id="chartGauge"></canvas>
+                <div class="hero-value">
+                    <h1 id="hero-perc">0%</h1>
+                    <span class="label">Integrity Index</span>
                 </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid var(--border);">
-                    <span class="kpi-label">Counted</span>
-                    <b id="stat-counted" style="font-size: 1.2rem; display: block;">0</b>
+            <div style="width: 100%; display: flex; gap: 15px;">
+                <div class="panel" style="flex:1; background: rgba(0,0,0,0.4); border-radius: 15px;">
+                    <span class="label" style="font-size: 0.5rem;">Total Counted</span>
+                    <b id="val-counted" style="font-size: 1.5rem;">0</b>
                 </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid var(--border);">
-                    <span class="kpi-label">Remaining</span>
-                    <b id="stat-rem" style="font-size: 1.2rem; display: block; color: var(--danger);">0</b>
+                <div class="panel" style="flex:1; background: rgba(0,0,0,0.4); border-radius: 15px;">
+                    <span class="label" style="font-size: 0.5rem;">Total Remaining</span>
+                    <b id="val-rem" style="font-size: 1.5rem; color: var(--danger);">0</b>
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-header">Weekly Efficiency Trend</div>
-            <div class="chart-side"><canvas id="chartWeekly"></canvas></div>
+            <div class="label">Weekly Efficiency Trend</div>
+            <div class="chart-wrap"><canvas id="chartWeekly"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-header">Daily Operational Tasks</div>
-            <div class="task-layout">
-                <div class="list-wrapper" id="listDaily"></div>
-                <div class="chart-side"><canvas id="pieDaily"></canvas></div>
+            <div class="label">Daily Ops Status</div>
+            <div class="task-box">
+                <div class="scroller" id="dailyList"></div>
+                <div class="chart-wrap"><canvas id="dailyPie"></canvas></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-header">Weekly Master Compliance</div>
-            <div class="task-layout">
-                <div class="list-wrapper" id="listWeekly"></div>
-                <div class="chart-side"><canvas id="pieWeekly"></canvas></div>
+            <div class="label">Weekly Compliance</div>
+            <div class="task-box">
+                <div class="scroller" id="weeklyList"></div>
+                <div class="chart-wrap"><canvas id="weeklyPie"></canvas></div>
             </div>
         </div>
     </main>
 
     <script>
-        const TARGET = 1193;
+        const DAILY_GOAL = 1193;
 
-        // --- CLOCK SYSTEM ---
         function updateClock() {
             const now = new Date();
-            document.getElementById('clock-date').innerText = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-            document.getElementById('clock-time').innerText = now.toLocaleTimeString('en-GB');
+            document.getElementById('date-label').innerText = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+            document.getElementById('time-label').innerText = now.toLocaleTimeString('en-GB');
         }
-        setInterval(updateClock, 1000); updateClock();
+        setInterval(updateClock, 1000);
 
-        // --- DATA ENGINE ---
-        async function fetchData() {
+        async function engine() {
             try {
-                const response = await fetch('data/dashboard.json');
-                const data = await response.json();
-                renderDashboard(data);
-            } catch (err) { console.error("Data Fetch Error"); }
+                const res = await fetch('data/dashboard.json');
+                const data = await res.json();
+                
+                const wPi = data.weeklyPiData || [];
+                const pi = data.piData || [];
+
+                // KPI LOGIC
+                const totalDaily = wPi.reduce((a, b) => a + (b["Daily Qty"] || 0), 0);
+                const delta = totalDaily - DAILY_GOAL;
+                document.getElementById('kpi-total').innerText = totalDaily.toLocaleString();
+                const dEl = document.getElementById('kpi-delta');
+                dEl.innerText = (delta >= 0 ? "+" : "") + delta + " VS TARGET";
+                dEl.style.color = delta >= 0 ? 'var(--success)' : 'var(--danger)';
+
+                let tL = 0, tC = 0;
+                pi.forEach(x => { tL += x["Total locations"]; tC += x.Counted; });
+                const acc = ((tC/tL)*100).toFixed(1);
+                document.getElementById('kpi-accuracy').innerText = acc + "%";
+                document.getElementById('hero-perc').innerText = acc + "%";
+                document.getElementById('val-counted').innerText = tC.toLocaleString();
+                document.getElementById('val-rem').innerText = (tL - tC).toLocaleString();
+
+                // CHARTS
+                initBars(wPi);
+                initLines(wPi);
+                initGauge(tC, tL - tC);
+                initTaskArea('dailyList', 'dailyPie', data.dailyTask, '#00d2ff');
+                initTaskArea('weeklyList', 'weeklyPie', data.weeklyTask, '#00ff9d');
+
+            } catch(e) { console.error(e); }
         }
 
-        function renderDashboard(data) {
-            const wPi = data.weeklyPiData || [];
-            const pi = data.piData || [];
-
-            // 1. COMBINED TARGET LOGIC
-            const combinedDaily = wPi.reduce((acc, curr) => acc + (curr["Daily Qty"] || 0), 0);
-            const delta = combinedDaily - TARGET;
-            
-            document.getElementById('val-combined').innerText = combinedDaily.toLocaleString();
-            const deltaEl = document.getElementById('delta-pill');
-            deltaEl.innerText = (delta >= 0 ? "+" : "") + delta;
-            deltaEl.style.color = delta >= 0 ? 'var(--success)' : 'var(--danger)';
-
-            // 2. CYCLE ACCURACY LOGIC
-            let totalL = 0, totalC = 0;
-            pi.forEach(item => { totalL += item["Total locations"]; totalC += item.Counted; });
-            const accuracy = ((totalC / totalL) * 100).toFixed(1);
-
-            document.getElementById('val-accuracy').innerText = accuracy + "%";
-            document.getElementById('gauge-perc').innerText = accuracy + "%";
-            document.getElementById('stat-counted').innerText = totalC.toLocaleString();
-            document.getElementById('stat-rem').innerText = (totalL - totalC).toLocaleString();
-
-            // 3. CHART INITIALIZATION
-            renderDailyBar(wPi);
-            renderWeeklyLine(wPi);
-            renderCycleGauge(totalC, totalL - totalC);
-            renderTaskGroup('listDaily', 'pieDaily', data.dailyTask, '#0ea5e9');
-            renderTaskGroup('listWeekly', 'pieWeekly', data.weeklyTask, '#10b981');
-        }
-
-        function renderDailyBar(data) {
+        function initBars(data) {
             new Chart(document.getElementById('chartDaily'), {
                 type: 'bar',
                 data: {
                     labels: data.map(x => x.Area),
-                    datasets: [{ data: data.map(x => x["Daily Qty"]), backgroundColor: '#0ea5e9', borderRadius: 6 }]
+                    datasets: [{
+                        data: data.map(x => x["Daily Qty"]),
+                        backgroundColor: '#00d2ff',
+                        borderRadius: 8,
+                        hoverBackgroundColor: '#fff'
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: {size:10} } },
-                             x: { grid: { display: false }, ticks: { color: '#64748b', font: {size:10} } } } }
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                    }
+                }
             });
         }
 
-        function renderWeeklyLine(data) {
+        function initLines(data) {
             const sorted = [...data].sort((a,b) => a["Week No"] - b["Week No"]);
             new Chart(document.getElementById('chartWeekly'), {
                 type: 'line',
                 data: {
                     labels: sorted.map(x => "WK" + x["Week No"]),
-                    datasets: [{ 
-                        data: sorted.map(x => x["Weekly Qty"]), 
-                        borderColor: '#10b981', 
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        fill: true, tension: 0.4, borderWidth: 3, pointRadius: 3 
+                    datasets: [{
+                        data: sorted.map(x => x["Weekly Qty"]),
+                        borderColor: '#00ff9d',
+                        borderWidth: 4,
+                        fill: true,
+                        backgroundColor: 'rgba(0, 255, 157, 0.1)',
+                        tension: 0.4
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: {size:10} } },
-                             x: { grid: { display: false }, ticks: { color: '#64748b', font: {size:10} } } } }
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                    }
+                }
             });
         }
 
-        function renderCycleGauge(c, r) {
-            new Chart(document.getElementById('chartCycle'), {
+        function initGauge(c, r) {
+            new Chart(document.getElementById('chartGauge'), {
                 type: 'doughnut',
                 data: {
-                    datasets: [{ 
-                        data: [c, r], 
-                        backgroundColor: ['#0ea5e9', 'rgba(255,255,255,0.05)'], 
-                        borderWidth: 0, cutout: '85%' 
+                    datasets: [{
+                        data: [c, r],
+                        backgroundColor: ['#00d2ff', 'rgba(255,255,255,0.03)'],
+                        borderWidth: 0,
+                        cutout: '88%'
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: 270 }
+                options: { responsive: true, maintainAspectRatio: false, circumference: 240, rotation: 240 }
             });
         }
 
-        function renderTaskGroup(listId, pieId, tasks, color) {
-            const container = document.getElementById(listId);
+        function initTaskArea(listId, pieId, tasks, color) {
+            const listEl = document.getElementById(listId);
             const done = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
             const pending = tasks.length - done;
 
-            container.innerHTML = tasks.map(t => {
-                const isOK = t.Status.toLowerCase().includes('complete');
-                return `<div class="task-item">
-                    <span style="color:${isOK ? '#fff' : 'var(--text-s)'}">${t.Task || t.TASK}</span>
-                    <div class="status-dot" style="color:${isOK ? 'var(--success)' : 'var(--danger)'}; background:currentColor;"></div>
+            listEl.innerHTML = tasks.map(t => {
+                const ok = t.Status.toLowerCase().includes('complete');
+                return `<div class="t-row ${ok ? 'complete' : 'pending'}">
+                    <span style="font-size: 0.8rem;">${t.Task || t.TASK}</span>
+                    <span style="font-size: 0.6rem; opacity: 0.6;">${ok ? 'OK' : '...'}</span>
                 </div>`;
             }).join('');
 
             new Chart(document.getElementById(pieId), {
                 type: 'doughnut',
                 data: {
-                    datasets: [{ data: [done, pending], backgroundColor: [color, 'rgba(0,0,0,0.3)'], borderWidth: 0, cutout: '70%' }]
+                    datasets: [{
+                        data: [done, pending],
+                        backgroundColor: [color, 'rgba(255,255,255,0.03)'],
+                        borderWidth: 0
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%' }
             });
         }
 
-        fetchData();
+        engine();
     </script>
 </body>
 </html>
