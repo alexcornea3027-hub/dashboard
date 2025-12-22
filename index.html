@@ -1,337 +1,72 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PI Dashboard — Type-aware, compact</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#02030a;--card:#071227;--muted:#95a3b8;--accent:#7c3aed;--good:#16a34a;--bad:#ef4444}
-    *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}
-    html,body{height:100%;margin:0;overflow-x:hidden}
-    body{background:linear-gradient(180deg,#010113 0%, #071428 80%);color:#e6eef8}
-    .wrap{max-width:1180px;margin:12px auto;padding:12px;height:calc(100vh - 24px);display:grid;grid-template-rows:auto 1fr auto;gap:10px}
-    header{display:flex;align-items:center;justify-content:space-between}
-    h1{margin:0;font-size:18px}
-    .controls{display:flex;gap:8px;align-items:center}
-    button, select{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--muted);cursor:pointer}
-    .chip.active{border-color:var(--accent);background:linear-gradient(90deg,rgba(124,58,237,0.12),transparent);color:#fff}
-    main{display:grid;grid-template-columns:1fr 340px;gap:12px;align-items:start}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
-    .metrics{display:flex;gap:8px;flex-wrap:wrap}
-    .metric{flex:1 1 160px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:13px}
-    .metric h3{margin:0;color:var(--muted);font-size:12px}
-    .metric p{margin:6px 0 0;font-weight:700;font-size:15px}
-    .charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
-    canvas{width:100%!important;height:180px!important}
-    .donut-wrap{display:flex;gap:12px;align-items:center}
-    .donut-float{width:160px;height:160px;display:flex;align-items:center;justify-content:center;position:relative}
-    .donut-float{animation:floaty 6s ease-in-out infinite}
-    @keyframes floaty{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
-    .list{max-height:140px;overflow:auto;margin-top:6px}
-    .small{font-size:12px;color:var(--muted)}
-    .center-clock{font-size:16px;font-weight:700;color:#fff;text-align:center}
-    .legend{display:flex;gap:8px;flex-wrap:wrap}
-    .swatch{width:12px;height:10px;border-radius:3px}
-    @media (max-width:1000px){main{grid-template-columns:1fr} .charts{grid-template-columns:1fr} .donut-float{width:140px;height:140px} }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PI Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;font-family:Inter,system-ui}
+body{margin:0;background:radial-gradient(circle at top,#0b1025,#02030a);color:#fff;overflow:hidden}
+.wrap{height:100vh;display:grid;grid-template-rows:auto 1fr;padding:16px;gap:12px}
+header{display:flex;justify-content:space-between;align-items:center}
+.title{font-weight:800;font-size:20px;letter-spacing:1px}
+.clock{font-size:22px;font-weight:700}
+main{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;height:100%}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border-radius:16px;padding:14px;display:flex;flex-direction:column;box-shadow:0 30px 60px rgba(0,0,0,.6)}
+.label{text-align:center;font-weight:800;letter-spacing:2px;margin-bottom:8px}
+canvas{flex:1}
+.float{animation:float 6s ease-in-out infinite}
+@keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-10px)}100%{transform:translateY(0)}}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>PI Dashboard — Type-aware</h1>
-        <div class="small">Snapshot: <span id="snapshotDate">—</span> · EN</div>
-      </div>
+<div class="wrap">
+<header>
+<div class="title">PI DASHBOARD</div>
+<div class="clock" id="clock"></div>
+</header>
 
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="center-clock" id="clock">--:--:--</div>
-        <div class="controls">
-          <button id="btnDaily" class="chip">Daily</button>
-          <button id="btnWeekly" class="chip active">Weekly</button>
-          <button id="btnTotal" class="chip">Total</button>
-          <select id="areaFilter"><option value="all">All areas</option></select>
-          <button id="downloadJson" class="chip">Download JSON</button>
-        </div>
-      </div>
-    </header>
+<main>
+<div class="card float">
+<div class="label">DAILY</div>
+<canvas id="dailyChart"></canvas>
+</div>
+<div class="card float">
+<div class="label">WEEKLY</div>
+<canvas id="weeklyChart"></canvas>
+</div>
+<div class="card float">
+<div class="label">CYCLE</div>
+<canvas id="cycleChart"></canvas>
+</div>
+</main>
+</div>
 
-    <main>
-      <div>
-        <section class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><strong>Summary</strong><div id="summaryInsight" class="small"></div></div>
-            <div id="targetStatus" style="text-align:right"></div>
-          </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const target=1193;
+const colors=['#7c3aed','#06b6d4','#22c55e','#f97316','#ef4444','#6366f1','#ec4899'];
 
-          <div class="metrics" id="metrics"></div>
+function clock(){setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleTimeString();},1000)}clock();
 
-          <div class="charts">
-            <div class="card" style="padding:10px">
-              <strong>Daily counted (ONLY daily-type areas)</strong>
-              <canvas id="dailyChart"></canvas>
-              <div id="dailyNote" class="small"></div>
-            </div>
+fetch('data/dashboard.json').then(r=>r.json()).then(DATA=>{
 
-            <div class="card" style="padding:10px">
-              <strong>Weekly Qty (ONLY weekly dataset)</strong>
-              <canvas id="weeklyChart"></canvas>
-              <div id="weeklyNote" class="small"></div>
-            </div>
+// DAILY (true daily)
+const dLabels=DATA.weeklyPiData.map(x=>x.Area);
+const dValues=DATA.weeklyPiData.map(x=>Number(x['Daily Qty'])||0);
+new Chart(dailyChart,{type:'bar',data:{labels:dLabels,datasets:[{data:dValues,backgroundColor:dValues.map(v=>v>=target?'#22c55e':'#ef4444'),borderRadius:8}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'},beginAtZero:true}}}});
 
-            <div class="card" style="padding:10px">
-              <strong>3D-style Donut — Counted distribution (all areas)</strong>
-              <div class="donut-wrap" style="margin-top:8px">
-                <div class="donut-float">
-                  <canvas id="donutDepth" class="depth-layer"></canvas>
-                  <canvas id="donutMain"></canvas>
-                </div>
-                <div style="flex:1">
-                  <div id="donutBreakdown" class="small"></div>
-                </div>
-              </div>
-            </div>
+// WEEKLY
+const wLabels=DATA.weeklyPiData.map(x=>x.Area);
+const wValues=DATA.weeklyPiData.map(x=>Number(x['Weekly Qty'])||0);
+new Chart(weeklyChart,{type:'bar',data:{labels:wLabels,datasets:[{data:wValues,backgroundColor:'#7c3aed',borderRadius:8}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#fff'}},y:{ticks:{color:'#fff'},beginAtZero:true}}}});
 
-            <div class="card" style="padding:10px">
-              <strong>Top areas — completion gauges</strong>
-              <div id="gauges" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="card" style="margin-top:10px">
-          <strong>Tasks</strong>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <div style="flex:1">
-              <h4 style="margin:0 0 6px 0">Daily tasks</h4>
-              <div class="list" id="dailyList"></div>
-            </div>
-            <div style="flex:1">
-              <h4 style="margin:0 0 6px 0">Weekly tasks</h4>
-              <div class="list" id="weeklyList"></div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <aside>
-        <div class="card">
-          <strong>Area quick filters</strong>
-          <div style="margin-top:8px" id="areaList"></div>
-          <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:10px 0">
-          <strong>Automated analysis</strong>
-          <div id="analysis" class="small"></div>
-          <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:10px 0">
-          <strong>Export</strong>
-          <div style="margin-top:8px">
-            <button id="exportCSV" class="chip">Export CSV</button>
-          </div>
-        </div>
-      </aside>
-    </main>
-
-    <footer style="display:flex;justify-content:space-between;align-items:center">
-      <div class="small">Copy this file as <code>index.html</code> to your GitHub Pages repo (root or docs/)</div>
-      <div id="credits" class="small">Generated: <span id="generatedAt"></span></div>
-    </footer>
-  </div>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script>
-    // ---------- FALLBACK DATA ----------
-    const FALLBACK_DATA = {"piData":[{"Date":"22.12.2025","Area":"MPR","Total locations":14622,"Counted":3936,"Behind targe":0,"Above target":222.47619047619,"Behind %":0},{"Date":"22.12.2025","Area":"PB1","Total locations":4329,"Counted":1189,"Behind targe":0,"Above target":89.5714285714287,"Behind %":0},{"Date":"22.12.2025","Area":"PB2","Total locations":795,"Counted":484,"Behind targe":0,"Above target":282.095238095238,"Behind %":0},{"Date":"22.12.2025","Area":"PB3","Total locations":772,"Counted":0,"Behind targe":196.063492063492,"Above target":0,"Behind %":0.253968253968254},{"Date":"22.12.2025","Area":"PB4","Total locations":164,"Counted":0,"Behind targe":41.6507936507937,"Above target":0,"Behind %":0.253968253968254},{"Date":"22.12.2025","Area":"PBSRES","Total locations":5197,"Counted":1374,"Behind targe":0,"Above target":54.1269841269841,"Behind %":0},{"Date":"22.12.2025","Area":"MP","Total locations":25612,"Counted":7409,"Behind targe":0,"Above target":904.36507936508,"Behind %":0},{"Date":"22.12.2025","Area":"MIX","Total locations":33087,"Counted":8941,"Behind targe":0,"Above target":537.952380952382,"Behind %":0},{"Date":"22.12.2025","Area":"MS","Total locations":21512,"Counted":5902,"Behind targe":0,"Above target":438.63492063492,"Behind %":0},{"Date":"22.12.2025","Area":"MSX","Total locations":28798,"Counted":7984,"Behind targe":0,"Above target":670.222222222223,"Behind %":0},{"Date":"22.12.2025","Area":"FM","Total locations":2308,"Counted":620,"Behind targe":0,"Above target":33.8412698412699,"Behind %":0},{"Date":"22.12.2025","Area":"HP","Total locations":561,"Counted":155,"Behind targe":0,"Above target":12.5238095238095,"Behind %":0}],"dailyTask":[{"DATE":"22.12.2025","Task":"ADJUSTMENTS (Returns)","Status":"Not started","Type":"Daily"},{"DATE":"22.12.2025","Task":"ADJUSTMENTS (Standard)","Status":"Not started","Type":"Daily"},{"DATE":"22.12.2025","Task":"Aged stock report 7AM","Status":"Completed","Type":"Daily"}],"weeklyTask":[],"weeklyPiData":[{"Date":"22.12.2025","Area":"MPR","Daily Qty":127,"Week No":27,"Weekly Qty":5103,"Weekly %":0.855490360435876}]};
-
-    // ---------- Helpers ----------
-    const target = 1193;
-    const colors = ['#7c3aed','#06b6d4','#f97316','#ef4444','#f59e0b','#10b981','#6366f1','#ec4899','#8b5cf6','#60a5fa','#f43f5e','#34d399'];
-    function formatNumber(n){return n?.toLocaleString() ?? '0'}
-    function pct(part,total,dec=1){return total?((part/total)*100).toFixed(dec)+'%':'-'}
-
-    // clock
-    function startClock(el){ setInterval(()=>{ const d=new Date(); el.textContent = d.toLocaleTimeString(); },1000); }
-    document.getElementById('generatedAt').textContent = new Date().toLocaleString();
-    startClock(document.getElementById('clock'));
-
-    // fetch JSON from /data/dashboard.json
-    async function fetchData(){
-      const banner = document.getElementById('errorBanner');
-      try{
-        const res = await fetch('data/dashboard.json', {cache: 'no-store'});
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        banner && (banner.style.display='none');
-        return json;
-      }catch(err){
-        console.warn('Fetch failed:', err);
-        const bannerEl = document.getElementById('errorBanner'); if(bannerEl){ bannerEl.style.display='block'; bannerEl.textContent = `Could not load /data/dashboard.json — using embedded fallback. Error: ${err.message}`; }
-        return FALLBACK_DATA;
-      }
-    }
-
-    (async function init(){
-      const DATA = await fetchData();
-      document.getElementById('snapshotDate').textContent = DATA.piData?.[0]?.Date || new Date().toLocaleDateString();
-
-      // build area lists
-      const areaFilter = document.getElementById('areaFilter');
-      const areaList = document.getElementById('areaList');
-      const uniqueAreas = [...new Set((DATA.piData||[]).map(r=>r.Area))];
-      uniqueAreas.forEach(a=>{ const opt=document.createElement('option'); opt.value=a; opt.textContent=a; areaFilter.appendChild(opt); const btn=document.createElement('button'); btn.textContent=a; btn.className='chip'; btn.style.margin='6px 6px 0 0'; btn.onclick=()=>{ areaFilter.value=a; renderAll(); }; areaList.appendChild(btn); });
-
-      // render tasks
-      function renderTasks(){
-        document.getElementById('dailyList').innerHTML = (DATA.dailyTask||[]).map(t=>`<div style="padding:6px;border-radius:6px;margin-bottom:6px;background:rgba(255,255,255,0.01)"><div style="display:flex;justify-content:space-between"><div><strong>${t.Task}</strong><div class='small'>${t.DATE || t.Date || ''}</div></div><div><span class='status ${t.Status==='Completed'?'completed':'notstarted'}'>${t.Status}</span></div></div></div>`).join('');
-        document.getElementById('weeklyList').innerHTML = (DATA.weeklyTask||[]).map(t=>`<div style="padding:6px;border-radius:6px;margin-bottom:6px;background:rgba(255,255,255,0.01)"><div style="display:flex;justify-content:space-between"><div><strong>${t.Task}</strong><div class='small'>${t.Date || t.DATE || ''}</div></div><div><span class='status ${t.Status==='Completed'?'completed':'notstarted'}'>${t.Status}</span></div></div></div>`).join('');
-      }
-      renderTasks();
-
-      // daily-type areas = weeklyPiData entries with Daily Qty > 0
-      const weeklyPiMap = new Map((DATA.weeklyPiData||[]).map(w=>[w.Area, w]));
-      const dailyTypeAreas = (DATA.weeklyPiData||[]).filter(w=>Number(w['Daily Qty'])>0).map(w=>w.Area);
-
-      // helpers
-      function calcTotals(filtered){
-        const totalLocations = filtered.reduce((s,r)=>s + (Number(r['Total locations'])||0),0);
-        const totalCounted = filtered.reduce((s,r)=>s + (Number(r.Counted)||0),0);
-        return {totalLocations,totalCounted};
-      }
-
-      // charts
-      let donutMain, donutDepth, dailyChart, weeklyChart;
-
-      function renderDonut(filtered){
-        const labels = filtered.map(r=>r.Area);
-        const data = filtered.map(r=>Number(r.Counted)||0);
-        const total = data.reduce((s,x)=>s+x,0);
-        document.getElementById('donutBreakdown').innerHTML = labels.map((l,i)=>`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="display:flex;gap:8px;align-items:center"><span class="swatch" style="background:${colors[i%colors.length]}"></span><div>${l}</div></div><div class="small">${formatNumber(data[i])}</div></div>`).join('') + `<div style="margin-top:6px" class="small"><strong>Total counted:</strong> ${formatNumber(total)}</div>`;
-        try{ if(donutMain) donutMain.destroy(); if(donutDepth) donutDepth.destroy();
-          const ctxDepth = document.getElementById('donutDepth').getContext('2d');
-          const ctxMain = document.getElementById('donutMain').getContext('2d');
-          donutDepth = new Chart(ctxDepth,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,hoverOffset:6}]},options:{cutout:'60%',plugins:{legend:{display:false},tooltip:{enabled:false}},maintainAspectRatio:false}});
-          donutMain = new Chart(ctxMain,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors.map(c=>c+'cc'),hoverOffset:12,borderColor:'#071227',borderWidth:3}]},options:{cutout:'78%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.raw;const p = total?((v/total)*100).toFixed(1):0;return `${ctx.label}: ${v} (${p}%)`;}}}},maintainAspectRatio:false}});
-        }catch(e){console.error('donut err',e)}
-      }
-
-      function renderGauges(filtered){
-        const top = [...filtered].sort((a,b)=>(b.Counted||0)-(a.Counted||0)).slice(0,6);
-        const gaugesEl = document.getElementById('gauges'); gaugesEl.innerHTML='';
-        top.forEach((r,i)=>{
-          const wrapper = document.createElement('div'); wrapper.className='card'; wrapper.style.padding='6px'; wrapper.style.background='rgba(255,255,255,0.02)'; wrapper.style.borderRadius='8px';
-          const counted = Number(r.Counted)||0; const total = Number(r['Total locations'])||0; const pctVal = total?Math.min(1,counted/total):0;
-          wrapper.innerHTML = `<div style="font-size:13px;margin-bottom:6px">${r.Area}</div><canvas id="gauge-${i}" style="height:70px"></canvas><div style="font-size:12px;color:var(--muted);margin-top:6px">${formatNumber(counted)} / ${formatNumber(total)} (${(pctVal*100).toFixed(1)}%)</div>`;
-          gaugesEl.appendChild(wrapper);
-          const ctx = wrapper.querySelector('canvas').getContext('2d');
-          new Chart(ctx,{type:'doughnut',data:{labels:['done','left'],datasets:[{data:[pctVal,1-pctVal],backgroundColor:[colors[i%colors.length],'rgba(255,255,255,0.06)']}]},options:{rotation:-1.1*Math.PI,circumference:1.1*Math.PI,cutout:'75%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
-        });
-      }
-
-            function renderWeeklyChart(areaSet){
-        try{
-          // WEEKLY = strictly weeklyPiData -> Weekly Qty
-          const rows = (DATA.weeklyPiData||[]);
-          const labels = rows.map(w=>w.Area);
-          const data = rows.map(w=>Number(w['Weekly Qty'])||0);
-
-          const ctx = document.getElementById('weeklyChart').getContext('2d');
-          if(weeklyChart) weeklyChart.destroy();
-          weeklyChart = new Chart(ctx,{
-            type:'bar',
-            data:{labels,datasets:[{label:'Weekly Qty',data,backgroundColor:labels.map((_,i)=>colors[i%colors.length]+'cc')}]},
-            options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}
-          });
-          document.getElementById('weeklyNote').textContent = 'Weekly values come ONLY from weeklyPiData → Weekly Qty.';
-        }catch(e){console.error('weekly err',e)}
-      }
-      }
-
-            function renderDailyChart(){
-        try{
-          // DAILY = strictly weeklyPiData -> Daily Qty (true daily values)
-          const dailyRows = (DATA.weeklyPiData||[]).filter(w=>Number(w['Daily Qty'])>0);
-          const labels = dailyRows.map(w=>w.Area);
-          const values = dailyRows.map(w=>Number(w['Daily Qty'])||0);
-
-          const sumAll = values.reduce((s,x)=>s+x,0);
-          const avg = values.length ? Math.round(sumAll / values.length) : 0;
-
-          const ctx = document.getElementById('dailyChart').getContext('2d');
-          if(dailyChart) dailyChart.destroy();
-          dailyChart = new Chart(ctx,{
-            type:'bar',
-            data:{labels,datasets:[{label:'Daily Qty (today)',data:values,backgroundColor:values.map(v=> v>=target ? colors[0] : colors[3])}]},
-            options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}
-          });
-
-          const overTarget = sumAll >= target;
-          document.getElementById('targetStatus').innerHTML = `<div class='small'>Daily target (sum): <strong>${formatNumber(target)}</strong></div><div style='font-weight:700;color:${overTarget?'var(--good)':'var(--bad)'}'>${overTarget?'OVER target':'BELOW target'} • ${formatNumber(sumAll)}</div>`;
-          document.getElementById('dailyNote').textContent = `Daily areas: ${labels.length} • Average per area: ${formatNumber(avg)} • Total today: ${formatNumber(sumAll)}.`;
-        }catch(e){console.error('daily err',e)}
-      }
-      }
-
-      function renderMetrics(filtered){
-        const totals = calcTotals(filtered);
-        const mEl = document.getElementById('metrics'); mEl.innerHTML='';
-        const items = [
-          {k:'Total locations',v:formatNumber(totals.totalLocations)},
-          {k:'Total counted',v:formatNumber(totals.totalCounted)},
-          {k:'Overall fill %',v:pct(totals.totalCounted,totals.totalLocations)},
-          {k:'Daily-type areas',v:dailyTypeAreas.length}
-        ];
-        items.forEach(it=>{ const d=document.createElement('div'); d.className='metric'; d.innerHTML=`<h3>${it.k}</h3><p>${it.v}</p>`; mEl.appendChild(d); });
-      }
-
-      function computeAnalysis(filtered){
-        const totals = calcTotals(filtered);
-        const worst = [...filtered].map(r=>({area:r.Area,fill:r['Total locations']? (Number(r.Counted||0)/Number(r['Total locations'])):0})).sort((a,b)=>a.fill-b.fill)[0];
-        const notes = [];
-        notes.push(`Total locs ${formatNumber(totals.totalLocations)}, counted ${formatNumber(totals.totalCounted)} (${pct(totals.totalCounted,totals.totalLocations)})`);
-        if(worst) notes.push(`Lowest fill: ${worst.area} ${(worst.fill*100).toFixed(1)}%`);
-        const behind = (filtered||[]).filter(r=>Number(r['Behind %'])>0).map(r=>r.Area);
-        if(behind.length) notes.push(`Behind target: ${behind.join(', ')}`);
-        return notes.join('. ');
-      }
-
-      function renderAll(){
-        const area = areaFilter.value;
-        let filtered = (DATA.piData||[]).slice();
-        if(area && area !== 'all') filtered = filtered.filter(r=>r.Area===area);
-        renderMetrics(filtered);
-        // donut: always show distribution of counted across filtered (if area selected) or all
-        renderDonut(filtered);
-        renderGauges(filtered);
-        // weekly only uses weeklyPiData
-        renderWeeklyChart(area==='all' ? new Set((DATA.weeklyPiData||[]).map(w=>w.Area)) : new Set([area]));
-        // daily: use daily-type areas only regardless of filter if area===all, otherwise if specific area selected, show it only if it's a daily-type
-        renderDailyChart();
-        document.getElementById('analysis').textContent = computeAnalysis(filtered);
-        const activeBtn = document.querySelector('button.chip.active');
-        const mode = activeBtn ? activeBtn.id.replace('btn','').toUpperCase() : 'WEEKLY';
-        document.getElementById('summaryInsight').textContent = `Showing ${filtered.length} areas — mode: ${mode}`;
-      }
-
-      // handlers
-      function setActive(button){ document.querySelectorAll('button.chip').forEach(b=>b.classList.remove('active')); button.classList.add('active'); }
-      document.getElementById('btnDaily').onclick = ()=>{ setActive(document.getElementById('btnDaily')); renderAll(); };
-      document.getElementById('btnWeekly').onclick = ()=>{ setActive(document.getElementById('btnWeekly')); renderAll(); };
-      document.getElementById('btnTotal').onclick = ()=>{ setActive(document.getElementById('btnTotal')); renderAll(); };
-      areaFilter.onchange = renderAll;
-
-      document.getElementById('downloadJson').onclick = ()=>{ const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='data.json'; a.click(); URL.revokeObjectURL(url); };
-            document.getElementById('exportCSV').onclick = ()=>{
-        const rows=[['Date','Area','Total locations','Counted','Above target','Behind %']];
-        (DATA.piData||[]).forEach(r=>rows.push([r.Date,r.Area,r['Total locations'],r.Counted,r['Above target'],r['Behind %']]));
-        const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-        const blob=new Blob([csv],{type:'text/csv'});
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a'); a.href=url; a.download='piData.csv'; a.click(); URL.revokeObjectURL(url);
-      }; (DATA.piData||[]).forEach(r=>rows.push([r.Date,r.Area,r['Total locations'],r.Counted,r['Above target'],r['Behind %']])); const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('
-'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='piData.csv'; a.click(); URL.revokeObjectURL(url); };
-
-      // initial render
-      renderAll();
-    })();
-  </script>
+// CYCLE
+const cLabels=DATA.piData.map(x=>x.Area);
+const cValues=DATA.piData.map(x=>Number(x.Counted)||0);
+new Chart(cycleChart,{type:'doughnut',data:{labels:cLabels,datasets:[{data:cValues,backgroundColor:colors,hoverOffset:20}]},options:{plugins:{legend:{display:false}},cutout:'65%'}});
+});
+</script>
 </body>
 </html>
