@@ -1,127 +1,124 @@
-{
-  "piData": [
-    {
-      "Date ": 46010,
-      "Area ": "Area",
+"Date": "22.12.2025",
+      "Area": "Area",
       "Total locations": "Total locations",
-      "Counted ": "Counted",
+      "Counted": "Counted",
       "Behind targe": "Locations behind the target",
       "Above target": "Locations above the target",
       "Behind %": "Behind the target %"
     },
     {
-      "Date ": 46010,
-      "Area ": "MPR",
+      "Date": "22.12.2025",
+      "Area": "MPR",
       "Total locations": 14622,
-      "Counted ": 3936,
+      "Counted": 3936,
       "Behind targe": 0,
       "Above target": 222.47619047619,
       "Behind %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "PB1",
+      "Date": "22.12.2025",
+      "Area": "PB1",
       "Total locations": 4329,
-      "Counted ": 1189,
+      "Counted": 1189,
       "Behind targe": 0,
       "Above target": 89.5714285714287,
       "Behind %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "PB2",
+      "Date": "22.12.2025",
+      "Area": "PB2",
       "Total locations": 795,
-      "Counted ": 484,
+      "Counted": 484,
       "Behind targe": 0,
       "Above target": 282.095238095238,
       "Behind %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "PB3",
+      "Date": "22.12.2025",
+      "Area": "PB3",
       "Total locations": 772,
-      "Counted ": 0,
+      "Counted": 0,
       "Behind targe": 196.063492063492,
       "Above target": 0,
       "Behind %": 0.253968253968254
     },
     {
-      "Date ": 46010,
-      "Area ": "PB4",
+      "Date": "22.12.2025",
+      "Area": "PB4",
       "Total locations": 164,
-      "Counted ": 0,
+      "Counted": 0,
       "Behind targe": 41.6507936507937,
       "Above target": 0,
       "Behind %": 0.253968253968254
     },
     {
-      "Date ": 46010,
-      "Area ": "PBSRES",
+      "Date": "22.12.2025",
+      "Area": "PBSRES",
       "Total locations": 5197,
-      "Counted ": 1374,
+      "Counted": 1374,
       "Behind targe": 0,
       "Above target": 54.1269841269841,
       "Behind %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "MP",
+      "Date": "22.12.2025",
+      "Area": "MP",
       "Total locations": 25612,
-      "Counted ": 7409,
+      "Counted": 7409,
       "Behind targe": 0,
       "Above target": 904.36507936508,
       "Behind %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "MIX",
+      "Date": "22.12.2025",
+      "Area": "MIX",
       "Total locations": 33087,
-      "Counted ": 8941,
+      "Counted": 8941,
       "Behind targe": 0,
       "Above target": 537.952380952382,
       "Behind %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "MS",
+      "Date": "22.12.2025",
+      "Area": "MS",
       "Total locations": 21512,
-      "Counted ": 5902,
+      "Counted": 5902,
       "Behind targe": 0,
       "Above target": 438.63492063492,
       "Behind %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "MSX",
+      "Date": "22.12.2025",
+      "Area": "MSX",
       "Total locations": 28798,
-      "Counted ": 7984,
+      "Counted": 7984,
       "Behind targe": 0,
       "Above target": 670.222222222223,
       "Behind %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "FM",
+      "Date": "22.12.2025",
+      "Area": "FM",
       "Total locations": 2308,
-      "Counted ": 620,
+      "Counted": 620,
       "Behind targe": 0,
       "Above target": 33.8412698412699,
       "Behind %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "HP",
+      "Date": "22.12.2025",
+      "Area": "HP",
       "Total locations": 561,
-      "Counted ": 155,
+      "Counted": 155,
       "Behind targe": 0,
       "Above target": 12.5238095238095,
       "Behind %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "Total:",
+      "Date": "22.12.2025",
+      "Area": "Total:",
       "Total locations": 137369,
-      "Counted ": 37994,
+      "Counted": 37994,
       "Behind targe": 237.714285714286,
       "Above target": 3245.80952380952,
       "Behind %": 0.00173047984417362
@@ -129,243 +126,243 @@
   ],
   "dailyTask": [
     {
-      "DATE": 46010,
-      "Task ": "ADJUSTMENTS (Returns)",
+      "DATE": "22.12.2025",
+      "Task": "ADJUSTMENTS (Returns)",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "ADJUSTMENTS (Standard)",
+      "DATE": "22.12.2025",
+      "Task": "ADJUSTMENTS (Standard)",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Aged stock report 7AM",
+      "DATE": "22.12.2025",
+      "Task": "Aged stock report 7AM",
       "Status": "Completed",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Aged stock report 3PM",
+      "DATE": "22.12.2025",
+      "Task": "Aged stock report 3PM",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Blackwells",
+      "DATE": "22.12.2025",
+      "Task": "Blackwells",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "AGED STOCK REPORT 6 AM",
+      "DATE": "22.12.2025",
+      "Task": "AGED STOCK REPORT 6 AM",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Available inventory status in Prob-Res pots 3PM",
+      "DATE": "22.12.2025",
+      "Task": "Available inventory status in Prob-Res pots 3PM",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Available inventory status in Prob-Res pots 6AM",
+      "DATE": "22.12.2025",
+      "Task": "Available inventory status in Prob-Res pots 6AM",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "EMPTY BIN CHECKS",
+      "DATE": "22.12.2025",
+      "Task": "EMPTY BIN CHECKS",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Internet returns",
+      "DATE": "22.12.2025",
+      "Task": "Internet returns",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Inventory Status (DATA STUDIO)",
+      "DATE": "22.12.2025",
+      "Task": "Inventory Status (DATA STUDIO)",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "LOCATIONS IN ERROR",
+      "DATE": "22.12.2025",
+      "Task": "LOCATIONS IN ERROR",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Manual Despatch Adjustment",
+      "DATE": "22.12.2025",
+      "Task": "Manual Despatch Adjustment",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Manual location checks",
+      "DATE": "22.12.2025",
+      "Task": "Manual location checks",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Mixing violations (multiple ISBN)",
+      "DATE": "22.12.2025",
+      "Task": "Mixing violations (multiple ISBN)",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "MLC Tracker update",
+      "DATE": "22.12.2025",
+      "Task": "MLC Tracker update",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Supplier Overs Report",
+      "DATE": "22.12.2025",
+      "Task": "Supplier Overs Report",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "SIS afternoon report",
+      "DATE": "22.12.2025",
+      "Task": "SIS afternoon report",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "PI 1st count",
+      "DATE": "22.12.2025",
+      "Task": "PI 1st count",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "PI 2nd count",
+      "DATE": "22.12.2025",
+      "Task": "PI 2nd count",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "PI assign",
+      "DATE": "22.12.2025",
+      "Task": "PI assign",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "PI Investigation",
+      "DATE": "22.12.2025",
+      "Task": "PI Investigation",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "PI Master file update (Cycle)",
+      "DATE": "22.12.2025",
+      "Task": "PI Master file update (Cycle)",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "POD",
+      "DATE": "22.12.2025",
+      "Task": "POD",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "PI set up",
+      "DATE": "22.12.2025",
+      "Task": "PI set up",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "SHRINKAGE RECONCILATION DAILY",
+      "DATE": "22.12.2025",
+      "Task": "SHRINKAGE RECONCILATION DAILY",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "SLA update",
+      "DATE": "22.12.2025",
+      "Task": "SLA update",
       "Status": "Not started",
       "Type": "Daily"
     },
     {
-      "DATE": 46010,
-      "Task ": "Stock left on RDTs check",
+      "DATE": "22.12.2025",
+      "Task": "Stock left on RDTs check",
       "Status": "Not started",
       "Type": "Daily"
     }
   ],
   "weeklyTask": [
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Weekly) SLA",
-      "Status": "Completed",
+      "Status": "Not started",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Weekly) SIS report",
       "Status": "Not started",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Weekly) Shrinkage",
-      "Status": "Completed",
+      "Status": "Not started",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Weekly) ORM",
-      "Status": "Completed",
+      "Status": "Not started",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Tuesday) RP split pack",
-      "Status": "Completed",
+      "Status": "Not started",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Thursday) RP split pack",
-      "Status": "Completed",
+      "Status": "Not started",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Weekly) Price checker update",
-      "Status": "Completed",
+      "Status": "Not started",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Weekly) AGED STOCK REPORT 12 PM Friday",
       "Status": "Not started",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(once a month) Shrinkage for Period",
       "Status": "Completed",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Once a month) MLC on FM",
       "Status": "Not started",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Weekly) Shrinkage to Database",
       "Status": "Not started",
       "Type": "Weekly"
     },
     {
-      "Date": 46010,
+      "Date": "22.12.2025",
       "Task": "(Weekly) Returns locations checks",
       "Status": "Not started",
       "Type": "Weekly"
@@ -373,100 +370,100 @@
   ],
   "weeklyPiData": [
     {
-      "Date ": 46010,
-      "Area ": "MPR",
+      "Date": "22.12.2025",
+      "Area": "MPR",
       "Daily Qty": 127,
       "Week No": 27,
-      " Weekly Qty": 5103,
-      " Weekly %": 0.855490360435876
+      "Weekly Qty": 5103,
+      "Weekly %": 0.855490360435876
     },
     {
-      "Date ": 46010,
-      "Area ": "PB1",
+      "Date": "22.12.2025",
+      "Area": "PB1",
       "Daily Qty": 38,
       "Week No": 28,
-      " Weekly Qty": 6457,
-      " Weekly %": 1.08248113998324
+      "Weekly Qty": 6457,
+      "Weekly %": 1.08248113998324
     },
     {
-      "Date ": 46010,
-      "Area ": "PB2",
+      "Date": "22.12.2025",
+      "Area": "PB2",
       "Daily Qty": 15,
       "Week No": 29,
-      " Weekly Qty": 7494,
-      " Weekly %": 1.25632858340319
+      "Weekly Qty": 7494,
+      "Weekly %": 1.25632858340319
     },
     {
-      "Date ": 46010,
-      "Area ": "PB3",
+      "Date": "22.12.2025",
+      "Area": "PB3",
       "Daily Qty": 0,
       "Week No": 30,
-      " Weekly Qty": 6901,
-      " Weekly %": 1.1569153394803
+      "Weekly Qty": 6901,
+      "Weekly %": 1.1569153394803
     },
     {
-      "Date ": 46010,
-      "Area ": "PB4",
+      "Date": "22.12.2025",
+      "Area": "PB4",
       "Daily Qty": 0,
       "Week No": 31,
-      " Weekly Qty": 5447,
-      " Weekly %": 0.913160100586756
+      "Weekly Qty": 5447,
+      "Weekly %": 0.913160100586756
     },
     {
-      "Date ": 46010,
-      "Area ": "PBSRES",
+      "Date": "22.12.2025",
+      "Area": "PBSRES",
       "Daily Qty": 45,
       "Week No": 32,
-      " Weekly Qty": 4524,
-      " Weekly %": 0.758424140821458
+      "Weekly Qty": 4524,
+      "Weekly %": 0.758424140821458
     },
     {
-      "Date ": 46010,
-      "Area ": "MP",
+      "Date": "22.12.2025",
+      "Area": "MP",
       "Daily Qty": 221,
       "Week No": 33,
-      " Weekly Qty": 2068,
-      " Weekly %": 0.346689019279128
+      "Weekly Qty": 2068,
+      "Weekly %": 0.346689019279128
     },
     {
-      "Date ": 46010,
-      "Area ": "MIX",
+      "Date": "22.12.2025",
+      "Area": "MIX",
       "Daily Qty": 136,
       "Week No": 34,
-      " Weekly Qty": 0,
-      " Weekly %": 0
+      "Weekly Qty": 0,
+      "Weekly %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "MS",
+      "Date": "22.12.2025",
+      "Area": "MS",
       "Daily Qty": 61,
       "Week No": 35,
-      " Weekly Qty": 0,
-      " Weekly %": 0
+      "Weekly Qty": 0,
+      "Weekly %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "MSX",
+      "Date": "22.12.2025",
+      "Area": "MSX",
       "Daily Qty": 249,
       "Week No": 36,
-      " Weekly Qty": 0,
-      " Weekly %": 0
+      "Weekly Qty": 0,
+      "Weekly %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "FM",
+      "Date": "22.12.2025",
+      "Area": "FM",
       "Daily Qty": 20,
       "Week No": 37,
-      " Weekly Qty": 0,
-      " Weekly %": 0
+      "Weekly Qty": 0,
+      "Weekly %": 0
     },
     {
-      "Date ": 46010,
-      "Area ": "HP",
+      "Date": "22.12.2025",
+      "Area": "HP",
       "Daily Qty": 5,
       "Week No": 38,
-      " Weekly Qty": 0,
-      " Weekly %": 0
+      "Weekly Qty": 0,
+      "Weekly %": 0
     }
   ]
 }
