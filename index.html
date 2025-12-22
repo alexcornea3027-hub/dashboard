@@ -6,9 +6,9 @@
   <title>PI Dashboard — Polished 3D-style</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#04050a;--card:#071227;--muted:#95a3b8;--accent:#7c3aed;--good:#16a34a;--bad:#ef4444}
+    :root{--bg:#02030a;--card:#071227;--muted:#95a3b8;--accent:#7c3aed;--good:#16a34a;--bad:#ef4444}
     *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}
-    body{margin:0;background:linear-gradient(180deg,#02030a 0%, #081426 80%);color:#e6eef8}
+    body{margin:0;background:linear-gradient(180deg,#010113 0%, #071428 80%);color:#e6eef8}
     .wrap{max-width:1200px;margin:18px auto;padding:18px}
     header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
     h1{margin:0;font-size:20px}
@@ -49,11 +49,11 @@
       </div>
 
       <div class="controls">
-        <button id="btnDaily">Daily</button>
+        <button id="btnDaily" class="chip">Daily</button>
         <button id="btnWeekly" class="chip active">Weekly</button>
-        <button id="btnTotal">Total</button>
+        <button id="btnTotal" class="chip">Total</button>
         <select id="areaFilter"><option value="all">All areas</option></select>
-        <button id="downloadJson">Download JSON</button>
+        <button id="downloadJson" class="chip">Download JSON</button>
       </div>
     </header>
 
@@ -125,7 +125,7 @@
           <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:10px 0">
           <strong>Export</strong>
           <div style="margin-top:8px">
-            <button id="exportCSV">Export CSV</button>
+            <button id="exportCSV" class="chip">Export CSV</button>
           </div>
         </div>
       </aside>
@@ -186,13 +186,6 @@
     // Charts
     let donutMain, donutDepth, dailyChart, weeklyChart;
 
-    function createGradient(ctx, area, color){
-      const grad = ctx.createLinearGradient(area.left, area.top, area.right, area.bottom);
-      grad.addColorStop(0, color);
-      grad.addColorStop(1, 'rgba(0,0,0,0.15)');
-      return grad;
-    }
-
     function renderDonut(filtered){
       const labels = filtered.map(r=>r.Area);
       const data = filtered.map(r=>Number(r.Counted)||0);
@@ -242,7 +235,7 @@
         const overTarget = sumAll >= target;
         const targetNode = document.getElementById('targetStatus');
         targetNode.innerHTML = `<div style="font-size:13px">Target (sum): <strong>${formatNumber(target)}</strong></div><div style="font-size:14px;margin-top:6px;color:${overTarget? 'var(--good)':'var(--bad)'}"><strong>${overTarget? 'OVER target':'BELOW target'}</strong> (${formatNumber(sumAll)})</div>`;
-        document.getElementById('dailyNote').textContent = `Daily-type areas: ${dailyAreas.length} • Average per area: ${formatNumber(avg)} • Sum: ${formatNumber(sumAll)}. Bars coloured by area performance.`;
+        document.getElementById('dailyNote').textContent = `Daily-type areas: ${dailyAreas.length} • Average per area: ${formatNumber(avg)} • Sum: ${formatNumber(sumAll)}.`;
       }catch(err){console.error('Daily chart error',err);}    }
 
     // Render helpers
@@ -279,18 +272,20 @@
       renderWeeklyChart(area==='all' ? new Set(DATA.weeklyPiData.map(w=>w.Area)) : new Set([area]));
       renderDailyChart();
       document.getElementById('analysis').textContent = computeAnalysis(filtered);
-      document.getElementById('summaryInsight').textContent = `Showing ${filtered.length} areas — mode: ${document.getElementById('btnWeekly').classList.contains('chip') ? 'weekly' : (document.getElementById('btnDaily').classList.contains('chip') ? 'daily' : 'total')}`;
+      const activeBtn = document.querySelector('button.chip.active');
+      const mode = activeBtn ? activeBtn.id.replace('btn','').toUpperCase() : 'WEEKLY';
+      document.getElementById('summaryInsight').textContent = `Showing ${filtered.length} areas — mode: ${mode}`;
     }
 
     // Handlers
-    document.getElementById('btnDaily').onclick = ()=>{ document.querySelectorAll('button').forEach(b=>b.classList.remove('chip','active')); document.getElementById('btnDaily').classList.add('chip','active'); renderAll(); };
-    document.getElementById('btnWeekly').onclick = ()=>{ document.querySelectorAll('button').forEach(b=>b.classList.remove('chip','active')); document.getElementById('btnWeekly').classList.add('chip','active'); renderAll(); };
-    document.getElementById('btnTotal').onclick = ()=>{ document.querySelectorAll('button').forEach(b=>b.classList.remove('chip','active')); document.getElementById('btnTotal').classList.add('chip','active'); renderAll(); };
+    function setActive(button){ document.querySelectorAll('button.chip').forEach(b=>b.classList.remove('active')); button.classList.add('active'); }
+    document.getElementById('btnDaily').onclick = ()=>{ setActive(document.getElementById('btnDaily')); renderAll(); };
+    document.getElementById('btnWeekly').onclick = ()=>{ setActive(document.getElementById('btnWeekly')); renderAll(); };
+    document.getElementById('btnTotal').onclick = ()=>{ setActive(document.getElementById('btnTotal')); renderAll(); };
     areaFilter.onchange = renderAll;
 
     document.getElementById('downloadJson').onclick = ()=>{ const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='data.json'; a.click(); URL.revokeObjectURL(url); };
-    document.getElementById('exportCSV').onclick = ()=>{ const rows=[['Date','Area','Total locations','Counted','Above target','Behind %']]; DATA.piData.forEach(r=>rows.push([r.Date,r.Area,r['Total locations'],r.Counted,r['Above target'],r['Behind %']])); const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('
-'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='piData.csv'; a.click(); URL.revokeObjectURL(url); };
+    document.getElementById('exportCSV').onclick = ()=>{ const rows=[['Date','Area','Total locations','Counted','Above target','Behind %']]; DATA.piData.forEach(r=>rows.push([r.Date,r.Area,r['Total locations'],r.Counted,r['Above target'],r['Behind %']])); const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='piData.csv'; a.click(); URL.revokeObjectURL(url); };
 
     // Init
     renderTasks(); renderAll();
