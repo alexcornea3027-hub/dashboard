@@ -1,321 +1,340 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Team VCB | Performance Tracker</title>
+    <title>VCB Command Center | Stock Team</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0b0f19;
-            --card: #151c2c;
-            --accent: #0ea5e9;
+            --bg-deep: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
             --success: #10b981;
             --danger: #f43f5e;
-            --text: #f8fafc;
+            --text-main: #f8fafc;
             --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
         body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background-color: var(--bg-deep);
+            color: var(--text-main);
             height: 100vh;
+            width: 100vw;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 12px;
+            padding: 15px;
         }
 
-        /* --- HEADER & LIVE PERFORMANCE --- */
+        /* --- HEADER AREA --- */
         header {
             height: 12vh;
             display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr;
-            gap: 20px;
-            margin-bottom: 12px;
+            grid-template-columns: 1.2fr 1.5fr 1.2fr;
+            gap: 15px;
+            margin-bottom: 15px;
         }
 
-        .header-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 10px 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .performance-panel {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border: 1px solid var(--accent);
-            box-shadow: 0 0 15px rgba(14, 165, 233, 0.1);
-        }
-
-        .kpi-unit { text-align: center; }
-        .kpi-unit big { font-size: 2rem; font-weight: 800; display: block; line-height: 1; }
-        .kpi-unit small { font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; }
-
-        #delta-pill {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 0.9rem;
-        }
-
-        /* --- MAIN DASHBOARD GRID --- */
-        .dashboard-grid {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 1fr 1.2fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 12px;
-            min-height: 0;
-        }
-
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
+        .h-box {
+            background: var(--card-bg);
             border-radius: 15px;
             padding: 15px;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .brand-title { font-size: 1.6rem; font-weight: 900; color: var(--accent); letter-spacing: -1px; }
+        .clock-big { font-size: 1.8rem; font-weight: 700; color: #fff; }
+        .date-small { font-size: 0.9rem; color: var(--text-dim); text-transform: capitalize; }
+
+        /* TARGET MONITOR */
+        .target-box {
+            background: #1e293b;
+            border: 2px solid var(--accent);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .kpi-circle { text-align: center; }
+        .kpi-circle span { display: block; font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; }
+        .kpi-circle b { font-size: 2.2rem; line-height: 1; }
+        #delta-label { font-size: 1rem; padding: 4px 12px; border-radius: 8px; font-weight: 700; }
+
+        /* --- MAIN DASHBOARD GRID --- */
+        .main-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 15px;
             min-height: 0;
         }
 
-        .card-title {
-            font-size: 0.75rem;
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .card-label {
+            font-size: 0.85rem;
             font-weight: 700;
             color: var(--accent);
             text-transform: uppercase;
-            margin-bottom: 10px;
-            border-left: 3px solid var(--accent);
-            padding-left: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+        .card-label::before { content: ''; width: 4px; height: 15px; background: var(--accent); border-radius: 2px; }
 
-        /* --- CENTER SECTION (3D CYCLE) --- */
-        .center-card { grid-row: span 2; justify-content: space-around; }
-        .gauge-box { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
-        .gauge-label { position: absolute; text-align: center; transform: translateY(15px); }
-        .gauge-label h2 { font-size: 3.5rem; font-weight: 900; }
+        /* CENTER PIECE (3D GAUGE) */
+        .center-hero { grid-row: span 2; }
+        .gauge-wrap { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+        .gauge-text { position: absolute; text-align: center; transform: translateY(20px); }
+        .gauge-text h2 { font-size: 4rem; font-weight: 900; color: #fff; }
 
-        /* --- TASK LAYOUT --- */
-        .task-layout { flex: 1; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 10px; min-height: 0; }
+        /* TASK LISTS */
+        .split-box { flex: 1; display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 10px; min-height: 0; }
         .task-list { overflow-y: auto; padding-right: 5px; }
-        .task-list::-webkit-scrollbar { width: 3px; }
-        .task-list::-webkit-scrollbar-thumb { background: var(--accent); }
+        .task-list::-webkit-scrollbar { width: 4px; }
+        .task-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
         .task-row {
-            background: rgba(0,0,0,0.2);
-            padding: 7px 10px;
-            border-radius: 6px;
-            margin-bottom: 4px;
-            font-size: 0.75rem;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-left: 3px solid var(--border);
         }
-        .status-indicator { width: 6px; height: 6px; border-radius: 50%; }
+        .task-row.done { border-left-color: var(--success); }
+        .task-row.todo { border-left-color: var(--danger); }
+
+        .status-tag { font-size: 0.65rem; font-weight: 900; padding: 2px 6px; border-radius: 4px; }
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="header-box">
-            <h1 style="font-size: 1.2rem; font-weight: 800;">STOCK <span style="color:var(--accent)">VCB</span></h1>
-            <p id="full-date" style="font-size: 0.7rem; color: var(--text-dim);"></p>
-            <p id="live-time" style="font-size: 1.1rem; font-weight: bold;"></p>
+        <div class="h-box">
+            <div class="brand-title">STOCK TEAM VCB</div>
+            <div class="date-small" id="live-date">...</div>
+            <div class="clock-big" id="live-clock">00:00:00</div>
         </div>
 
-        <div class="header-box performance-panel">
-            <div class="kpi-unit">
-                <small>Combined Total</small>
-                <big id="total-daily">0</big>
+        <div class="h-box target-box">
+            <div class="kpi-circle">
+                <span>Realizat (Total)</span>
+                <b id="val-total-day">0</b>
             </div>
-            <div style="height: 40px; width: 1px; background: var(--border);"></div>
-            <div class="kpi-unit">
-                <small>Status vs Target</small>
-                <div id="delta-pill">0</div>
+            <div class="kpi-circle">
+                <span>vs. Target (1193)</span>
+                <div id="delta-label">0</div>
             </div>
-            <div style="height: 40px; width: 1px; background: var(--border);"></div>
-            <div class="kpi-unit">
-                <small>Daily Target</small>
-                <big>1193</big>
+            <div class="kpi-circle">
+                <span>Progres</span>
+                <b id="perc-day" style="color: var(--accent);">0%</b>
             </div>
         </div>
 
-        <div class="header-box" style="text-align: right;">
-            <small style="color:var(--text-dim)">INVENTORY INTEGRITY</small>
-            <h2 id="accuracy-perc" style="color: var(--success); font-size: 1.8rem;">0%</h2>
+        <div class="h-box" style="align-items: flex-end;">
+            <span style="font-size: 0.8rem; color: var(--text-dim);">SYSTEM ACCURACY</span>
+            <div id="main-accuracy" style="font-size: 2.2rem; font-weight: 900; color: var(--success);">0%</div>
+            <span style="font-size: 0.7rem;">STATUS: OPERATIONAL</span>
         </div>
     </header>
 
-    <main class="dashboard-grid">
+    <main class="main-grid">
         <div class="card">
-            <div class="card-title">Daily Area Distribution</div>
-            <div style="flex:1; position:relative;"><canvas id="chartArea"></canvas></div>
+            <div class="card-label">Distribuție Zilnică / Arie</div>
+            <div style="flex:1; position:relative;"><canvas id="chartDailyArea"></canvas></div>
         </div>
 
-        <div class="card center-card">
-            <div class="card-title" style="text-align: center;">Total Inventory Cycle</div>
-            <div class="gauge-box">
-                <canvas id="chartCycle"></canvas>
-                <div class="gauge-label">
-                    <h2 id="gauge-val">0%</h2>
-                    <p style="font-size: 0.7rem; color: var(--text-dim);">COMPLETED</p>
+        <div class="card center-hero">
+            <div class="card-label" style="justify-content: center;">Progres Total Ciclu Inventar</div>
+            <div class="gauge-wrap">
+                <canvas id="chartCycleGauge"></canvas>
+                <div class="gauge-text">
+                    <h2 id="gauge-perc">0%</h2>
+                    <p style="color: var(--text-dim); font-size: 0.8rem; font-weight: 700;">ACCURACY INDEX</p>
                 </div>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <div style="flex:1; background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; text-align:center;">
-                    <small style="display:block; font-size:0.6rem; color:var(--text-dim);">COUNTED</small>
-                    <b id="val-counted">0</b>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center;">
+                    <small style="color:var(--text-dim); display:block; font-size: 0.7rem;">NUMĂRATE</small>
+                    <b id="stat-counted" style="font-size: 1.2rem;">0</b>
                 </div>
-                <div style="flex:1; background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; text-align:center;">
-                    <small style="display:block; font-size:0.6rem; color:var(--text-dim);">REMAINING</small>
-                    <b id="val-rem" style="color:var(--danger)">0</b>
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center;">
+                    <small style="color:var(--text-dim); display:block; font-size: 0.7rem;">RĂMASE</small>
+                    <b id="stat-rem" style="font-size: 1.2rem; color: var(--danger);">0</b>
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title">Weekly Productivity Trend</div>
-            <div style="flex:1; position:relative;"><canvas id="chartWeekly"></canvas></div>
+            <div class="card-label">Evoluție Săptămânală (Trend)</div>
+            <div style="flex:1; position:relative;"><canvas id="chartWeeklyLine"></canvas></div>
         </div>
 
         <div class="card">
-            <div class="card-title">Daily Operations Status</div>
-            <div class="task-layout">
-                <div class="task-list" id="dailyTasks"></div>
-                <div style="position:relative;"><canvas id="dailyPie"></canvas></div>
+            <div class="card-label">Status Operațiuni Zilnice</div>
+            <div class="split-box">
+                <div class="task-list" id="listDaily"></div>
+                <div style="position:relative;"><canvas id="pieDaily"></canvas></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-title">Weekly Master Tasks</div>
-            <div class="task-layout">
-                <div class="task-list" id="weeklyTasks"></div>
-                <div style="position:relative;"><canvas id="weeklyPie"></canvas></div>
+            <div class="card-label">Sarcini Master Săptămânale</div>
+            <div class="split-box">
+                <div class="task-list" id="listWeekly"></div>
+                <div style="position:relative;"><canvas id="pieWeekly"></canvas></div>
             </div>
         </div>
     </main>
 
     <script>
-        const TARGET = 1193;
+        const TARGET_VAL = 1193;
 
-        // --- TIME ENGINE ---
-        function runClock() {
-            const now = new Date();
-            document.getElementById('full-date').innerText = now.toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long' });
-            document.getElementById('live-time').innerText = now.toLocaleTimeString('en-GB');
+        // --- CEAS ȘI DATA ---
+        function updateTime() {
+            const acum = new Date();
+            const optiuniData = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('live-date').innerText = acum.toLocaleDateString('ro-RO', optiuniData);
+            document.getElementById('live-clock').innerText = acum.toLocaleTimeString('ro-RO');
         }
-        setInterval(runClock, 1000); runClock();
+        setInterval(updateTime, 1000); updateTime();
 
-        // --- DATA ENGINE ---
-        async function init() {
+        // --- MOTOR DATE ---
+        async function start() {
             try {
-                const res = await fetch('data/dashboard.json');
-                const data = await res.json();
-                process(data);
-            } catch (e) { console.error("Data Load Error"); }
+                const r = await fetch('data/dashboard.json');
+                const d = await r.json();
+                render(d);
+            } catch (e) { console.error("JSON Error"); }
         }
 
-        function process(data) {
+        function render(data) {
             const wPi = data.weeklyPiData || [];
             const pi = data.piData || [];
 
-            // 1. COMBINED DAILY CALCULATION
-            const dailyCombined = wPi.reduce((s, x) => s + (x["Daily Qty"] || 0), 0);
-            const delta = dailyCombined - TARGET;
-            
-            document.getElementById('total-daily').innerText = dailyCombined.toLocaleString();
-            const deltaPill = document.getElementById('delta-pill');
-            deltaPill.innerText = (delta >= 0 ? "+" : "") + delta + " vs Target";
-            deltaPill.style.background = delta >= 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)';
-            deltaPill.style.color = delta >= 0 ? 'var(--success)' : 'var(--danger)';
+            // 1. Logica Target Combinat
+            const totalAzi = wPi.reduce((sum, item) => sum + (item["Daily Qty"] || 0), 0);
+            const diferenta = totalAzi - TARGET_VAL;
+            const procAzi = ((totalAzi / TARGET_VAL) * 100).toFixed(0);
 
-            // 2. CYCLE CALCULATION
+            document.getElementById('val-total-day').innerText = totalAzi.toLocaleString();
+            document.getElementById('perc-day').innerText = procAzi + "%";
+            
+            const dLabel = document.getElementById('delta-label');
+            dLabel.innerText = (diferenta >= 0 ? "+" : "") + diferenta;
+            dLabel.style.background = diferenta >= 0 ? 'var(--success)' : 'var(--danger)';
+            dLabel.style.color = "#fff";
+
+            // 2. Logica Ciclu Total
             let tL = 0, tC = 0;
             pi.forEach(x => { tL += x["Total locations"]; tC += x.Counted; });
-            const p = ((tC/tL)*100).toFixed(1);
-            document.getElementById('gauge-val').innerText = p + "%";
-            document.getElementById('accuracy-perc').innerText = p + "%";
-            document.getElementById('val-counted').innerText = tC.toLocaleString();
-            document.getElementById('val-rem').innerText = (tL - tC).toLocaleString();
+            const procTotal = ((tC/tL)*100).toFixed(1);
+            
+            document.getElementById('gauge-perc').innerText = procTotal + "%";
+            document.getElementById('main-accuracy').innerText = procTotal + "%";
+            document.getElementById('stat-counted').innerText = tC.toLocaleString();
+            document.getElementById('stat-rem').innerText = (tL - tC).toLocaleString();
 
-            // 3. RENDER CHARTS
-            renderDailyBars(wPi);
-            renderWeeklyLine(wPi);
-            renderCycleGauge(tC, tL - tC);
-            renderTaskSystem('dailyTasks', 'dailyPie', data.dailyTask, '#0ea5e9');
-            renderTaskSystem('weeklyTasks', 'weeklyPie', data.weeklyTask, '#10b981');
+            // 3. Init Charts
+            initBarChart(wPi);
+            initLineChart(wPi);
+            initGauge(tC, tL - tC);
+            initTaskSystem('listDaily', 'pieDaily', data.dailyTask, '#38bdf8');
+            initTaskSystem('listWeekly', 'pieWeekly', data.weeklyTask, '#10b981');
         }
 
-        function renderDailyBars(data) {
-            new Chart(document.getElementById('chartArea'), {
+        function initBarChart(data) {
+            new Chart(document.getElementById('chartDailyArea'), {
                 type: 'bar',
                 data: {
                     labels: data.map(x => x.Area),
-                    datasets: [{ data: data.map(x => x["Daily Qty"]), backgroundColor: '#0ea5e9', borderRadius: 4 }]
+                    datasets: [{ data: data.map(x => x["Daily Qty"]), backgroundColor: '#38bdf8', borderRadius: 6 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font:{size:10} } },
-                             x: { grid: { display: false }, ticks: { color: '#64748b', font:{size:10} } } } }
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                             x: { grid: { display: false }, ticks: { color: '#94a3b8' } } } }
             });
         }
 
-        function renderWeeklyLine(data) {
+        function initLineChart(data) {
             const sorted = [...data].sort((a,b) => a["Week No"] - b["Week No"]);
-            new Chart(document.getElementById('chartWeekly'), {
+            new Chart(document.getElementById('chartWeeklyLine'), {
                 type: 'line',
                 data: {
                     labels: sorted.map(x => "Wk " + x["Week No"]),
-                    datasets: [{ data: sorted.map(x => x["Weekly Qty"]), borderColor: '#10b981', tension: 0.4, fill: true, backgroundColor: 'rgba(16, 185, 129, 0.1)' }]
+                    datasets: [{ 
+                        data: sorted.map(x => x["Weekly Qty"]), 
+                        borderColor: '#10b981', 
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true, tension: 0.4, borderWidth: 4, pointRadius: 4
+                    }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font:{size:10} } },
-                             x: { grid: { display: false }, ticks: { color: '#64748b', font:{size:10} } } } }
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                             x: { grid: { display: false }, ticks: { color: '#94a3b8' } } } }
             });
         }
 
-        function renderCycleGauge(c, r) {
-            new Chart(document.getElementById('chartCycle'), {
+        function initGauge(c, r) {
+            new Chart(document.getElementById('chartCycleGauge'), {
                 type: 'doughnut',
                 data: {
-                    datasets: [{ data: [c, r], backgroundColor: ['#0ea5e9', 'rgba(255,255,255,0.05)'], borderWidth: 0, cutout: '85%' }]
+                    datasets: [{ 
+                        data: [c, r], 
+                        backgroundColor: ['#38bdf8', 'rgba(255,255,255,0.05)'], 
+                        borderWidth: 0, cutout: '82%' 
+                    }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: 270 }
             });
         }
 
-        function renderTaskSystem(listId, pieId, tasks, color) {
-            const list = document.getElementById(listId);
+        function initTaskSystem(listId, pieId, tasks, color) {
+            const listEl = document.getElementById(listId);
             const done = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
             const pending = tasks.length - done;
 
-            list.innerHTML = tasks.map(t => {
-                const isDone = t.Status.toLowerCase().includes('complete');
-                return `<div class="task-row">
-                    <span>${t.Task || t.TASK}</span>
-                    <div class="status-indicator" style="background: ${isDone ? 'var(--success)' : 'var(--danger)'}"></div>
+            listEl.innerHTML = tasks.map(t => {
+                const ok = t.Status.toLowerCase().includes('complete');
+                return `<div class="task-row ${ok ? 'done' : 'todo'}">
+                    <span style="font-weight:600;">${t.Task || t.TASK}</span>
+                    <span class="status-tag" style="background:${ok ? 'var(--success)' : 'var(--danger)'}">${ok ? 'OK' : 'PENDING'}</span>
                 </div>`;
             }).join('');
 
             new Chart(document.getElementById(pieId), {
-                type: 'pie',
+                type: 'doughnut',
                 data: {
-                    labels: ['Done', 'Pending'],
-                    datasets: [{ data: [done, pending], backgroundColor: [color, 'rgba(255,255,255,0.03)'], borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }]
+                    datasets: [{ data: [done, pending], backgroundColor: [color, 'rgba(0,0,0,0.2)'], borderWidth: 0 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
             });
         }
 
-        init();
+        start();
     </script>
 </body>
 </html>
