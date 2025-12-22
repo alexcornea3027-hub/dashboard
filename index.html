@@ -3,318 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Team VCB | Pro Dashboard</title>
+    <title>Stock Team VCB | Management Console</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg: #05070a;
-            --card: rgba(17, 25, 40, 0.75);
-            --accent: #00f2ff;
-            --green: #00ff88;
-            --red: #ff3366;
-            --text: #e2e8f0;
-            --border: rgba(255, 255, 255, 0.1);
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --accent: #38bdf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.05);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             height: 100vh;
-            width: 100vw;
-            overflow: hidden; /* Blocăm scroll-ul general */
             display: flex;
             flex-direction: column;
-            padding: 10px;
+            overflow: hidden;
+            padding: 12px;
         }
 
         /* --- HEADER --- */
         header {
-            height: 60px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
-            margin-bottom: 10px;
+            background: var(--bg-card);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
         }
 
-        .title { font-weight: bold; letter-spacing: 2px; color: var(--accent); }
-        #clock { font-family: monospace; font-size: 1.5rem; color: #fff; }
+        .brand h1 { font-size: 1.4rem; letter-spacing: -0.5px; color: var(--accent); font-weight: 700; }
+        
+        .date-time { text-align: right; }
+        #full-date { font-size: 0.85rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        #live-clock { font-size: 1.6rem; font-weight: 600; font-family: monospace; color: #fff; }
 
-        /* --- GRID LAYOUT --- */
-        .dashboard {
+        /* --- LAYOUT GRID --- */
+        .dashboard-grid {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr 1.2fr 1fr;
+            grid-template-columns: 280px 1fr 1fr 300px;
             grid-template-rows: 1fr 1fr;
-            gap: 10px;
-            min-height: 0; /* Important pentru Firefox/Chrome grid */
-        }
-
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            min-height: 0; /* Previne extinderea forțată */
-            position: relative;
-        }
-
-        .card-header {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 10px;
-            font-weight: bold;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 5px;
-        }
-
-        /* --- CHART STYLES --- */
-        .chart-container {
-            flex: 1;
-            position: relative;
+            gap: 12px;
             min-height: 0;
         }
 
-        /* --- CENTER GAUGE --- */
-        .center-val {
-            position: absolute;
-            top: 55%; left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
-        .center-val h2 { font-size: 2.5rem; color: #fff; }
 
-        /* --- TASK LIST STYLES --- */
-        .list-container {
+        .card-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* --- CHART CONTAINERS --- */
+        .chart-box { flex: 1; position: relative; min-height: 0; }
+
+        /* --- TASK LISTS --- */
+        .task-scroll {
             flex: 1;
             overflow-y: auto;
             padding-right: 5px;
         }
-        .list-container::-webkit-scrollbar { width: 4px; }
-        .list-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        .task-scroll::-webkit-scrollbar { width: 4px; }
+        .task-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
-        .task-row {
+        .task-item {
+            font-size: 0.8rem;
+            padding: 8px 10px;
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 6px;
+            margin-bottom: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px;
-            background: rgba(255,255,255,0.03);
-            margin-bottom: 5px;
-            border-radius: 6px;
-            font-size: 0.8rem;
+            border-left: 3px solid transparent;
         }
-        .status-pill {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-        .done { background: rgba(0, 255, 136, 0.2); color: var(--green); }
-        .pending { background: rgba(255, 51, 102, 0.2); color: var(--red); }
+        .task-item.done { border-left-color: var(--success); }
+        .task-item.todo { border-left-color: var(--danger); }
+        
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-        /* STATS PILLS */
-        .stats-bar { display: flex; gap: 10px; margin-top: 10px; }
-        .stat-item { flex: 1; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 8px; text-align: center; }
-        .stat-item span { font-size: 0.6rem; display: block; color: #888; }
-        .stat-item b { font-size: 0.9rem; color: var(--accent); }
+        /* --- SPECIAL KPI --- */
+        .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .kpi-tile { background: var(--bg-main); padding: 10px; border-radius: 8px; text-align: center; }
+        .kpi-tile small { font-size: 0.65rem; color: var(--text-dim); display: block; }
+        .kpi-tile b { font-size: 1.1rem; color: var(--accent); }
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="title">STOCK TEAM VCB // COMMAND_CENTER</div>
-        <div id="clock">00:00:00</div>
-        <div id="target-box" style="text-align: right;">
-            <span style="font-size: 0.7rem;">DAILY VS TARGET</span><br>
-            <b id="target-val" style="font-size: 1.2rem;">0</b>
+        <div class="brand">
+            <h1>Stock Team <span style="color: #fff;">VCB</span></h1>
+            <p style="font-size: 0.7rem; color: var(--text-dim);">V3.5 | DATA RECONCILIATION</p>
+        </div>
+        
+        <div class="date-time">
+            <div id="full-date">Loading...</div>
+            <div id="live-clock">00:00:00</div>
         </div>
     </header>
 
-    <div class="dashboard">
+    <div class="dashboard-grid">
+        
+        <div class="card" style="grid-row: span 2;">
+            <div class="card-label">Daily Tasks Details</div>
+            <div class="task-scroll" id="daily-list-container"></div>
+            <div class="kpi-row">
+                <div class="kpi-tile">
+                    <small>Completed</small><b id="d-task-count">0</b>
+                </div>
+                <div class="kpi-tile">
+                    <small>Pending</small><b id="d-task-pending" style="color: var(--danger);">0</b>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
-            <div class="card-header">Daily Volume by Area</div>
-            <div class="chart-container">
-                <canvas id="dailyChart"></canvas>
+            <div class="card-label">Daily Volume by Area</div>
+            <div class="chart-box">
+                <canvas id="chart-daily-bars"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-label">Weekly Progress Trend</div>
+            <div class="chart-box">
+                <canvas id="chart-weekly-line"></canvas>
             </div>
         </div>
 
         <div class="card" style="grid-row: span 2;">
-            <div class="card-header">Total Cycle Completion</div>
-            <div class="chart-container">
-                <canvas id="cycleChart"></canvas>
-                <div class="center-val">
-                    <h2 id="perc-text">0%</h2>
-                    <p style="font-size: 0.7rem; color: var(--accent);">STABILITY</p>
+            <div class="card-label">Weekly Tasks Details</div>
+            <div class="task-scroll" id="weekly-list-container"></div>
+            <div class="kpi-row">
+                <div class="kpi-tile">
+                    <small>Done</small><b id="w-task-count">0</b>
                 </div>
-            </div>
-            <div class="stats-bar">
-                <div class="stat-item"><span>Counted</span><b id="s-counted">0</b></div>
-                <div class="stat-item"><span>Total Locs</span><b id="s-total">0</b></div>
+                <div class="kpi-tile">
+                    <small>Pending</small><b id="w-task-pending" style="color: var(--warning);">0</b>
+                </div>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-header">Weekly Trend (by Week No)</div>
-            <div class="chart-container">
-                <canvas id="weeklyChart"></canvas>
+            <div class="card-label">Daily Task Completion Ratio</div>
+            <div class="chart-box">
+                <canvas id="chart-daily-tasks-pie"></canvas>
             </div>
         </div>
 
         <div class="card">
-            <div class="card-header">Daily Smart Tasks</div>
-            <div class="list-container" id="dailyTasks">
-                </div>
+            <div class="card-label">Weekly Task Completion Ratio</div>
+            <div class="chart-box">
+                <canvas id="chart-weekly-tasks-pie"></canvas>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">Weekly Master Tasks</div>
-            <div class="list-container" id="weeklyTasks">
-                </div>
-        </div>
     </div>
 
     <script>
-        const TARGET = 1193;
+        // --- 1. CLOCK & DATE ---
+        function updateClock() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('full-date').textContent = now.toLocaleDateString('en-GB', options);
+            document.getElementById('live-clock').textContent = now.toLocaleTimeString('en-GB');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        // Clock logic
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
-        }, 1000);
-
-        // Main Data Fetch
-        async function init() {
+        // --- 2. DATA ENGINE ---
+        async function fetchData() {
             try {
-                const res = await fetch('data/dashboard.json');
-                const data = await res.json();
-                render(data);
-            } catch (e) {
-                console.error("Fetch error, ensure data/dashboard.json exists.");
+                const response = await fetch('data/dashboard.json');
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (err) {
+                console.error("Critical: dashboard.json not found.", err);
             }
         }
 
-        function render(data) {
-            const wPi = data.weeklyPiData || [];
-            const pi = data.piData || [];
-            
-            // 1. Target Logic
-            const dSum = wPi.reduce((a, b) => a + (b["Daily Qty"] || 0), 0);
-            const diff = dSum - TARGET;
-            const targetEl = document.getElementById('target-val');
-            targetEl.innerText = (diff >= 0 ? "+" : "") + diff;
-            targetEl.style.color = diff >= 0 ? 'var(--green)' : 'var(--red)';
+        function renderDashboard(data) {
+            const dailyTasks = data.dailyTask || [];
+            const weeklyTasks = data.weeklyTask || [];
+            const weeklyPiData = data.weeklyPiData || [];
 
-            // 2. Cycle Logic
-            let totalL = 0, totalC = 0;
-            pi.forEach(x => { totalL += x["Total locations"]; totalC += x.Counted; });
-            document.getElementById('perc-text').innerText = ((totalC/totalL)*100).toFixed(1) + "%";
-            document.getElementById('s-counted').innerText = totalC.toLocaleString();
-            document.getElementById('s-total').innerText = totalL.toLocaleString();
+            // 3. TASK LISTS RENDERING
+            populateTaskList('daily-list-container', dailyTasks, 'd-task-count', 'd-task-pending');
+            populateTaskList('weekly-list-container', weeklyTasks, 'w-task-count', 'w-task-pending');
 
-            // 3. Charts
-            createDailyChart(wPi);
-            createWeeklyChart(wPi);
-            createCycleChart(totalC, totalL - totalC);
-
-            // 4. Tasks
-            fillTasks('dailyTasks', data.dailyTask);
-            fillTasks('weeklyTasks', data.weeklyTask);
+            // 4. CHARTS RENDERING
+            renderDailyBar(weeklyPiData);
+            renderWeeklyLine(weeklyPiData);
+            renderTaskPie('chart-daily-tasks-pie', dailyTasks, '#10b981');
+            renderTaskPie('chart-weekly-tasks-pie', weeklyTasks, '#38bdf8');
         }
 
-        function createDailyChart(data) {
-            new Chart(document.getElementById('dailyChart'), {
+        // --- 5. CHART CONSTRUCTORS ---
+
+        function renderDailyBar(data) {
+            new Chart(document.getElementById('chart-daily-bars'), {
                 type: 'bar',
                 data: {
                     labels: data.map(x => x.Area),
                     datasets: [{
+                        label: 'Locations',
                         data: data.map(x => x["Daily Qty"]),
-                        backgroundColor: '#00f2ff',
+                        backgroundColor: '#38bdf8',
                         borderRadius: 4
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666', font: {size: 10} } },
-                        x: { grid: { display: false }, ticks: { color: '#666', font: {size: 10} } }
+                        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
                     }
                 }
             });
         }
 
-        function createWeeklyChart(data) {
+        function renderWeeklyLine(data) {
             const sorted = [...data].sort((a,b) => a["Week No"] - b["Week No"]);
-            new Chart(document.getElementById('weeklyChart'), {
+            new Chart(document.getElementById('chart-weekly-line'), {
                 type: 'line',
                 data: {
                     labels: sorted.map(x => "Wk " + x["Week No"]),
                     datasets: [{
                         data: sorted.map(x => x["Weekly Qty"]),
-                        borderColor: '#00ff88',
-                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                        borderColor: '#10b981',
+                        borderWidth: 3,
+                        tension: 0.4,
                         fill: true,
-                        tension: 0.3
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)'
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666', font: {size: 10} } },
-                        x: { grid: { display: false }, ticks: { color: '#666', font: {size: 10} } }
+                        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
                     }
                 }
             });
         }
 
-        function createCycleChart(c, r) {
-            new Chart(document.getElementById('cycleChart'), {
+        function renderTaskPie(canvasId, tasks, color) {
+            const done = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
+            const pending = tasks.length - done;
+            
+            new Chart(document.getElementById(canvasId), {
                 type: 'doughnut',
                 data: {
+                    labels: ['Completed', 'Pending'],
                     datasets: [{
-                        data: [c, r],
-                        backgroundColor: ['#00f2ff', 'rgba(255,255,255,0.05)'],
-                        borderWidth: 0,
-                        cutout: '85%'
+                        data: [done, pending],
+                        backgroundColor: [color, 'rgba(255,255,255,0.05)'],
+                        borderWidth: 0
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    circumference: 180,
-                    rotation: 270
+                    responsive: true, maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } }
+                    }
                 }
             });
         }
 
-        function fillTasks(id, tasks) {
-            const container = document.getElementById(id);
+        function populateTaskList(containerId, tasks, countId, pendingId) {
+            const container = document.getElementById(containerId);
+            const done = tasks.filter(t => t.Status.toLowerCase().includes('complete')).length;
+            
+            document.getElementById(countId).innerText = done;
+            document.getElementById(pendingId).innerText = tasks.length - done;
+
             container.innerHTML = tasks.map(t => {
                 const isDone = t.Status.toLowerCase().includes('complete');
                 return `
-                    <div class="task-row">
-                        <span>${t.Task}</span>
-                        <span class="status-pill ${isDone ? 'done' : 'pending'}">
-                            ${isDone ? 'DONE' : 'PENDING'}
-                        </span>
+                    <div class="task-item ${isDone ? 'done' : 'todo'}">
+                        <span>${t.Task || t.TASK}</span>
+                        <div class="status-dot" style="background: ${isDone ? 'var(--success)' : 'var(--danger)'}"></div>
                     </div>
                 `;
             }).join('');
         }
 
-        init();
+        fetchData();
     </script>
 </body>
 </html>
