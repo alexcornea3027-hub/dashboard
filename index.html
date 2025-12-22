@@ -3,501 +3,234 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Stock Team VCB — Dashboard (final)</title>
+<title>VCB Dashboard — Clean</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  :root{
-    --bg:#041226; --panel:#071227; --muted:#98a8bd;
-    --accentA:#7dd3fc; --accentB:#8b5cf6; --accentC:#60a5fa;
-    --done:#16a34a; --todo:#f97316; --glass: rgba(255,255,255,0.03);
-  }
+  :root{ --bg:#041226; --panel:#071227; --muted:#98a8bd; --accentA:#7dd3fc; --accentB:#8b5cf6; --done:#16a34a; --todo:#f97316; }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial;background:linear-gradient(180deg,#021026,#05122a);color:#eaf6ff;overflow:hidden}
+  html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial;background:linear-gradient(180deg,#021026,#05122a);color:#eaf6ff}
   header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px}
-  h1{margin:0;font-size:20px}
-  .actions{display:flex;gap:8px;align-items:center}
-  button, select{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--accentA);cursor:pointer}
-  button.primary{background:linear-gradient(90deg,var(--accentA),var(--accentB));color:#021026;border:0}
   .layout{display:grid;grid-template-columns:320px 1fr 420px;gap:12px;height:calc(100vh - 72px);padding:12px}
-  .panel{background:var(--panel);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 18px 40px rgba(2,6,23,0.45);display:flex;flex-direction:column;min-height:0;overflow:hidden}
-  .taskList{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:6px}
-  .taskCard{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.04));border:1px solid rgba(255,255,255,0.02)}
-  .taskTitle{font-weight:700;font-size:13px}
-  .taskMeta{font-size:12px;color:var(--muted)}
-  .badge{padding:6px 12px;border-radius:999px;color:#fff;font-weight:800;display:inline-flex;align-items:center;gap:8px}
-  .done{background:linear-gradient(90deg,var(--done),#065f46)}
-  .inprog{background:linear-gradient(90deg,#f59e0b,#b45309)}
-  .notstarted{background:linear-gradient(90deg,#64748b,#334155)}
-  .charts{display:grid;grid-template-rows:1fr 1fr;gap:12px;min-height:0}
-  .chartRow{display:flex;gap:12px;min-height:0}
-  .chartCard{flex:1;display:flex;flex-direction:column;border-radius:10px;padding:8px;background:var(--glass);min-height:0}
-  .chartTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-weight:700;color:#cfeeff}
-  .canvasWrap{flex:1;min-height:0}
-  canvas{width:100% !important;height:100% !important;display:block}
+  .panel{background:var(--panel);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);overflow:auto}
+  .taskList{display:flex;flex-direction:column;gap:8px}
+  .taskCard{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02)}
+  .badge{padding:6px 10px;border-radius:999px}
+  canvas{width:100% !important;height:220px}
   table{width:100%;border-collapse:collapse;color:#eaf6ff;font-size:13px}
-  thead th{position:sticky;top:0;background:rgba(10,14,24,0.35);padding:8px;color:var(--muted);font-weight:700;text-align:left}
+  thead th{background:rgba(10,14,24,0.35);padding:8px;color:var(--muted);text-align:left}
   td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}
-  #debug{margin-top:8px;background:#071427;color:#fff;padding:8px;border-radius:8px;font-size:13px;max-height:160px;overflow:auto}
-  .small{font-size:12px;color:var(--muted)}
-  .targetCard{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(125,211,252,0.04),rgba(139,92,246,0.03));border:1px solid rgba(255,255,255,0.03);margin-bottom:12px}
-  .progressBar{width:220px;height:12px;border-radius:999px;background:rgba(255,255,255,0.04);overflow:hidden;margin-top:8px}
-  .progressFill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accentA),var(--accentB))}
-  @media(max-width:1100px){ .layout{grid-template-columns:1fr;grid-auto-rows:auto;height:calc(100vh - 72px)} body,html{overflow:auto} }
+  #debug{font-size:13px;padding:8px;background:#071427;border-radius:8px;max-height:140px;overflow:auto;margin-top:8px}
 </style>
 </head>
 <body>
 <header>
+  <div><h1 style="margin:0">VCB Dashboard</h1><div id="liveDate" style="font-size:12px;color:#98a8bd">—</div></div>
   <div>
-    <h1>Stock Team VCB</h1>
-    <div class="small">Live • <span id="liveDate">—</span></div>
-  </div>
-  <div class="actions">
-    <select id="scaleMode" title="Scale mode">
-      <option value="auto">Auto scale</option>
-      <option value="raw">Raw</option>
-      <option value="log">Log</option>
-    </select>
     <button id="refreshBtn">Refresh</button>
     <button id="uploadBtn">Upload JSON</button>
     <button id="pasteBtn">Paste JSON</button>
-    <button id="exportCsv">Export CSV</button>
-    <button id="exportPng" class="primary">Export PNGs</button>
   </div>
 </header>
 
 <div class="layout">
-  <!-- LEFT -->
   <div class="panel">
-    <h3 style="margin:0 0 8px 0">Daily tasks</h3>
+    <h3>Daily tasks</h3>
     <div id="dailyList" class="taskList"></div>
-    <div style="height:10px"></div>
-    <h3 style="margin:8px 0 8px 0">Weekly tasks</h3>
+    <h3 style="margin-top:12px">Weekly tasks</h3>
     <div id="weeklyList" class="taskList"></div>
   </div>
 
-  <!-- CENTER -->
-  <div class="panel charts">
-    <div class="chartRow">
-      <div class="chartCard">
-        <div class="chartTitle"><div>Counted vs Remaining (Top areas)</div><div class="small" id="countHint">—</div></div>
-        <div class="canvasWrap"><canvas id="piBar"></canvas></div>
-      </div>
-      <div class="chartCard">
-        <div class="chartTitle"><div>Weekly PI — Series</div><div class="small" id="weekHint">—</div></div>
-        <div class="canvasWrap"><canvas id="weeklyLine"></canvas></div>
-      </div>
-    </div>
+  <div class="panel">
+    <h3>Counted vs Remaining (Top areas)</h3>
+    <div id="countHint" style="font-size:13px;color:#98a8bd;margin-bottom:6px">—</div>
+    <canvas id="piBar"></canvas>
 
-    <div class="chartRow">
-      <div class="chartCard">
-        <div class="chartTitle"><div>Daily tasks</div><div class="small" id="dailyCountSmall">—</div></div>
-        <div class="canvasWrap"><canvas id="dailyDonut"></canvas></div>
-      </div>
-      <div class="chartCard">
-        <div class="chartTitle"><div>Weekly tasks</div><div class="small" id="weeklyCountSmall">—</div></div>
-        <div class="canvasWrap"><canvas id="weeklyDonut"></canvas></div>
-      </div>
-    </div>
+    <h3 style="margin-top:18px">Weekly PI — Series</h3>
+    <canvas id="weeklyLine"></canvas>
+
+    <div id="debug"></div>
   </div>
 
-  <!-- RIGHT -->
   <div class="panel">
-    <div class="targetCard">
-      <div style="font-weight:800;font-size:18px" id="targetTitle">Daily target: 1,193</div>
-      <div class="small" id="targetSub">Progress</div>
-      <div class="progressBar" aria-hidden="true"><div id="progressFill" class="progressFill" style="width:0%"></div></div>
-    </div>
-
-    <h3 style="margin-top:6px">Daily progress (gauge)</h3>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-      <div style="width:140px;height:120px"><canvas id="gaugeMini"></canvas></div>
-      <div>
-        <div id="gaugeCenterText" style="font-weight:800;font-size:18px">—</div>
-        <div id="gaugeBreakdown" class="small">—</div>
-      </div>
-    </div>
-
-    <h3 style="margin-top:6px">PI — Daily by area</h3>
-    <div style="flex:1;overflow:auto;margin-bottom:8px">
-      <table id="piTable"><thead><tr><th>Area</th><th style="text-align:right">Counted</th><th style="text-align:right">Total locations</th><th style="text-align:right">Behind %</th></tr></thead><tbody></tbody></table>
-    </div>
-
-    <h3 style="margin-top:6px">Weekly details</h3>
-    <div style="max-height:160px;overflow:auto">
-      <table id="weeklyPiTable"><thead><tr><th>Week</th><th>Area</th><th style="text-align:right">Daily</th><th style="text-align:right">Weekly</th><th style="text-align:right">Weekly %</th></tr></thead><tbody></tbody></table>
+    <h3>Daily progress</h3>
+    <div id="gaugeWrap"><canvas id="gaugeMini"></canvas></div>
+    <div style="margin-top:12px">
+      <table id="piTable"><thead><tr><th>Area</th><th style="text-align:right">Counted</th><th style="text-align:right">Total loc</th><th style="text-align:right">Behind %</th></tr></thead><tbody></tbody></table>
     </div>
   </div>
 </div>
 
-<div id="debug" aria-live="polite"></div>
-
 <script>
-/* ------------- CONFIG ------------- */
+/* CONFIG */
 const DAILY_TARGET = 1193;
-const STORAGE_PREFIX = 'vcb_daily_';
-const MAX_BARS = 10;
+const PATH_JSON = 'data/dashboard.json';
 
-/* ------------- HELPERS ------------- */
-function dbg(msg){
-  const el = document.getElementById('debug');
-  const d = document.createElement('div');
-  d.textContent = (new Date()).toLocaleTimeString() + ' — ' + msg;
-  el.appendChild(d);
-  el.scrollTop = el.scrollHeight;
-  console.log(msg);
-}
-function safeNum(v){ if (v == null) return 0; if (typeof v==='number') return isFinite(v)?v:0; const s = String(v).replace(/,/g,'').trim(); const n = Number(s); return isFinite(n)?n:0; }
-function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function todayISO(){ return new Date().toISOString().slice(0,10); }
-function storageKeyForToday(){ return STORAGE_PREFIX + todayISO(); }
-function findKey(obj, candidates){
-  if (!obj) return undefined;
-  if (!Array.isArray(candidates)) candidates = [candidates];
-  const ks = Object.keys(obj);
-  for (const c of candidates){
-    for (const k of ks) if (k.trim().toLowerCase() === c.trim().toLowerCase()) return k;
-  }
-  for (const c of candidates){
-    for (const k of ks) if (k.trim().toLowerCase().indexOf(c.trim().toLowerCase()) !== -1) return k;
-  }
-  return undefined;
-}
-function formatNumber(n){
-  n = Number(n) || 0;
-  if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M';
-  if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1) + 'K';
-  return n.toLocaleString();
-}
+/* UTILS */
+function dbg(msg){ const el=document.getElementById('debug'); const d=document.createElement('div'); d.textContent=(new Date()).toLocaleTimeString() + ' — ' + msg; el.appendChild(d); el.scrollTop = el.scrollHeight; console.log(msg); }
+function safeNum(v){ if(v==null) return 0; if(typeof v==='number') return isFinite(v)?v:0; const s=String(v).replace(/,/g,'').trim(); const n=Number(s); return isFinite(n)?n:0; }
+function escapeHtml(s){ return String(s||''); }
+function formatNumber(n){ n=Number(n)||0; if(Math.abs(n)>=1e6) return (n/1e6).toFixed(1)+'M'; if(Math.abs(n)>=1e3) return (n/1e3).toFixed(1)+'K'; return n.toLocaleString(); }
+function findKey(obj,cands){ if(!obj) return undefined; if(!Array.isArray(cands)) cands=[cands]; const ks=Object.keys(obj); for(const c of cands){ for(const k of ks) if(k.trim().toLowerCase()===c.trim().toLowerCase()) return k; } for(const c of cands){ for(const k of ks) if(k.trim().toLowerCase().indexOf(c.trim().toLowerCase())!==-1) return k; } return undefined; }
 
-/* ------------- bar gloss plugin ------------- */
-const barGlossPlugin = {
-  id: 'barGloss',
-  afterDatasetsDraw(chart){
-    const ctx = chart.ctx;
-    const meta = chart.getDatasetMeta(0);
-    if (!meta) return;
-    for (const r of meta.data){
-      const x = r.x - r.width/2;
-      const y = r.y;
-      const w = r.width;
-      const h = chart.chartArea.bottom - r.y;
-      ctx.save();
-      ctx.shadowColor = 'rgba(0,0,0,0.22)';
-      ctx.shadowBlur = 10;
-      ctx.fillStyle = 'rgba(0,0,0,0.03)';
-      ctx.fillRect(x, r.y, w, h);
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = 'rgba(255,255,255,0.06)';
-      ctx.beginPath();
-      ctx.ellipse(r.x, r.y + 6, w * 0.45, Math.max(6, w*0.12), 0, Math.PI, 2*Math.PI);
-      ctx.fill();
-      ctx.restore();
-    }
-  }
-};
-Chart.register(barGlossPlugin);
+/* GLOBAL */
+let payload=null;
+let charts={piBar:null,weeklyLine:null,gauge:null};
 
-/* ------------- STATE ------------- */
-let payload = null;
-let charts = { piBar:null, weeklyLine:null, dailyDonut:null, weeklyDonut:null, gaugeMini:null };
-
-/* ------------- fetch robust ------------- */
-async function tryLoadJsonPaths(){
-  const candidates = ['data/dashboard.json','./data/dashboard.json'];
-  let base = location.pathname;
-  if (!base.endsWith('/')) base = base.replace(/\/[^/]*$/, '/');
-  candidates.push(location.origin + base + 'data/dashboard.json');
-  candidates.push(location.origin + '/data/dashboard.json');
-  const ts = Date.now();
-  candidates.push('data/dashboard.json?v=' + ts);
-  candidates.push(location.origin + base + 'data/dashboard.json?v=' + ts);
-
-  dbg('Trying JSON paths: ' + candidates.join(' , '));
-  for (const p of candidates){
-    try {
-      const res = await fetch(p, { cache: 'no-store' });
-      if (!res.ok){ dbg('No: ' + p + ' → ' + res.status); continue; }
-      const j = await res.json();
-      dbg('Loaded: ' + p);
-      return j;
-    } catch(e){
-      dbg('Err: ' + p + ' — ' + (e && e.message ? e.message : e));
-    }
-  }
-  return null;
-}
-
-/* ------------- load & start ------------- */
-async function loadAndRender(){
-  dbg('Start load...');
-  const inline = document.getElementById('inlinePayload');
-  if (inline){
-    try { payload = JSON.parse(inline.textContent); dbg('Using inline payload'); document.querySelector('#liveDate').innerText = new Date().toLocaleDateString(); reconcileAndPersist(); renderAll(); return; } catch(e){ dbg('Inline parse err: ' + e.message); }
-  }
-  const j = await tryLoadJsonPaths();
-  if (!j){ dbg('All fetch failed — using demo'); payload = demoPayload(); }
-  else payload = j;
-  document.querySelector('#liveDate').innerText = new Date().toLocaleDateString();
-  reconcileAndPersist();
-  renderAll();
-}
-
-/* ------------- demo fallback ------------- */
-function demoPayload(){ return {
-  piData:[{"Date":"22.12.2025","Area":"MPR","Total locations":14622,"Counted":3936},{"Date":"22.12.2025","Area":"PB1","Total locations":4329,"Counted":1189}],
-  dailyTask:[{"DATE":"22.12.2025","Task":"Aged stock report 7AM","Status":"Completed"}],
-  weeklyTask:[{"Date":"22.12.2025","Task":"(Weekly) SLA","Status":"Not started"}],
-  weeklyPiData:[]
-}; }
-
-/* ------------- persistence helpers ------------- */
-function loadStored(){
-  try {
-    const raw = localStorage.getItem(storageKeyForToday());
-    return raw ? JSON.parse(raw) : { date: todayISO(), areas: {}, weekAccum: {}, weekStart: getWeekStartISO(new Date()) };
+async function loadJSON(){
+  dbg('Loading JSON from ' + PATH_JSON);
+  try{
+    const res = await fetch(PATH_JSON, { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const j = await res.json();
+    dbg('JSON loaded');
+    return j;
   } catch(e){
-    dbg('loadStored err: ' + e.message);
-    return { date: todayISO(), areas: {}, weekAccum: {}, weekStart: getWeekStartISO(new Date()) };
+    dbg('Load JSON failed: '+e.message);
+    return null;
   }
 }
-function saveStored(obj){
-  try { localStorage.setItem(storageKeyForToday(), JSON.stringify(obj)); } catch(e){ dbg('saveStored err: '+e.message); }
-}
-function getWeekStartISO(date){
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = (day === 0 ? -6 : 1) - day;
-  const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + diff);
-  return monday.toISOString().slice(0,10);
-}
 
-/* ------------- NEW: detect header/junk rows ------------- */
-function isHeaderRow(row){
-  if (!row || typeof row !== 'object') return true;
-  const areaVal = String(row['Area'] || row['Area '] || row.area || '').trim();
-  if (!areaVal) return true;
-  const lowerA = areaVal.toLowerCase();
-  if (lowerA === 'area' || lowerA.startsWith('total') || lowerA === 'total:') return true;
-  for (const v of Object.values(row)){
-    if (typeof v === 'string'){
-      const s = v.trim().toLowerCase();
-      if (s === 'counted' || s === 'total locations' || s === 'date' || s === 'locations behind the target' || s === 'area') return true;
-    }
+function cleanPiData(piData){
+  // remove any header-like or Total rows (Area==='Area' or starts with 'Total')
+  const areaKey = findKey(piData[0]||{}, ['Area','Area ']) || 'Area';
+  const countedKey = findKey(piData[0]||{}, ['Counted','Counted ','CountedToday']) || 'Counted';
+  const totalKey = findKey(piData[0]||{}, ['Total locations','Total locations ','Total']) || 'Total locations';
+  const dateKey = findKey(piData[0]||{}, ['Date','DATE']) || 'Date';
+  const out = [];
+  for(const r of piData){
+    const area = String(r[areaKey]||r['Area']||'').trim();
+    if(!area) continue;
+    if(/^area$/i.test(area)) continue;
+    if(/^total\b/i.test(area)) continue;
+    const counted = safeNum(r[countedKey] ?? r['Counted']);
+    const totalLoc = safeNum(r[totalKey] ?? r['Total locations']);
+    const date = r[dateKey] ? String(r[dateKey]) : null;
+    out.push({ Date: date, Area: area, Counted: counted, Total: totalLoc, Raw: r });
   }
-  const countedRaw = row['Counted'] || row['Counted '] || row['CountedToday'] || row.counted;
-  if (typeof countedRaw === 'string' && countedRaw.toLowerCase().includes('count')) return true;
-  return false;
+  return out;
 }
 
-/* ------------- reconcile & persist (updated) ------------- */
-function reconcileAndPersist(){
-  const stored = loadStored();
-  const currentWeek = getWeekStartISO(new Date());
-  if (stored.weekStart !== currentWeek){
-    stored.weekStart = currentWeek;
-    stored.weekAccum = {};
-    stored.areas = {};
-  }
-  payload.piData = Array.isArray(payload.piData) ? payload.piData.slice() : [];
-  const areaKey = findKey(payload.piData[0] || {}, ['Area','Area ']) || 'Area';
-  const countedKey = findKey(payload.piData[0] || {}, ['Counted','Counted ','CountedToday']) || 'Counted';
-  const totalKey = findKey(payload.piData[0] || {}, ['Total locations','Total locations ','Total']) || 'Total locations';
-  payload._areaKey = areaKey;
-  payload._countedKey = countedKey;
-  payload._totalKey = totalKey;
-  const areas = [];
-  for (const r of payload.piData){
-    if (isHeaderRow(r)) continue;
-    const area = String(r[areaKey] || r['Area'] || '').trim();
-    if (!area) continue;
-    if (/total/i.test(area)) continue;
-    areas.push(area);
-    const incomingRaw = r[countedKey] !== undefined ? r[countedKey] : r['Counted'];
-    const incoming = safeNum(incomingRaw);
-    if (!stored.areas) stored.areas = {};
-    if (!stored.weekAccum) stored.weekAccum = {};
-    if (!stored.areas.hasOwnProperty(area)){
-      stored.areas[area] = incoming;
-      stored.weekAccum[area] = (stored.weekAccum[area] || 0) + incoming;
-    }
-  }
-  payload._areas = Array.from(new Set(areas));
-  payload._stored = stored;
-  saveStored(stored);
+function mostRecentDate(piClean){
+  // choose most frequent date or latest by parsing dd.mm.yyyy
+  const freq = {};
+  for(const r of piClean){ const d = r.Date || ''; freq[d] = (freq[d]||0)+1; }
+  const entries = Object.entries(freq).filter(e=>e[0]);
+  if(!entries.length) return null;
+  // prefer the date with max count; tie-break by parsing date
+  entries.sort((a,b)=> b[1]-a[1]);
+  const candidate = entries[0][0];
+  // verify parse
+  return candidate;
 }
 
-/* ------------- render pipeline ------------- */
-function renderAll(){
-  renderTasks(payload.dailyTask || [], 'dailyList');
-  renderTasks(payload.weeklyTask || [], 'weeklyList');
-  renderPI(payload.piData || [], payload._stored || {});
-  renderWeeklyPI(payload.weeklyPiData || []);
-  renderTaskDonuts(payload);
-  computeAndRenderGauge(payload);
-}
-
-/* ------------- tasks ------------- */
+/* RENDER */
 function renderTasks(list, containerId){
-  const el = document.getElementById(containerId);
-  el.innerHTML = '';
-  if (!Array.isArray(list) || !list.length){ el.innerHTML = '<div class="small">No tasks</div>'; return; }
-  list.sort((a,b) => {
-    const sa = String(a.Status || a['Status'] || '').toLowerCase();
-    const sb = String(b.Status || b['Status'] || '').toLowerCase();
-    const rank = s => s.includes('progress') ? 1 : (s.includes('complete')||s.includes('done')?3:2);
-    return rank(sa) - rank(sb);
-  });
-  for (const t of list){
-    const title = t.Task || t['Task'] || JSON.stringify(t).slice(0,40);
-    const raw = t.Status || t['Status'] || '';
-    const s = String(raw).toLowerCase();
-    const cls = s.includes('complete')||s.includes('done') ? 'done' : (s.includes('progress') ? 'inprog' : 'notstarted');
-    const label = s.includes('complete')||s.includes('done') ? 'Completed' : (s.includes('progress') ? 'In progress' : 'Not started');
-    const div = document.createElement('div'); div.className='taskCard';
-    div.innerHTML = `<div><div class="taskTitle">${escapeHtml(title)}</div><div class="taskMeta">${escapeHtml(raw)}</div></div><div><span class="badge ${cls}">${label}</span></div>`;
+  const el=document.getElementById(containerId);
+  el.innerHTML='';
+  if(!Array.isArray(list)||!list.length){ el.innerHTML='<div style="color:#98a8bd">No tasks</div>'; return; }
+  for(const t of list){
+    const title = t.Task || t['Task'] || '';
+    const status = t.Status || t['Status'] || '';
+    const div=document.createElement('div'); div.className='taskCard';
+    div.innerHTML = `<div>${escapeHtml(title)}<div style="font-size:12px;color:#98a8bd">${escapeHtml(status)}</div></div><div style="min-width:80px;text-align:right"><span class="badge">${escapeHtml(status)}</span></div>`;
     el.appendChild(div);
   }
 }
 
-/* ------------- renderPI (updated) ------------- */
-function renderPI(piList, stored){
-  const tbody = document.querySelector('#piTable tbody'); tbody.innerHTML = '';
-  const areaKey = payload._areaKey || findKey(piList[0]||{}, ['Area','Area ']) || 'Area';
-  const countedKey = payload._countedKey || findKey(piList[0]||{}, ['Counted','Counted ','CountedToday']) || 'Counted';
-  const totalKey = payload._totalKey || findKey(piList[0]||{}, ['Total locations','Total locations ','Total']) || 'Total locations';
-  const rows = [];
-  for (const r of piList){
-    if (isHeaderRow(r)) continue;
-    const area = String(r[areaKey] || r['Area'] || '').trim();
-    if (!area || /total/i.test(area)) continue;
-    const incoming = safeNum(r[countedKey] !== undefined ? r[countedKey] : r['Counted']);
-    const totalLoc = safeNum(r[totalKey] !== undefined ? r[totalKey] : r['Total locations']);
-    const behindPct = safeNum(r['Behind %'] || r['Behind % '] || r['Behind targe'] || 0);
-    const todayVal = (stored && stored.areas && stored.areas[area]) ? safeNum(stored.areas[area]) : incoming;
-    rows.push({ area, counted: todayVal, totalLoc, behindPct });
+function renderPiAndCharts(piData, weeklyPiData){
+  const piClean = cleanPiData(piData);
+  const day = mostRecentDate(piClean) || new Date().toLocaleDateString();
+  document.getElementById('liveDate').innerText = day;
+  // filter only rows for that day
+  const todayRows = piClean.filter(r => (r.Date?String(r.Date).trim():null) === day || !r.Date);
+  // if no rows match day, fallback to all rows but prefer recent
+  const rowsToUse = todayRows.length ? todayRows : piClean;
+
+  // build table
+  const tbody = document.querySelector('#piTable tbody'); tbody.innerHTML='';
+  let totalCounted = 0;
+  for(const r of rowsToUse){
+    tbody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHtml(r.Area)}</td><td style="text-align:right">${formatNumber(r.Counted)}</td><td style="text-align:right">${formatNumber(r.Total)}</td><td style="text-align:right">—</td></tr>`);
+    totalCounted += r.Counted;
   }
-  rows.sort((a,b) => b.counted - a.counted);
-  const top = rows.slice(0, MAX_BARS);
-  let totalCounted = rows.reduce((s,r) => s + safeNum(r.counted), 0);
+
+  // prepare bar chart top areas
+  const sorted = rowsToUse.slice().sort((a,b)=>b.Counted - a.Counted).slice(0,10);
+  const labels = sorted.map(r=>r.Area).concat(['Remaining']);
   const remaining = Math.max(0, DAILY_TARGET - totalCounted);
-  const over = Math.max(0, totalCounted - DAILY_TARGET);
-  for (const r of top){
-    tbody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHtml(r.area)}</td><td style="text-align:right">${formatNumber(r.counted)}</td><td style="text-align:right">${formatNumber(r.totalLoc)}</td><td style="text-align:right">${(r.behindPct*100).toFixed(2)}%</td></tr>`);
-  }
-  const labels = top.map(t => t.area).concat(['Remaining']);
-  const dataVals = top.map(t => t.counted).concat([remaining]);
-  try{ if (charts.piBar) charts.piBar.destroy(); } catch(e){}
+  const data = sorted.map(r=>r.Counted).concat([remaining]);
+
+  try{ if(charts.piBar) charts.piBar.destroy(); }catch(e){}
   const ctx = document.getElementById('piBar').getContext('2d');
   charts.piBar = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: labels, datasets: [{ label: 'Counted', data: dataVals, backgroundColor: generateColors(labels.length), borderRadius:6 }] },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => formatNumber(ctx.parsed.y) } } },
-      scales:{ y:{ beginAtZero:true, ticks:{ callback: v => formatNumber(v) } } }
-    },
-    plugins: [barGlossPlugin]
+    type:'bar',
+    data: { labels, datasets:[{ label:'Counted', data, backgroundColor: ['#7dd3fc','#8b5cf6','#60a5fa','#f97316','#fbbf24','#f472b6','#34d399','#a78bfa','#fca5a5','#64748b']}]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{ ticks:{ callback: v => formatNumber(v) } } } }
   });
-  const hint = over ? `Total counted today: ${formatNumber(totalCounted)} • Over by: ${formatNumber(over)} (target ${formatNumber(DAILY_TARGET)})` :
-    `Total counted today: ${formatNumber(totalCounted)} • Remaining: ${formatNumber(remaining)} (target ${formatNumber(DAILY_TARGET)})`;
-  document.getElementById('countHint').innerText = hint;
-  const pct = Math.round(Math.min(100, (totalCounted / DAILY_TARGET) * 100));
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('targetSub').innerText = `${pct}% of ${formatNumber(DAILY_TARGET)}`;
-}
 
-/* ------------- renderWeeklyPI (updated) ------------- */
-function renderWeeklyPI(list){
-  const tbody = document.querySelector('#weeklyPiTable tbody'); tbody.innerHTML = '';
-  if (!Array.isArray(list) || !list.length){ tbody.innerHTML = '<tr><td colspan="5">No weekly data</td></tr>'; try{ if (charts.weeklyLine) charts.weeklyLine.destroy(); }catch(e){} document.getElementById('weekHint').innerText='—'; return; }
-  const agg = {}; const weeks = new Set();
-  for (const r of list){
-    if (isHeaderRow(r)) continue;
-    const area = r.Area || r['Area'] || '';
-    if (!area) continue;
-    const dailyQty = safeNum(r['Daily Qty'] || r.DailyQty || r.Daily || 0);
-    const weeklyQty = safeNum(r['Weekly Qty'] || r.WeeklyQty || 0);
-    const weeklyPct = safeNum(r['Weekly %'] || r.WeeklyPct || 0);
-    const wk = r['Week No'] || r['WeekNo'] || r.WeekNo || r.Week || '';
-    if (String(wk).toLowerCase().includes('week')) continue;
-    weeks.add(wk);
-    agg[wk] = (agg[wk] || 0) + weeklyQty;
-    tbody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHtml(String(wk))}</td><td>${escapeHtml(area)}</td><td style="text-align:right">${formatNumber(dailyQty)}</td><td style="text-align:right">${formatNumber(weeklyQty)}</td><td style="text-align:right">${(weeklyPct*100).toFixed(2)}%</td></tr>`);
+  document.getElementById('countHint').innerText = `Total counted today: ${formatNumber(totalCounted)} • Remaining: ${formatNumber(remaining)} (target ${formatNumber(DAILY_TARGET)})`;
+
+  // weekly time series: aggregate by Week No from weeklyPiData
+  if(Array.isArray(weeklyPiData) && weeklyPiData.length){
+    // normalize keys
+    const weekKey = findKey(weeklyPiData[0], ['Week No','WeekNo','Week']);
+    const weeklyQtyKey = findKey(weeklyPiData[0], ['Weekly Qty','WeeklyQty','WeeklyQty']);
+    const dailyQtyKey = findKey(weeklyPiData[0], ['Daily Qty','DailyQty','Daily']);
+    const areaKey = findKey(weeklyPiData[0], ['Area','Area ']);
+    const agg = {};
+    const weekLabelsSet = new Set();
+    for(const r of weeklyPiData){
+      if(!r) continue;
+      // ignore repeated header rows
+      const wk = r[weekKey] ?? r['Week No'] ?? r['WeekNo'] ?? r.WeekNo ?? '';
+      const qty = safeNum(r[weeklyQtyKey] ?? r['Weekly Qty'] ?? r['WeeklyQty'] ?? 0);
+      if(wk==='') continue;
+      agg[wk] = (agg[wk]||0) + qty;
+      weekLabelsSet.add(String(wk));
+    }
+    const weekLabels = Array.from(weekLabelsSet).sort((a,b)=> (isFinite(Number(a)) && isFinite(Number(b))) ? Number(a)-Number(b) : String(a).localeCompare(String(b)));
+    const weekVals = weekLabels.map(l=>agg[l]||0);
+    try{ if(charts.weeklyLine) charts.weeklyLine.destroy(); }catch(e){}
+    const ctx2 = document.getElementById('weeklyLine').getContext('2d');
+    charts.weeklyLine = new Chart(ctx2, { type:'line', data:{ labels: weekLabels, datasets:[{ label:'Weekly qty', data: weekVals, borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.08)', fill:true }]}, options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ ticks:{ callback: v => formatNumber(v) } } } } });
+    document.getElementById('countHint').innerText += ` • Weeks: ${weekLabels.length}`;
+  } else {
+    try{ if(charts.weeklyLine) charts.weeklyLine.destroy(); }catch(e){}
+    document.getElementById('weekHint').innerText = '—';
   }
-  const labels = Array.from(weeks).sort((a,b) => (isFinite(Number(a)) && isFinite(Number(b))) ? Number(a)-Number(b) : String(a).localeCompare(String(b)));
-  const values = labels.map(l => agg[l] || 0);
-  try{ if (charts.weeklyLine) charts.weeklyLine.destroy(); } catch(e){}
-  const ctx = document.getElementById('weeklyLine').getContext('2d');
-  charts.weeklyLine = new Chart(ctx, { type:'line', data:{ labels, datasets:[{ label:'Weekly qty', data: values, borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.08)', fill:true }] }, options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ ticks:{ callback: v => formatNumber(v) } } } } });
-  document.getElementById('weekHint').innerText = 'Weeks: ' + labels.length;
+
+  // gauge
+  try{ if(charts.gauge) charts.gauge.destroy(); }catch(e){}
+  const ctxg = document.getElementById('gaugeMini').getContext('2d');
+  charts.gauge = new Chart(ctxg, { type:'doughnut', data:{ labels:['Counted','Remaining'], datasets:[{ data:[totalCounted, Math.max(0,DAILY_TARGET-totalCounted)], backgroundColor:['#7dd3fc','#f97316'] }] }, options:{ rotation:-Math.PI, circumference:Math.PI, responsive:false, maintainAspectRatio:false, plugins:{legend:{display:false}} } });
+
 }
 
-/* ------------- task donuts ------------- */
-function renderTaskDonuts(payload){
-  const dailyList = Array.isArray(payload.dailyTask) ? payload.dailyTask : [];
-  const weeklyList = Array.isArray(payload.weeklyTask) ? payload.weeklyTask : [];
-  const dailyDone = dailyList.filter(t => String(t.Status||'').toLowerCase().includes('complete')).length;
-  const dailyRem = Math.max(0, dailyList.length - dailyDone);
-  const weeklyDone = weeklyList.filter(t => String(t.Status||'').toLowerCase().includes('complete')).length;
-  const weeklyRem = Math.max(0, weeklyList.length - weeklyDone);
-  try{ if (charts.dailyDonut) charts.dailyDonut.destroy(); if (charts.weeklyDonut) charts.weeklyDonut.destroy(); } catch(e){}
-  charts.dailyDonut = new Chart(document.getElementById('dailyDonut').getContext('2d'), { type:'doughnut', data:{ labels:['Done','Remaining'], datasets:[{ data:[dailyDone,dailyRem], backgroundColor:['#16a34a','#0ea5a0'] }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} } } });
-  charts.weeklyDonut = new Chart(document.getElementById('weeklyDonut').getContext('2d'), { type:'doughnut', data:{ labels:['Done','Remaining'], datasets:[{ data:[weeklyDone,weeklyRem], backgroundColor:['#8b5cf6','#7dd3fc'] }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} } } });
-  document.getElementById('dailyCountSmall').innerText = dailyDone + '/' + (dailyDone + dailyRem);
-  document.getElementById('weeklyCountSmall').innerText = weeklyDone + '/' + (weeklyDone + weeklyRem);
-}
+/* BOOT */
+document.getElementById('refreshBtn').addEventListener('click', async ()=>{
+  const j = await loadJSON();
+  if(!j){ dbg('No JSON loaded'); return;}
+  payload = j;
+  renderTasks(payload.dailyTask || [], 'dailyList');
+  renderTasks(payload.weeklyTask || [], 'weeklyList');
+  renderPiAndCharts(payload.piData || [], payload.weeklyPiData || []);
+});
 
-/* ------------- gauge (shows over) ------------- */
-function computeAndRenderGauge(payload){
-  const stored = payload._stored || {};
-  let totalCounted = 0;
-  for (const area of (payload._areas || [])){
-    totalCounted += safeNum((stored.areas && stored.areas[area]) ? stored.areas[area] : (payload.piData.find(x => String((x.Area||x['Area']||'')).trim() === area) || {})[payload._countedKey] || 0);
-  }
-  totalCounted = Math.round(totalCounted);
-  const below = Math.min(totalCounted, DAILY_TARGET);
-  const over = Math.max(0, totalCounted - DAILY_TARGET);
-  try { if (charts.gaugeMini) charts.gaugeMini.destroy(); } catch(e){}
-  const ctx = document.getElementById('gaugeMini').getContext('2d');
-  charts.gaugeMini = new Chart(ctx, {
-    type:'doughnut',
-    data:{ labels:['Reached','Over'], datasets:[{ data:[below, over], backgroundColor:['#7dd3fc','#34d399'] }]},
-    options:{ rotation:-Math.PI, circumference:Math.PI, responsive:false, maintainAspectRatio:false, plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => formatNumber(ctx.parsed) } } } }
-  });
-  document.getElementById('gaugeCenterText').innerText = formatNumber(totalCounted) + ' / ' + formatNumber(DAILY_TARGET);
-  document.getElementById('gaugeBreakdown').innerText = (over ? ('Over by: '+formatNumber(over)) : ('Remaining: ' + formatNumber(DAILY_TARGET - totalCounted)));
-}
+// initial load
+(async ()=>{ const j=await loadJSON(); if(!j){ dbg('Failed to load; paste JSON or use Upload'); return;} payload=j; document.getElementById('liveDate').innerText = (new Date()).toLocaleDateString(); renderTasks(payload.dailyTask||[],'dailyList'); renderTasks(payload.weeklyTask||[],'weeklyList'); renderPiAndCharts(payload.piData||[], payload.weeklyPiData||[]); })();
 
-/* ------------- utils ------------- */
-function generateColors(n){
-  const base = ['#7dd3fc','#8b5cf6','#60a5fa','#f97316','#fbbf24','#f472b6','#34d399','#a78bfa','#fca5a5','#64748b'];
-  const out=[];
-  for(let i=0;i<n;i++) out.push(base[i%base.length]);
-  return out;
-}
-
-/* ------------- export / upload ------------- */
-function downloadCsv(){
-  const rows=[['Area','Counted','Total locations','Behind %']];
-  document.querySelectorAll('#piTable tbody tr').forEach(tr=>{ const tds=tr.querySelectorAll('td'); if(!tds.length) return; rows.push([tds[0].innerText, tds[1].innerText, tds[2].innerText, tds[3].innerText]); });
-  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pi_by_area_'+todayISO()+'.csv'; a.click(); URL.revokeObjectURL(a.href);
-}
-function exportPNGs(){ ['piBar','weeklyLine','dailyDonut','weeklyDonut'].forEach(id=>{ const c=document.getElementById(id); if(!c) return; try{ const url=c.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download=id+'_'+todayISO()+'.png'; a.click(); }catch(e){ dbg('PNG export failed: '+e.message); } }); }
-function onUpload(){ const input=document.createElement('input'); input.type='file'; input.accept='application/json'; input.onchange=e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{ try{ payload = JSON.parse(ev.target.result); dbg('Uploaded JSON parsed'); reconcileAndPersist(); renderAll(); }catch(err){ alert('Invalid JSON: '+err.message); dbg('Upload parse error: '+err.message); } }; r.readAsText(f); }; input.click(); }
-function onPaste(){ const txt = prompt('Paste dashboard JSON here (full object)'); if(!txt) return; try{ payload = JSON.parse(txt); dbg('Pasted JSON parsed'); reconcileAndPersist(); renderAll(); }catch(e){ alert('Invalid JSON pasted: ' + (e && e.message ? e.message : e)); dbg('Paste parse error: ' + (e && e.message ? e.message : e)); } }
-
-/* ------------- events ------------- */
-document.getElementById('refreshBtn').addEventListener('click', loadAndRender);
-document.getElementById('uploadBtn').addEventListener('click', onUpload);
-document.getElementById('pasteBtn').addEventListener('click', onPaste);
-document.getElementById('exportCsv').addEventListener('click', downloadCsv);
-document.getElementById('exportPng').addEventListener('click', exportPNGs);
-document.getElementById('scaleMode').addEventListener('change', ()=>{ if (payload) renderAll(); });
-
-/* ------------- start ------------- */
-loadAndRender();
+/* Upload / Paste handlers */
+document.getElementById('uploadBtn').addEventListener('click', ()=>{
+  const input=document.createElement('input'); input.type='file'; input.accept='application/json';
+  input.onchange = e => { const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload = ev => { try{ payload = JSON.parse(ev.target.result); dbg('Uploaded JSON parsed'); renderTasks(payload.dailyTask||[],'dailyList'); renderTasks(payload.weeklyTask||[],'weeklyList'); renderPiAndCharts(payload.piData||[], payload.weeklyPiData||[]); }catch(err){ dbg('Upload parse error: '+err.message); alert('Invalid JSON'); } }; r.readAsText(f); };
+  input.click();
+});
+document.getElementById('pasteBtn').addEventListener('click', ()=>{
+  const txt = prompt('Paste JSON here');
+  if(!txt) return;
+  try{ payload = JSON.parse(txt); dbg('Pasted JSON parsed'); renderTasks(payload.dailyTask||[],'dailyList'); renderTasks(payload.weeklyTask||[],'weeklyList'); renderPiAndCharts(payload.piData||[], payload.weeklyPiData||[]); }catch(e){ dbg('Paste parse error: '+e.message); alert('Invalid JSON'); }
+});
 </script>
 </body>
 </html>
