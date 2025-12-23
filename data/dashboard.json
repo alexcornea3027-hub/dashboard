@@ -1,454 +1,283 @@
 {
-  "piData": [
+  "Metadata": {
+    "Project": "StockTeam VCB",
+    "Daily_Target": 1193,
+    "Timestamp": "23.12.2025, 12:58:09"
+  },
+  "Counting_Stats": [
     {
-      "Date": "22.12.2025",
+      "Area": "Area",
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 0,
+      "Status_Behind_Pct": "Behind the target %"
+    },
+    {
       "Area": "MPR",
-      "Total locations": 14622,
-      "Counted": 3936,
-      "Behind targe": 0,
-      "Above target": 222.47619047619,
-      "Behind %": 0
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 14622,
+      "Status_Behind_Pct": "0"
     },
     {
-      "Date": "22.12.2025",
       "Area": "PB1",
-      "Total locations": 4329,
-      "Counted": 1189,
-      "Behind targe": 0,
-      "Above target": 89.5714285714287,
-      "Behind %": 0
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 4329,
+      "Status_Behind_Pct": "0"
     },
     {
-      "Date": "22.12.2025",
       "Area": "PB2",
-      "Total locations": 795,
-      "Counted": 484,
-      "Behind targe": 0,
-      "Above target": 282.095238095238,
-      "Behind %": 0
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 795,
+      "Status_Behind_Pct": "0"
     },
     {
-      "Date": "22.12.2025",
       "Area": "PB3",
-      "Total locations": 772,
-      "Counted": 0,
-      "Behind targe": 196.063492063492,
-      "Above target": 0,
-      "Behind %": 0.253968253968254
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 772,
+      "Status_Behind_Pct": "0.253968253968254"
     },
     {
-      "Date": "22.12.2025",
       "Area": "PB4",
-      "Total locations": 164,
-      "Counted": 0,
-      "Behind targe": 41.6507936507937,
-      "Above target": 0,
-      "Behind %": 0.253968253968254
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 164,
+      "Status_Behind_Pct": "0.253968253968254"
     },
     {
-      "Date": "22.12.2025",
       "Area": "PBSRES",
-      "Total locations": 5197,
-      "Counted": 1374,
-      "Behind targe": 0,
-      "Above target": 54.1269841269841,
-      "Behind %": 0
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 5197,
+      "Status_Behind_Pct": "0"
     },
     {
-      "Date": "22.12.2025",
       "Area": "MP",
-      "Total locations": 25612,
-      "Counted": 7409,
-      "Behind targe": 0,
-      "Above target": 904.36507936508,
-      "Behind %": 0
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 25612,
+      "Status_Behind_Pct": "0"
     },
     {
-      "Date": "22.12.2025",
       "Area": "MIX",
-      "Total locations": 33087,
-      "Counted": 8941,
-      "Behind targe": 0,
-      "Above target": 537.952380952382,
-      "Behind %": 0
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 33087,
+      "Status_Behind_Pct": "0"
     },
     {
-      "Date": "22.12.2025",
       "Area": "MS",
-      "Total locations": 21512,
-      "Counted": 5902,
-      "Behind targe": 0,
-      "Above target": 438.63492063492,
-      "Behind %": 0
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 21512,
+      "Status_Behind_Pct": "0"
     },
     {
-      "Date": "22.12.2025",
       "Area": "MSX",
-      "Total locations": 28798,
-      "Counted": 7984,
-      "Behind targe": 0,
-      "Above target": 670.222222222223,
-      "Behind %": 0
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 28798,
+      "Status_Behind_Pct": "0"
     },
     {
-      "Date": "22.12.2025",
       "Area": "FM",
-      "Total locations": 2308,
-      "Counted": 620,
-      "Behind targe": 0,
-      "Above target": 33.8412698412699,
-      "Behind %": 0
-    },
-    {
-      "Date": "22.12.2025",
-      "Area": "HP",
-      "Total locations": 561,
-      "Counted": 155,
-      "Behind targe": 0,
-      "Above target": 12.5238095238095,
-      "Behind %": 0
+      "Daily_Qty_Today": 0,
+      "Total_Cycle_Counted": 2308,
+      "Status_Behind_Pct": "0"
     }
   ],
-  "dailyTask": [
+  "Daily_Tasks": [
     {
-      "DATE": "22.12.2025",
-      "Task": "ADJUSTMENTS (Returns)",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "ADJUSTMENTS (Returns)",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "ADJUSTMENTS (Standard)",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "ADJUSTMENTS (Standard)",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Aged stock report 7AM",
-      "Status": "Completed",
-      "Type": "Daily"
+      "Description": "Aged stock report 7AM",
+      "Current_Status": "Completed"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Aged stock report 3PM",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Aged stock report 3PM",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Blackwells",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Blackwells",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "AGED STOCK REPORT 6 AM",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "AGED STOCK REPORT 6 AM",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Available inventory status in Prob-Res pots 3PM",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Available inventory status in Prob-Res pots 3PM",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Available inventory status in Prob-Res pots 6AM",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Available inventory status in Prob-Res pots 6AM",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "EMPTY BIN CHECKS",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "EMPTY BIN CHECKS",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Internet returns",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Internet returns",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Inventory Status (DATA STUDIO)",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Inventory Status (DATA STUDIO)",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "LOCATIONS IN ERROR",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "LOCATIONS IN ERROR",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Manual Despatch Adjustment",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Manual Despatch Adjustment",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Manual location checks",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Manual location checks",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Mixing violations (multiple ISBN)",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Mixing violations (multiple ISBN)",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "MLC Tracker update",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "MLC Tracker update",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Supplier Overs Report",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Supplier Overs Report",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "SIS afternoon report",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "SIS afternoon report",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "PI 1st count",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "PI 1st count",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "PI 2nd count",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "PI 2nd count",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "PI assign",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "PI assign",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "PI Investigation",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "PI Investigation",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "PI Master file update (Cycle)",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "PI Master file update (Cycle)",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "POD",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "POD",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "PI set up",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "PI set up",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "SHRINKAGE RECONCILATION DAILY",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "SHRINKAGE RECONCILATION DAILY",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "SLA update",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "SLA update",
+      "Current_Status": "Not started"
     },
     {
-      "DATE": "22.12.2025",
-      "Task": "Stock left on RDTs check",
-      "Status": "Not started",
-      "Type": "Daily"
+      "Description": "Stock left on RDTs check",
+      "Current_Status": "Not started"
     }
   ],
-  "weeklyTask": [
+  "Weekly_Tasks": [
     {
-      "Date": "22.12.2025",
-      "Task": "(Weekly) SLA",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Weekly) SLA",
+      "Current_Status": "Not started"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(Weekly) SIS report",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Weekly) SIS report",
+      "Current_Status": "Not started"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(Weekly) Shrinkage",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Weekly) Shrinkage",
+      "Current_Status": "Not started"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(Weekly) ORM",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Weekly) ORM",
+      "Current_Status": "Not started"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(Tuesday) RP split pack",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Tuesday) RP split pack",
+      "Current_Status": "Not started"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(Thursday) RP split pack",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Thursday) RP split pack",
+      "Current_Status": "Not started"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(Weekly) Price checker update",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Weekly) Price checker update",
+      "Current_Status": "Not started"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(Weekly) AGED STOCK REPORT 12 PM Friday",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Weekly) AGED STOCK REPORT 12 PM Friday",
+      "Current_Status": "Not started"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(once a month) Shrinkage for Period",
-      "Status": "Completed",
-      "Type": "Weekly"
+      "Description": "(once a month) Shrinkage for Period",
+      "Current_Status": "Completed"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(Once a month) MLC on FM",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Once a month) MLC on FM",
+      "Current_Status": "Not started"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(Weekly) Shrinkage to Database",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Weekly) Shrinkage to Database",
+      "Current_Status": "Not started"
     },
     {
-      "Date": "22.12.2025",
-      "Task": "(Weekly) Returns locations checks",
-      "Status": "Not started",
-      "Type": "Weekly"
+      "Description": "(Weekly) Returns locations checks",
+      "Current_Status": "Not started"
     }
   ],
-  "weeklyPiData": [
+  "Trend_History": [
     {
-      "Date": "22.12.2025",
-      "Area": "MPR",
-      "Daily Qty": 127,
-      "Week No": 27,
-      "Weekly Qty": 5103,
-      "Weekly %": 0.855490360435876
+      "Week_No": 46014,
+      "Volume": null
     },
     {
-      "Date": "22.12.2025",
-      "Area": "PB1",
-      "Daily Qty": 38,
-      "Week No": 28,
-      "Weekly Qty": 6457,
-      "Weekly %": 1.08248113998324
+      "Week_No": 46014,
+      "Volume": null
     },
     {
-      "Date": "22.12.2025",
-      "Area": "PB2",
-      "Daily Qty": 15,
-      "Week No": 29,
-      "Weekly Qty": 7494,
-      "Weekly %": 1.25632858340319
+      "Week_No": 46014,
+      "Volume": null
     },
     {
-      "Date": "22.12.2025",
-      "Area": "PB3",
-      "Daily Qty": 0,
-      "Week No": 30,
-      "Weekly Qty": 6901,
-      "Weekly %": 1.1569153394803
+      "Week_No": 46014,
+      "Volume": null
     },
     {
-      "Date": "22.12.2025",
-      "Area": "PB4",
-      "Daily Qty": 0,
-      "Week No": 31,
-      "Weekly Qty": 5447,
-      "Weekly %": 0.913160100586756
+      "Week_No": 46014,
+      "Volume": null
     },
     {
-      "Date": "22.12.2025",
-      "Area": "PBSRES",
-      "Daily Qty": 45,
-      "Week No": 32,
-      "Weekly Qty": 4524,
-      "Weekly %": 0.758424140821458
+      "Week_No": 46014,
+      "Volume": null
     },
     {
-      "Date": "22.12.2025",
-      "Area": "MP",
-      "Daily Qty": 221,
-      "Week No": 33,
-      "Weekly Qty": 2068,
-      "Weekly %": 0.346689019279128
+      "Week_No": 46014,
+      "Volume": null
     },
     {
-      "Date": "22.12.2025",
-      "Area": "MIX",
-      "Daily Qty": 136,
-      "Week No": 34,
-      "Weekly Qty": 0,
-      "Weekly %": 0
+      "Week_No": 46014,
+      "Volume": null
     },
     {
-      "Date": "22.12.2025",
-      "Area": "MS",
-      "Daily Qty": 61,
-      "Week No": 35,
-      "Weekly Qty": 0,
-      "Weekly %": 0
-    },
-    {
-      "Date": "22.12.2025",
-      "Area": "MSX",
-      "Daily Qty": 249,
-      "Week No": 36,
-      "Weekly Qty": 0,
-      "Weekly %": 0
-    },
-    {
-      "Date": "22.12.2025",
-      "Area": "FM",
-      "Daily Qty": 20,
-      "Week No": 37,
-      "Weekly Qty": 0,
-      "Weekly %": 0
-    },
-    {
-      "Date": "22.12.2025",
-      "Area": "HP",
-      "Daily Qty": 5,
-      "Week No": 38,
-      "Weekly Qty": 0,
-      "Weekly %": 0
+      "Week_No": 46014,
+      "Volume": null
     }
   ]
 }
