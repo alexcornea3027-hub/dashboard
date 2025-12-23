@@ -1,205 +1,344 @@
-/*
-VCB StockTeam Dashboard – FIXED STYLING VERSION (NO TAILWIND REQUIRED)
----------------------------------------------------------------
-This version uses INLINE STYLES + minimal layout CSS so it will NOT appear white
-and will work even if Tailwind is NOT installed.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCB Executive | Twilight Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Paleta Caldă / Premium */
+            --bg-dark: #0f172a;
+            --glass: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #8b5cf6; /* Violet */
+            --accent-secondary: #06b6d4; /* Sky Blue */
+            --accent-warm: #f43f5e; /* Rose */
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
 
-Reads data from: /data/dashboard.json
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-USAGE (GitHub / Vite / CRA):
-1. Place dashboard.json in: public/data/dashboard.json
-2. npm install recharts framer-motion lucide-react
-3. Import and render <VCBStockTeamDashboard />
-*/
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top left, #2e1065, #0f172a, #000000);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden; /* Fara scroll pe pagina principala */
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
 
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from 'recharts';
-import { motion } from 'framer-motion';
-import { RefreshCw } from 'lucide-react';
+        /* --- BUTON FULLSCREEN --- */
+        #fs-btn {
+            position: fixed; top: 20px; right: 20px; z-index: 999;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); color: var(--text-main);
+            padding: 8px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+            cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        #fs-btn:hover { background: var(--accent-primary); border-color: var(--accent-primary); transform: translateY(-2px); }
 
-const COLORS = ['#F59E0B', '#FB923C', '#F97316', '#D97706', '#92400E'];
+        /* --- HEADER --- */
+        header {
+            height: 11vh;
+            display: grid; grid-template-columns: 1fr 2fr 1fr;
+            gap: 16px; margin-bottom: 16px;
+        }
 
-const styles = {
-  page: {
-    background: '#FFF7ED',
-    minHeight: '100vh',
-    padding: 24,
-    fontFamily: 'Inter, system-ui, Arial, sans-serif',
-    color: '#1F2937',
-  },
-  header: {
-    marginBottom: 24,
-  },
-  h1: {
-    fontSize: 28,
-    fontWeight: 700,
-  },
-  sub: { color: '#6B7280', marginTop: 4 },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: 24,
-  },
-  card: {
-    background: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    boxShadow: '0 10px 20px rgba(0,0,0,0.08)',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    fontSize: 14,
-  },
-  th: {
-    textAlign: 'left',
-    padding: '8px 6px',
-    borderBottom: '2px solid #E5E7EB',
-  },
-  td: {
-    padding: '6px',
-    borderBottom: '1px solid #E5E7EB',
-  },
-  badgeDone: {
-    background: '#DCFCE7',
-    color: '#166534',
-    padding: '2px 8px',
-    borderRadius: 8,
-    fontSize: 12,
-  },
-  badgeTodo: {
-    background: '#FFEDD5',
-    color: '#9A3412',
-    padding: '2px 8px',
-    borderRadius: 8,
-    fontSize: 12,
-  },
-};
+        .glass-panel {
+            background: var(--glass); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 0 24px;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; justify-content: center;
+        }
 
-function num(n) {
-  return n == null ? '-' : n.toLocaleString();
-}
+        .kpi-wrapper { display: flex; justify-content: space-around; align-items: center; height: 100%; }
+        .kpi-item { text-align: center; }
+        .kpi-item span { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 4px; }
+        .kpi-item h2 { font-size: 2rem; font-weight: 700; background: linear-gradient(to right, #c084fc, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* --- MAIN GRID --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr; /* Coloana stanga putin mai lata */
+            grid-template-rows: repeat(2, minmax(0, 1fr)); /* Imparte fix in 2 randuri egale */
+            gap: 16px;
+            min-height: 0;
+        }
 
-export default function VCBStockTeamDashboard() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+        .card {
+            background: var(--glass); backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 16px; display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
 
-  useEffect(() => {
-    fetch('/data/dashboard.json')
-      .then((r) => r.json())
-      .then(setData)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;
+        }
+        .card-title { font-size: 0.85rem; font-weight: 500; color: var(--text-main); }
+        .card-tag { font-size: 0.65rem; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 6px; color: var(--text-muted); }
 
-  const dailyStatus = useMemo(() => {
-    if (!data) return [];
-    const c = {};
-    data.dailyTask.forEach((t) => (c[t.Status] = (c[t.Status] || 0) + 1));
-    return Object.entries(c).map(([k, v], i) => ({ name: k, value: v, color: COLORS[i % COLORS.length] }));
-  }, [data]);
+        .chart-area { flex: 1; position: relative; width: 100%; min-height: 0; }
 
-  const weeklyVolumes = useMemo(() => {
-    if (!data) return [];
-    return data.weeklyPiData
-      .map((r) => ({ week: `W${r['Week No']}`, qty: r['Weekly Qty'] }))
-      .sort((a, b) => a.week.localeCompare(b.week));
-  }, [data]);
+        /* --- OVERLAY PENTRU DONUTS --- */
+        .donut-center {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); text-align: center; pointer-events: none;
+        }
+        .donut-center h3 { font-size: 1.8rem; font-weight: 700; line-height: 1; color: var(--text-main); }
+        .donut-center p { font-size: 0.6rem; color: var(--text-muted); letter-spacing: 1px; }
 
-  if (loading) return <div style={styles.page}>Loading dashboard…</div>;
-  if (error) return <div style={styles.page}>Error: {error}</div>;
+        /* --- LISTA TASKS --- */
+        .task-list { overflow-y: auto; padding-right: 4px; }
+        .task-list::-webkit-scrollbar { width: 4px; }
+        .task-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        
+        .task-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.02); margin-bottom: 6px;
+            padding: 10px 14px; border-radius: 12px; transition: 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .task-row:hover { background: rgba(255,255,255,0.05); }
+        .task-row.completed { border-left-color: var(--accent-secondary); }
+        .task-row.pending { border-left-color: var(--accent-warm); }
+        
+        .t-name { font-size: 0.75rem; font-weight: 500; }
+        .t-status { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; opacity: 0.8; }
+    </style>
+</head>
+<body>
 
-  return (
-    <div style={styles.page}>
-      <div style={styles.header}>
-        <h1 style={styles.h1}>VCB StockTeam Dashboard</h1>
-        <div style={styles.sub}>Snapshot date: {data.piData?.[0]?.Date}</div>
-      </div>
+    <button id="fs-btn" onclick="toggleFS()">FULL SCREEN</button>
 
-      <div style={styles.grid}>
-        {/* AREA TABLE */}
-        <div style={styles.card}>
-          <h3>Area KPIs</h3>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Area</th>
-                <th style={styles.th}>Total</th>
-                <th style={styles.th}>Counted</th>
-                <th style={styles.th}>Above</th>
-                <th style={styles.th}>Behind</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.piData.map((r, i) => (
-                <tr key={i}>
-                  <td style={styles.td}>{r.Area}</td>
-                  <td style={styles.td}>{num(r['Total locations'])}</td>
-                  <td style={styles.td}>{num(r.Counted)}</td>
-                  <td style={styles.td}>{r['Above target']?.toFixed(1)}</td>
-                  <td style={styles.td}>{r['Behind targe']?.toFixed(1)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <header>
+        <div class="glass-panel">
+            <h1 id="clock" style="font-size: 1.8rem; font-weight: 300;">00:00</h1>
+            <p id="date" style="color: var(--accent-secondary); font-size: 0.8rem; margin-top: -5px;"></p>
         </div>
-
-        {/* DAILY TASK PIE */}
-        <div style={styles.card}>
-          <h3>Daily Tasks – Status</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie data={dailyStatus} dataKey="value" nameKey="name" outerRadius={90}>
-                {dailyStatus.map((e, i) => (
-                  <Cell key={i} fill={e.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* WEEKLY VOLUMES */}
-        <div style={styles.card}>
-          <h3>Weekly Volumes</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={weeklyVolumes}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="qty" fill="#F59E0B" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* TASK LIST */}
-        <div style={styles.card}>
-          <h3>Daily Tasks</h3>
-          {data.dailyTask.map((t, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span>{t.Task}</span>
-              <span style={t.Status === 'Completed' ? styles.badgeDone : styles.badgeTodo}>{t.Status}</span>
+        <div class="glass-panel">
+            <div class="kpi-wrapper">
+                <div class="kpi-item"><span>Total Today</span><h2 id="kpi-today">0</h2></div>
+                <div class="kpi-item"><span>Target Delta</span><h2 id="kpi-delta">0</h2></div>
+                <div class="kpi-item"><span>Avg / Week</span><h2 id="kpi-avg">0</h2></div>
             </div>
-          ))}
         </div>
-      </div>
+        <div class="glass-panel" style="align-items: flex-end;">
+            <span style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 5px;">EFFICIENCY SCORE</span>
+            <div style="font-size: 2.2rem; font-weight: 700; color: var(--accent-secondary);" id="score">0%</div>
+        </div>
+    </header>
 
-      <div style={{ marginTop: 24, fontSize: 12, color: '#6B7280' }}>
-        Data source: /data/dashboard.json
-      </div>
-    </div>
-  );
-}
+    <main>
+        <div class="card">
+            <div class="card-header"><span class="card-title">Daily Output Breakdown</span><span class="card-tag">Live</span></div>
+            <div class="chart-area"><canvas id="dailyBar"></canvas></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><span class="card-title">Daily Tasks</span><span class="card-tag">Today</span></div>
+            <div class="chart-area">
+                <canvas id="dailyDonut"></canvas>
+                <div class="donut-center"><h3 id="d-val">0%</h3><p>DONE</p></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><span class="card-title">Weekly Tasks</span><span class="card-tag">Current</span></div>
+            <div class="chart-area">
+                <canvas id="weeklyDonut"></canvas>
+                <div class="donut-center"><h3 id="w-val">0%</h3><p>DONE</p></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><span class="card-title" id="dist-title">Weekly Distribution</span><span class="card-tag">Area</span></div>
+            <div class="chart-area"><canvas id="distBar"></canvas></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><span class="card-title">Volume Progression</span><span class="card-tag">Trend</span></div>
+            <div class="chart-area"><canvas id="trendLine"></canvas></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><span class="card-title">Task Feed</span><span class="card-tag">Action Items</span></div>
+            <div class="task-list" id="taskFeed"></div>
+        </div>
+    </main>
+
+    <script>
+        // --- CONFIG DATA ---
+        // AICI ESTE LOCUL UNDE DATELE TALE SUNT PRELUCRATE
+        const db = {
+            target: 1193,
+            // Lista de zone si date
+            stats: [
+                { area: "MPR", day: 127, weekQty: 5103, weekNo: 27 },
+                { area: "PB1", day: 38,  weekQty: 6457, weekNo: 28 },
+                { area: "PB2", day: 15,  weekQty: 7494, weekNo: 29 },
+                { area: "PB3", day: 45,  weekQty: 6901, weekNo: 30 },
+                { area: "MP",  day: 221, weekQty: 2068, weekNo: 34 }, // Saptamana curenta
+                { area: "MIX", day: 136, weekQty: 3900, weekNo: 34 }, // Saptamana curenta
+                { area: "MS",  day: 61,  weekQty: 1200, weekNo: 34 }, // Saptamana curenta
+                { area: "HP",  day: 20,  weekQty: 450,  weekNo: 33 }
+            ],
+            tasks: [
+                { txt: "Aged stock report 7AM", status: "Completed", type: "D" },
+                { txt: "ADJUSTMENTS (Returns)", status: "Pending", type: "D" },
+                { txt: "PI Investigation", status: "Pending", type: "D" },
+                { txt: "Shrinkage Period", status: "Completed", type: "W" },
+                { txt: "Weekly SLA Report", status: "Pending", type: "W" }
+            ]
+        };
+
+        function toggleFS() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+
+        // --- CEAS ---
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('date').innerText = now.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'});
+        }, 1000);
+
+        // --- RENDER LOGIC ---
+        function initDashboard() {
+            const ctxCommon = {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#fff', bodyColor: '#cbd5e1', padding: 10, cornerRadius: 8 } },
+                scales: { 
+                    y: { display: false }, 
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, family: 'Outfit' } } } 
+                },
+                layout: { padding: 5 }
+            };
+
+            // 1. Daily Bar Chart (Totaluri pe Zi)
+            // Agregam datele pe Area doar pentru ziua curenta
+            const dailyData = db.stats.map(s => s.day);
+            const areas = db.stats.map(s => s.area);
+
+            const ctx1 = document.getElementById('dailyBar').getContext('2d');
+            const grad1 = ctx1.createLinearGradient(0, 0, 0, 400);
+            grad1.addColorStop(0, '#8b5cf6'); grad1.addColorStop(1, '#6366f1');
+
+            new Chart(ctx1, {
+                type: 'bar',
+                data: { labels: areas, datasets: [{ data: dailyData, backgroundColor: grad1, borderRadius: 6, barThickness: 'flex', maxBarThickness: 30 }] },
+                options: ctxCommon
+            });
+
+            // 2. Weekly Distribution (FILTER: Saptamana curenta)
+            // Gasim cea mai mare saptamana din date
+            const maxWeek = Math.max(...db.stats.map(s => s.weekNo));
+            document.getElementById('dist-title').innerHTML = `Weekly Distribution <span style="color:#06b6d4; margin-left:5px">W${maxWeek}</span>`;
+            
+            // Filtram doar datele care au weekNo == maxWeek
+            const currentWeekItems = db.stats.filter(s => s.weekNo === maxWeek);
+            
+            const ctx2 = document.getElementById('distBar').getContext('2d');
+            const grad2 = ctx2.createLinearGradient(0, 0, 0, 400);
+            grad2.addColorStop(0, '#06b6d4'); grad2.addColorStop(1, '#3b82f6');
+
+            new Chart(ctx2, {
+                type: 'bar',
+                data: { labels: currentWeekItems.map(s => s.area), datasets: [{ data: currentWeekItems.map(s => s.weekQty), backgroundColor: grad2, borderRadius: 6, barThickness: 'flex', maxBarThickness: 40 }] },
+                options: ctxCommon
+            });
+
+            // 3. Trend Line (Progression per Week)
+            // Grupam datele pe saptamani
+            const trendMap = {};
+            db.stats.forEach(s => {
+                trendMap[s.weekNo] = (trendMap[s.weekNo] || 0) + s.weekQty;
+            });
+            const weeks = Object.keys(trendMap).sort();
+            const weekVals = weeks.map(w => trendMap[w]);
+
+            const ctx3 = document.getElementById('trendLine').getContext('2d');
+            const grad3 = ctx3.createLinearGradient(0, 0, 0, 300);
+            grad3.addColorStop(0, 'rgba(139, 92, 246, 0.4)'); grad3.addColorStop(1, 'rgba(139, 92, 246, 0)');
+
+            new Chart(ctx3, {
+                type: 'line',
+                data: { 
+                    labels: weeks.map(w => 'W'+w), 
+                    datasets: [{ 
+                        data: weekVals, 
+                        borderColor: '#c084fc', borderWidth: 3, 
+                        backgroundColor: grad3, fill: true, pointBackgroundColor: '#fff', pointRadius: 4, tension: 0.4 
+                    }] 
+                },
+                options: ctxCommon
+            });
+
+            // 4. Donuts & Tasks
+            calcDonut('dailyDonut', 'd-val', db.tasks.filter(t => t.type === 'D'), '#8b5cf6');
+            calcDonut('weeklyDonut', 'w-val', db.tasks.filter(t => t.type === 'W'), '#06b6d4');
+
+            // 5. KPIs
+            const totalDay = db.stats.reduce((acc, val) => acc + val.day, 0);
+            const totalWeekAll = db.stats.reduce((acc, val) => acc + val.weekQty, 0);
+            
+            document.getElementById('kpi-today').innerText = totalDay;
+            const delta = totalDay - db.target;
+            const deltaEl = document.getElementById('kpi-delta');
+            deltaEl.innerText = (delta > 0 ? "+" : "") + delta;
+            deltaEl.style.color = delta >= 0 ? '#10b981' : '#f43f5e';
+            
+            document.getElementById('kpi-avg').innerText = (totalWeekAll / weeks.length || 1).toFixed(0);
+
+            // Feed
+            const feed = document.getElementById('taskFeed');
+            db.tasks.forEach(t => {
+                feed.innerHTML += `
+                    <div class="task-row ${t.status === 'Completed' ? 'completed' : 'pending'}">
+                        <span class="t-name">${t.txt}</span>
+                        <span class="t-status" style="color:${t.status === 'Completed' ? '#06b6d4' : '#f43f5e'}">${t.status}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function calcDonut(id, labelId, list, color) {
+            const done = list.filter(t => t.status === 'Completed').length;
+            const total = list.length;
+            const perc = total === 0 ? 0 : Math.round((done / total) * 100);
+            
+            document.getElementById(labelId).innerText = perc + "%";
+            
+            new Chart(document.getElementById(id), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [done, total - done],
+                        backgroundColor: [color, 'rgba(255,255,255,0.05)'],
+                        borderWidth: 0, cutout: '85%', circumference: 360, rotation: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false } } }
+            });
+
+            // Update global score approx
+            const curScore = parseInt(document.getElementById('score').innerText);
+            if(curScore === 0) document.getElementById('score').innerText = perc + "%";
+            else document.getElementById('score').innerText = Math.round((curScore + perc)/2) + "%";
+        }
+
+        initDashboard();
+    </script>
+</body>
+</html>
