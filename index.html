@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>STOCK TEAM VCB | 3D MISSION CONTROL</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-
 <style>
 :root{
  --bg:#05070d;
@@ -52,7 +51,6 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888}
 .canvas3d{width:100%;height:100%}
 </style>
 </head>
-
 <body data-theme="dark">
 
 <div class="app">
@@ -92,15 +90,21 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888}
 </div>
 </div>
 
-<script type="module">
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js";
-import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/controls/OrbitControls.js";
+<!-- Three.js + OrbitControls classic global build -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
 
-/* BUTTONS */
-window.toggleTheme=()=>document.body.dataset.theme=document.body.dataset.theme==="dark"?"light":"dark";
-window.toggleFS=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+<script>
+// BUTTONS
+function toggleTheme(){
+  document.body.dataset.theme=document.body.dataset.theme==="dark"?"light":"dark";
+}
+function toggleFS(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
 
-/* DATA */
+// DATA
 const weekly=[6901,5447,4524,2068,1100];
 const tasks=[
  {t:"Aged stock report 7AM",s:"Completed"},
@@ -111,26 +115,27 @@ const tasks=[
  {t:"High Value Audit",s:"Not started"}
 ];
 
-/* TASKS */
+// TASKS
 const tb=document.getElementById("tasks");
 tasks.forEach(x=>{
  tb.innerHTML+=`<div class="task ${x.s==="Completed"?"done":""}"><span>${x.t}</span><span class="badge ${x.s==="Completed"?"ok":"wait"}">${x.s==="Completed"?"READY":"PENDING"}</span></div>`;
 });
 
-/* CLOCK + HOURGLASS */
+// CLOCK + HOURGLASS
 let lastMin=null;
 setInterval(()=>{
  const d=new Date();
- time.innerText=d.toLocaleTimeString("en-GB",{hour12:false});
- date.innerText=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+ document.getElementById("time").innerText=d.toLocaleTimeString("en-GB",{hour12:false});
+ document.getElementById("date").innerText=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
  if(d.getMinutes()!==lastMin){
+  const hg=document.getElementById("hg");
   hg.style.animation="flip 1s ease-in-out";
   setTimeout(()=>hg.style.animation="idle 4s infinite",1000);
   lastMin=d.getMinutes();
  }
 },1000);
 
-/* WEEKLY 3D WATERFALL + PARTICLES + CINEMATIC CAMERA */
+// WEEKLY 3D WATERFALL + PARTICLES
 (function(){
  const el=document.getElementById("weekly3d");
  const scene=new THREE.Scene();
@@ -140,7 +145,9 @@ setInterval(()=>{
  renderer.setSize(el.clientWidth,el.clientHeight); el.appendChild(renderer.domElement);
 
  scene.add(new THREE.AmbientLight(0xffffff,.4));
- const light=new THREE.DirectionalLight(0x4fd1c5,1.2); light.position.set(5,12,10); scene.add(light);
+ const light=new THREE.DirectionalLight(0x4fd1c5,1.2);
+ light.position.set(5,12,10);
+ scene.add(light);
 
  const max=Math.max(...weekly);
  const bars=[];
@@ -148,8 +155,9 @@ setInterval(()=>{
   const h=(v/max)*7+.3;
   const mat=new THREE.MeshStandardMaterial({color:0x4fd1c5,metalness:.5,roughness:.25});
   const bar=new THREE.Mesh(new THREE.BoxGeometry(1,h,1),mat);
-  bar.position.set((i-2)*2,10,0);
-  scene.add(bar); bars.push({bar,h});
+  bar.position.set((i-2)*2,h/2,0);
+  scene.add(bar);
+  bars.push({bar,h});
  });
 
  // PARTICLES
@@ -166,8 +174,9 @@ setInterval(()=>{
  const particles=new THREE.Points(pgeo,pmaterial);
  scene.add(particles);
 
- const controls=new OrbitControls(cam,renderer.domElement);
- controls.enableDamping=true; controls.enableZoom=false;
+ const controls=new THREE.OrbitControls(cam,renderer.domElement);
+ controls.enableDamping=true;
+ controls.enableZoom=false;
 
  let t=0;
  function animate(){
@@ -175,10 +184,7 @@ setInterval(()=>{
   controls.update();
   t+=0.02;
   particles.rotation.y=t/5;
-  bars.forEach(b=>{
-   const targetY=b.h/2;
-   b.bar.position.y += (targetY-b.bar.position.y)*0.05; 
-  });
+  bars.forEach(b=>{b.bar.position.y += (b.h/2-b.bar.position.y)*0.05;});
   cam.position.x=12*Math.sin(t/5);
   cam.position.z=12*Math.cos(t/5);
   cam.lookAt(0,3,0);
@@ -187,7 +193,7 @@ setInterval(()=>{
  animate();
 })();
 
-/* DONUT 3D */
+// DONUT 3D
 (function(){
  const el=document.getElementById("donut3d");
  const scene=new THREE.Scene();
@@ -214,5 +220,6 @@ setInterval(()=>{
  anim();
 })();
 </script>
+
 </body>
 </html>
