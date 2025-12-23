@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>STOCK TEAM VCB | 3D MISSION CONTROL</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 
 <style>
@@ -16,74 +15,32 @@
  --amber:#ffb703;
  --rose:#ff6b6b;
 }
-
 [data-theme="light"]{
  --bg:#f3f5fa;
  --panel:#fff;
  --border:#d0d6e0;
  --text:#111;
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
-body{
- font-family:'Outfit',sans-serif;
- background:var(--bg);
- color:var(--text);
- height:100vh;
- overflow:hidden;
-}
-
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
 .app{height:100vh;display:grid;grid-template-rows:70px 110px 1fr}
-
-/* TOP */
-.top{
- display:flex;
- justify-content:space-between;
- align-items:center;
- padding:0 30px;
-}
+.top{display:flex;justify-content:space-between;align-items:center;padding:0 30px}
 .logo{font-size:1.4rem;font-weight:800}
 .logo span{color:var(--amber)}
-button{
- padding:10px 22px;
- border:none;border-radius:50px;font-weight:700;cursor:pointer;
- background:linear-gradient(135deg,var(--amber),#ff8c42);
-}
-
-/* CLOCK */
-.clock{
- display:flex;
- justify-content:center;
- align-items:center;
-}
-.clock-card{
- display:flex;
- align-items:center;
- gap:25px;
- padding:20px 50px;
- border-radius:70px;
- background:var(--panel);
- border:1px solid var(--border);
- box-shadow:0 20px 40px rgba(0,0,0,.5);
-}
+button{padding:10px 22px;border:none;border-radius:50px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--amber),#ff8c42)}
+.clock{display:flex;justify-content:center;align-items:center}
+.clock-card{display:flex;align-items:center;gap:25px;padding:20px 50px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 20px 40px rgba(0,0,0,.5)}
 #time{font-size:2.6rem;font-weight:800;letter-spacing:3px}
 #date{font-size:.8rem;color:var(--amber)}
 .hourglass{width:40px;height:60px;position:relative;animation:idle 4s infinite ease-in-out}
-.hourglass::before,.hourglass::after{
- content:'';position:absolute;left:0;right:0;margin:auto;width:40px;height:30px;
- border:3px solid var(--amber);border-radius:20px 20px 5px 5px;
-}
+.hourglass::before,.hourglass::after{content:'';position:absolute;left:0;right:0;margin:auto;width:40px;height:30px;border:3px solid var(--amber);border-radius:20px 20px 5px 5px}
 .hourglass::after{top:30px;transform:rotate(180deg)}
 .sand{position:absolute;width:8px;height:8px;background:var(--amber);border-radius:50%;left:16px;top:26px}
 @keyframes flip{0%{transform:rotate(0)}100%{transform:rotate(180deg)}}
 @keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-
-/* MAIN */
 .main{padding:20px;display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 1fr;gap:20px}
 .card{background:var(--panel);border:1px solid var(--border);border-radius:36px;padding:20px;overflow:hidden}
 h3{font-size:.75rem;letter-spacing:2px;color:#888}
-
-/* TASKS */
 .tasks{height:100%;overflow-y:auto;padding-right:6px}
 .tasks::-webkit-scrollbar{width:4px}
 .tasks::-webkit-scrollbar-thumb{background:var(--border)}
@@ -99,7 +56,6 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888}
 <body data-theme="dark">
 
 <div class="app">
-
 <div class="top">
  <div class="logo">STOCK TEAM <span>| VCB</span></div>
  <div>
@@ -119,7 +75,6 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888}
 </div>
 
 <div class="main">
-
 <div class="card" style="grid-row:span 2">
  <h3>WEEKLY VOLUME · 3D WATERFALL + PARTICLES</h3>
  <div id="weekly3d" class="canvas3d"></div>
@@ -134,7 +89,6 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888}
  <h3>DAILY TASKS</h3>
  <div class="tasks" id="tasks"></div>
 </div>
-
 </div>
 </div>
 
@@ -195,7 +149,7 @@ setInterval(()=>{
   const mat=new THREE.MeshStandardMaterial({color:0x4fd1c5,metalness:.5,roughness:.25});
   const bar=new THREE.Mesh(new THREE.BoxGeometry(1,h,1),mat);
   bar.position.set((i-2)*2,10,0); // start above
-  scene.add(bar); bars.push({bar,h,i});
+  scene.add(bar); bars.push({bar,h});
  });
 
  // PARTICLES
@@ -223,9 +177,8 @@ setInterval(()=>{
   particles.rotation.y=t/5;
   bars.forEach(b=>{
    const targetY=b.h/2;
-   b.bar.position.y += (targetY-b.bar.position.y)*0.05; // smooth cascade
+   b.bar.position.y += (targetY-b.bar.position.y)*0.05; 
   });
-  // cinematic orbit camera
   cam.position.x=12*Math.sin(t/5);
   cam.position.z=12*Math.cos(t/5);
   cam.lookAt(0,3,0);
