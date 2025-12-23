@@ -1,336 +1,321 @@
-<!DOCTYPE html>
-<html lang="ro">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VCB Stock Intelligence | Executive 3D</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+/*
+VCB StockTeam Dashboard — single-file React component (default export)
+Reads data from: /data/dashboard.json (place your JSON file in the repo at that path or serve it from your server)
 
-        :root {
-            --bg: #020617;
-            --glass: rgba(15, 23, 42, 0.8);
-            --border: rgba(255, 255, 255, 0.1);
-            --cyan: #22d3ee;
-            --emerald: #10b981;
-            --rose: #f43f5e;
-            --amber: #fbbf24;
-            --shadow-3d: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
-            --neon-glow: 0 0 15px rgba(34, 211, 238, 0.3);
-        }
+How to use:
+1) Put data/dashboard.json in your repository/public so it is served at /data/dashboard.json.
+2) Install deps: npm install recharts framer-motion lucide-react
+3) Ensure Tailwind is configured in your project for the styling to match. If you don't use Tailwind, the layout will still work but look will be basic.
+4) Put this file into src/components/VCB_StockTeam_Dashboard.jsx and import it in your app (or replace App.jsx).
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at 0% 0%, #0f172a 0%, #020617 100%);
-            color: #f8fafc;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-        }
+Notes:
+- Warm professional palette used.
+- Responsive Recharts charts: Pie charts for Daily & Weekly task statuses, Bar chart for weekly volumes, Table for area KPIs.
+- Uses fetch to read /data/dashboard.json; shows a loading and error state.
+*/
 
-        /* FULLSCREEN BUTTON */
-        #fs-toggle {
-            position: fixed; top: 15px; right: 20px; z-index: 1000;
-            background: var(--glass); border: 1px solid var(--cyan);
-            color: var(--cyan); padding: 8px 15px; border-radius: 12px;
-            font-weight: 800; cursor: pointer; backdrop-filter: blur(10px);
-            box-shadow: var(--neon-glow); transition: 0.3s;
-        }
-        #fs-toggle:hover { background: var(--cyan); color: white; transform: translateY(-2px); }
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Legend,
+  CartesianGrid,
+} from 'recharts';
+import { motion } from 'framer-motion';
+import { Search, RefreshCw } from 'lucide-react';
 
-        /* HEADER SECTION */
-        header {
-            height: 12vh;
-            display: grid; grid-template-columns: 1.2fr 2fr 1.2fr;
-            gap: 15px; margin-bottom: 15px;
-        }
+const WARM_PALETTE = [
+  '#D97706', // amber-600
+  '#FB923C', // orange-400
+  '#F97316', // orange-500
+  '#F59E0B', // amber-500
+  '#C2410C', // deep orange
+  '#7C2D12',
+];
 
-        .h-panel {
-            background: var(--glass); backdrop-filter: blur(20px);
-            border: 1px solid var(--border); border-radius: 20px;
-            padding: 10px 25px; box-shadow: var(--shadow-3d);
-            display: flex; align-items: center; justify-content: space-between;
-        }
+function humanNumber(n) {
+  if (n == null) return '-';
+  if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+  if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+  return String(n);
+}
 
-        .kpi-unit { text-align: center; }
-        .kpi-unit span { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-        .kpi-unit h2 { font-size: 1.8rem; font-weight: 800; color: var(--cyan); text-shadow: var(--neon-glow); }
+export default function VCBStockTeamDashboard() {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [taskSearch, setTaskSearch] = useState('');
 
-        /* MAIN GRID */
-        main {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 1.3fr 1fr 1fr;
-            grid-template-rows: repeat(2, 1fr);
-            gap: 15px;
-            min-height: 0; /* Important pentru flex-scroll */
-        }
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    fetch('/data/dashboard.json')
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to load /data/dashboard.json');
+        return r.json();
+      })
+      .then((json) => {
+        if (!mounted) return;
+        setData(json);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (!mounted) return;
+        setError(err.message);
+        setLoading(false);
+      });
+    return () => (mounted = false);
+  }, []);
 
-        .card {
-            background: var(--glass); backdrop-filter: blur(15px);
-            border: 1px solid var(--border); border-radius: 24px;
-            padding: 15px; display: flex; flex-direction: column;
-            box-shadow: var(--shadow-3d); position: relative;
-        }
+  const overview = useMemo(() => {
+    if (!data) return null;
+    const totalLocations = data.piData.reduce((s, r) => s + (r['Total locations'] || 0), 0);
+    const counted = data.piData.reduce((s, r) => s + (r.Counted || 0), 0);
+    const aboveTarget = data.piData.reduce((s, r) => s + (r['Above target'] || 0), 0);
+    const behindTarget = data.piData.reduce((s, r) => s + (r['Behind targe'] || 0), 0);
+    return { totalLocations, counted, aboveTarget, behindTarget };
+  }, [data]);
 
-        .card::after { /* Efect de sticla 3D lateral */
-            content: ''; position: absolute; inset: 0; border-radius: 24px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
-            pointer-events: none;
-        }
+  const dailyTaskStatus = useMemo(() => {
+    if (!data) return [];
+    const counts = {};
+    data.dailyTask.forEach((t) => {
+      const s = t.Status || 'Unknown';
+      counts[s] = (counts[s] || 0) + 1;
+    });
+    return Object.keys(counts).map((k, i) => ({ name: k, value: counts[k], color: WARM_PALETTE[i % WARM_PALETTE.length] }));
+  }, [data]);
 
-        .card-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 15px;
-        }
+  const weeklyTaskStatus = useMemo(() => {
+    if (!data) return [];
+    const counts = {};
+    data.weeklyTask.forEach((t) => {
+      const s = t.Status || 'Unknown';
+      counts[s] = (counts[s] || 0) + 1;
+    });
+    return Object.keys(counts).map((k, i) => ({ name: k, value: counts[k], color: WARM_PALETTE[(i + 2) % WARM_PALETTE.length] }));
+  }, [data]);
 
-        .card-header h3 { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--cyan); letter-spacing: 1px; }
+  const weeklyVolumes = useMemo(() => {
+    if (!data) return [];
+    // weeklyPiData: map Week No -> Weekly Qty
+    return data.weeklyPiData
+      .map((r) => ({ week: r['Week No'] || r['Week No'] === 0 ? r['Week No'] : String(r['Week No']), qty: r['Weekly Qty'] || 0 }))
+      .sort((a, b) => (a.week > b.week ? 1 : -1));
+  }, [data]);
 
-        .chart-container { flex: 1; min-height: 0; position: relative; width: 100%; }
+  const filteredDailyTasks = useMemo(() => {
+    if (!data) return [];
+    const q = taskSearch.trim().toLowerCase();
+    return data.dailyTask.filter((t) => {
+      if (!q) return true;
+      return (t.Task || '').toLowerCase().includes(q) || (t.Status || '').toLowerCase().includes(q);
+    });
+  }, [data, taskSearch]);
 
-        /* DOUGHNUT CENTER TEXT */
-        .chart-overlay {
-            position: absolute; top: 55%; left: 50%;
-            transform: translate(-50%, -50%); text-align: center;
-        }
-        .chart-overlay h4 { font-size: 1.6rem; font-weight: 800; color: white; }
-        .chart-overlay p { font-size: 0.6rem; color: #94a3b8; }
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="text-center">
+        <div className="animate-spin mb-4" style={{ borderTop: '4px solid rgba(0,0,0,0.1)', borderRight: '4px solid rgba(0,0,0,0.1)', borderBottom: '4px solid rgba(0,0,0,0.1)', borderLeft: '4px solid #D97706', borderRadius: '50%', width: 48, height: 48 }} />
+        <div className="text-muted">Loading dashboard data from <code>/data/dashboard.json</code> ...</div>
+      </div>
+    </div>
+  );
 
-        /* TASK LIST */
-        .scroller { overflow-y: auto; padding-right: 5px; }
-        .scroller::-webkit-scrollbar { width: 4px; }
-        .scroller::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 10px; }
+  if (error) return (
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="bg-white p-6 rounded-lg shadow-md max-w-xl">
+        <h3 className="text-lg font-semibold mb-2">Failed to load dashboard data</h3>
+        <p className="mb-4">{error}</p>
+        <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md border" onClick={() => window.location.reload()}>
+          <RefreshCw size={16} /> Reload
+        </button>
+      </div>
+    </div>
+  );
 
-        .task-row {
-            background: rgba(255,255,255,0.03); margin-bottom: 6px;
-            padding: 10px 15px; border-radius: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-left: 4px solid var(--border); transition: 0.2s;
-        }
-        .task-row.done { border-left-color: var(--emerald); background: rgba(16, 185, 129, 0.05); }
-        .task-name { font-size: 0.8rem; font-weight: 600; }
-        .task-status { font-size: 0.65rem; font-weight: 800; color: #64748b; }
-
-        /* RESPONSIVE FIX FOR SMALLER SCREENS */
-        @media (max-height: 800px) {
-            .kpi-unit h2 { font-size: 1.4rem; }
-            .card { padding: 10px; }
-        }
-    </style>
-</head>
-<body>
-
-    <button id="fs-toggle" onclick="toggleFullScreen()">ACTIVATE FULLSCREEN</button>
-
-    <header>
-        <div class="h-panel">
-            <div>
-                <h2 id="live-clock" style="font-size: 1.6rem;">00:00:00</h2>
-                <p id="live-date" style="font-size: 0.8rem; color: var(--cyan); font-weight: 600;"></p>
-            </div>
+  return (
+    <div className="p-6 font-sans bg-gray-50 min-h-screen">
+      <header className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-amber-800">VCB StockTeam Dashboard</h1>
+          <p className="text-sm text-gray-600">Snapshot date: <strong>{data.piData[0]?.Date || '-'}</strong></p>
         </div>
-        <div class="h-panel">
-            <div class="kpi-unit"><span>Realized Today</span><h2 id="total-day">0</h2></div>
-            <div class="kpi-unit"><span>Avg/Area</span><h2 id="avg-area">0</h2></div>
-            <div class="kpi-unit"><span>Target Variance</span><h2 id="delta-target">0</h2></div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center border rounded-md px-3 py-1 bg-white">
+            <Search size={16} />
+            <input placeholder="Search tasks..." value={taskSearch} onChange={(e) => setTaskSearch(e.target.value)} className="ml-2 outline-none" />
+          </div>
+          <motion.button whileTap={{ scale: 0.95 }} onClick={() => window.location.reload()} className="px-3 py-2 rounded-md bg-amber-500 text-white">Refresh</motion.button>
         </div>
-        <div class="h-panel" style="border-right: 5px solid var(--emerald);">
-            <div style="text-align: right; width: 100%;">
-                <span>Compliance Score</span>
-                <h2 id="compliance-total" style="color: var(--emerald);">0%</h2>
-            </div>
-        </div>
-    </header>
+      </header>
 
-    <main>
-        <div class="card">
-            <div class="card-header"><h3>Daily Output by Area</h3><span>Live</span></div>
-            <div class="chart-container"><canvas id="dailyBar"></canvas></div>
+      {/* Overview */}
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card title="Total locations" value={humanNumber(overview.totalLocations)} sub={`Counted: ${humanNumber(overview.counted)}`} />
+        <Card title="Counted" value={humanNumber(overview.counted)} sub={`Above target: ${humanNumber(Math.round(overview.aboveTarget))}`} />
+        <Card title="Above target (sum)" value={humanNumber(Math.round(overview.aboveTarget))} sub={`Behind target: ${humanNumber(Math.round(overview.behindTarget))}`} />
+        <Card title="Completion %" value={`${((overview.counted / Math.max(overview.totalLocations,1)) * 100).toFixed(1)}%`} sub={`Based on total locations`} />
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Area Table */}
+        <div className="col-span-1 lg:col-span-2 bg-white rounded-2xl shadow p-4">
+          <h2 className="text-lg font-medium mb-3">Area KPIs</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-500 border-b">
+                  <th className="py-2">Area</th>
+                  <th>Total locations</th>
+                  <th>Counted</th>
+                  <th>Above target</th>
+                  <th>Behind target</th>
+                  <th>Behind %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.piData.map((r, i) => (
+                  <tr key={r.Area} className={`${i % 2 ? 'bg-gray-50' : ''}`}>
+                    <td className="py-2 font-medium">{r.Area}</td>
+                    <td>{humanNumber(r['Total locations'])}</td>
+                    <td>{humanNumber(r.Counted)}</td>
+                    <td>{r['Above target'] ? r['Above target'].toFixed(2) : 0}</td>
+                    <td>{r['Behind targe'] ? r['Behind targe'].toFixed(2) : 0}</td>
+                    <td>{r['Behind %'] ? (r['Behind %'] * 100).toFixed(2) + '%' : '0%'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="card">
-            <div class="card-header"><h3>Daily Tasks</h3><span>Internal</span></div>
-            <div class="chart-container">
-                <canvas id="dailyDonut"></canvas>
-                <div class="chart-overlay"><h4 id="d-label">0%</h4><p>COMPLETED</p></div>
-            </div>
-        </div>
+        {/* Right: Charts */}
+        <aside className="space-y-6">
+          <div className="bg-white rounded-2xl shadow p-4 h-64">
+            <h3 className="text-sm font-medium mb-2">Daily Tasks — status</h3>
+            <ResponsiveContainer width="100%" height={160}>
+              <PieChart>
+                <Pie data={dailyTaskStatus} dataKey="value" nameKey="name" outerRadius={60} innerRadius={28} label>
+                  {dailyTaskStatus.map((entry, idx) => (
+                    <Cell key={`d-${idx}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
 
-        <div class="card">
-            <div class="card-header"><h3>Weekly Tasks</h3><span>Global</span></div>
-            <div class="chart-container">
-                <canvas id="weeklyDonut"></canvas>
-                <div class="chart-overlay"><h4 id="w-label">0%</h4><p>COMPLETED</p></div>
-            </div>
-        </div>
+          <div className="bg-white rounded-2xl shadow p-4 h-64">
+            <h3 className="text-sm font-medium mb-2">Weekly Tasks — status</h3>
+            <ResponsiveContainer width="100%" height={160}>
+              <PieChart>
+                <Pie data={weeklyTaskStatus} dataKey="value" nameKey="name" outerRadius={60} innerRadius={28} label>
+                  {weeklyTaskStatus.map((entry, idx) => (
+                    <Cell key={`w-${idx}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </aside>
+      </div>
 
-        <div class="card">
-            <div class="card-header"><h3>Weekly Distribution</h3><span id="current-week-no">Week --</span></div>
-            <div class="chart-container"><canvas id="weeklyDistBar"></canvas></div>
+      {/* Weekly volumes chart */}
+      <section className="bg-white rounded-2xl shadow p-4 mt-6">
+        <h3 className="text-lg font-medium mb-3">Weekly Volumes</h3>
+        <div style={{ width: '100%', height: 260 }}>
+          <ResponsiveContainer>
+            <BarChart data={weeklyVolumes} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="week" label={{ value: 'Week No', position: 'insideBottom', offset: -5 }} />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="qty" name="Weekly Qty">
+                {weeklyVolumes.map((entry, idx) => (
+                  <Cell key={`bar-${idx}`} fill={WARM_PALETTE[idx % WARM_PALETTE.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
+      </section>
 
-        <div class="card">
-            <div class="card-header"><h3>Volume Progression</h3><span>By Week</span></div>
-            <div class="chart-container"><canvas id="progressionLine"></canvas></div>
-        </div>
+      {/* Tasks list */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="bg-white rounded-2xl shadow p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-medium">Daily Tasks ({data.dailyTask.length})</h3>
+            <div className="text-sm text-gray-500">Showing {filteredDailyTasks.length}</div>
+          </div>
 
-        <div class="card">
-            <div class="card-header"><h3>System Monitor</h3><span>Priority List</span></div>
-            <div class="scroller" id="task-feed">
+          <div className="space-y-2 max-h-80 overflow-auto pr-2">
+            {filteredDailyTasks.map((t, i) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-md border">
+                <div>
+                  <div className="font-medium">{t.Task}</div>
+                  <div className="text-xs text-gray-500">{t.DATE}</div>
                 </div>
+                <StatusBadge status={t.Status} />
+              </div>
+            ))}
+          </div>
         </div>
-    </main>
 
-    <script>
-        // DATE REALE BAZATE PE CERINTA TA
-        const dashboardData = {
-            "stats": [
-                {"area": "MPR", "day": 127, "week": 34, "total": 5103},
-                {"area": "PB1", "day": 38, "week": 34, "total": 6457},
-                {"area": "PB2", "day": 15, "week": 34, "total": 7494},
-                {"area": "PB3", "day": 42, "week": 33, "total": 6901},
-                {"area": "MP", "day": 221, "week": 34, "total": 2068},
-                {"area": "MIX", "day": 136, "week": 32, "total": 1200},
-                {"area": "MS", "day": 61, "week": 34, "total": 450}
-            ],
-            "dailyTasks": [
-                {"name": "Aged stock 7AM", "done": true},
-                {"name": "ADJUSTMENTS", "done": false},
-                {"name": "LOCATIONS ERROR", "done": false},
-                {"name": "SLA UPDATE", "done": false},
-                {"name": "PI 1st Count", "done": false}
-            ],
-            "weeklyTasks": [
-                {"name": "Shrinkage Period", "done": true},
-                {"name": "SIS Report", "done": false},
-                {"name": "Weekly SLA", "done": false}
-            ]
-        };
+        <div className="bg-white rounded-2xl shadow p-4">
+          <h3 className="text-lg font-medium mb-3">Weekly Tasks</h3>
+          <div className="space-y-2">
+            {data.weeklyTask.map((t, i) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-md border">
+                <div>
+                  <div className="font-medium">{t.Task}</div>
+                  <div className="text-xs text-gray-500">{t.Date}</div>
+                </div>
+                <StatusBadge status={t.Status} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-            else document.exitFullscreen();
-        }
+      <footer className="mt-8 text-center text-xs text-gray-500">Generated by VCB StockTeam Dashboard — data source: /data/dashboard.json</footer>
+    </div>
+  );
+}
 
-        function initClock() {
-            const update = () => {
-                const now = new Date();
-                document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-GB');
-                document.getElementById('live-date').innerText = now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'short' });
-            };
-            setInterval(update, 1000); update();
-        }
+function Card({ title, value, sub }) {
+  return (
+    <div className="bg-white rounded-2xl shadow p-4 flex flex-col justify-between">
+      <div>
+        <div className="text-sm text-gray-500">{title}</div>
+        <div className="text-2xl font-semibold text-amber-800">{value}</div>
+      </div>
+      {sub && <div className="text-xs text-gray-500 mt-2">{sub}</div>}
+    </div>
+  );
+}
 
-        function renderCharts() {
-            const ctxOptions = {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { 
-                    y: { display: false }, 
-                    x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } } 
-                }
-            };
-
-            // 1. Daily Bar Chart
-            new Chart(document.getElementById('dailyBar'), {
-                type: 'bar',
-                data: {
-                    labels: dashboardData.stats.map(s => s.area),
-                    datasets: [{
-                        data: dashboardData.stats.map(s => s.day),
-                        backgroundColor: '#22d3ee', borderRadius: 8, barThickness: 20
-                    }]
-                },
-                options: ctxOptions
-            });
-
-            // 2. Weekly Distribution (Only latest week)
-            const maxW = Math.max(...dashboardData.stats.map(s => s.week));
-            document.getElementById('current-week-no').innerText = `Week ${maxW}`;
-            const latestData = dashboardData.stats.filter(s => s.week === maxW);
-            
-            new Chart(document.getElementById('weeklyDistBar'), {
-                type: 'bar',
-                data: {
-                    labels: latestData.map(s => s.area),
-                    datasets: [{
-                        data: latestData.map(s => s.total),
-                        backgroundColor: '#10b981', borderRadius: 8, barThickness: 20
-                    }]
-                },
-                options: ctxOptions
-            });
-
-            // 3. Volume Progression
-            const weeks = [...new Set(dashboardData.stats.map(s => s.week))].sort();
-            const weekTotals = weeks.map(w => 
-                dashboardData.stats.filter(s => s.week === w).reduce((acc, curr) => acc + curr.total, 0)
-            );
-
-            new Chart(document.getElementById('progressionLine'), {
-                type: 'line',
-                data: {
-                    labels: weeks.map(w => "W" + w),
-                    datasets: [{
-                        data: weekTotals,
-                        borderColor: '#22d3ee', tension: 0.4, fill: true,
-                        backgroundColor: 'rgba(34, 211, 238, 0.1)', pointRadius: 5
-                    }]
-                },
-                options: ctxOptions
-            });
-
-            // 4. Donuts
-            const dScore = renderDonut('dailyDonut', 'd-label', dashboardData.dailyTasks, '#22d3ee');
-            const wScore = renderDonut('weeklyDonut', 'w-label', dashboardData.weeklyTasks, '#10b981');
-            document.getElementById('compliance-total').innerText = Math.round((dScore + wScore) / 2) + "%";
-
-            // KPI Header logic
-            const dayTotal = dashboardData.stats.reduce((a, b) => a + b.day, 0);
-            document.getElementById('total-day').innerText = dayTotal;
-            document.getElementById('avg-area').innerText = Math.round(dayTotal / dashboardData.stats.length);
-            const delta = dayTotal - 1193;
-            document.getElementById('delta-target').innerText = (delta > 0 ? "+" : "") + delta;
-            document.getElementById('delta-target').style.color = delta >= 0 ? 'var(--emerald)' : 'var(--rose)';
-
-            // Task Feed
-            const feed = document.getElementById('task-feed');
-            [...dashboardData.dailyTasks, ...dashboardData.weeklyTasks].forEach(t => {
-                feed.innerHTML += `
-                    <div class="task-row ${t.done ? 'done' : ''}">
-                        <span class="task-name">${t.name}</span>
-                        <span class="task-status">${t.done ? '✔ DONE' : 'WAITING'}</span>
-                    </div>
-                `;
-            });
-        }
-
-        function renderDonut(id, labelId, tasks, color) {
-            const done = tasks.filter(t => t.done).length;
-            const perc = Math.round((done / tasks.length) * 100);
-            document.getElementById(labelId).innerText = perc + "%";
-            
-            new Chart(document.getElementById(id), {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [done, tasks.length - done],
-                        backgroundColor: [color, 'rgba(255,255,255,0.05)'],
-                        borderWidth: 0, cutout: '80%'
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false } } }
-            });
-            return perc;
-        }
-
-        initClock();
-        renderCharts();
-    </script>
-</body>
-</html>
+function StatusBadge({ status }) {
+  const base = {
+    'Completed': { bg: '#DCFCE7', color: '#065F46' },
+    'Not started': { bg: '#FFF7ED', color: '#92400E' },
+    'In progress': { bg: '#EFF6FF', color: '#1E3A8A' },
+    Unknown: { bg: '#F3F4F6', color: '#374151' },
+  };
+  const s = base[status] || base.Unknown;
+  return (
+    <div style={{ background: s.bg, color: s.color }} className="px-3 py-1 rounded-full text-xs font-medium">
+      {status}
+    </div>
+  );
+}
