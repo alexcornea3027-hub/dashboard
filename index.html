@@ -1,15 +1,12 @@
-<!doctype html>
-<html lang="ro">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Stock Team | 3D Mission Control — Ultimate</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Team | 3D Mission Control</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 
-<!-- es-module-shims (polyfill pentru importmap pe browsere) -->
 <script async src="https://ga.jspm.io/npm:es-module-shims@1.8.1/dist/es-module-shims.js"></script>
-
-<!-- import map shim -->
 <script type="importmap-shim">
 {
   "imports": {
@@ -19,574 +16,219 @@
 }
 </script>
 
-<!-- Chart.js global UMD -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <style>
 :root{
-  --bg: #f3f5f9;            /* soft background */
-  --panel: #ffffff;         /* card background */
-  --muted: #9aa4b2;
-  --text: #1f2937;
-  --soft1: #cbb6ff;         /* lavender */
-  --soft2: #ffd7b5;         /* peach */
-  --soft3: #ffe58a;         /* warm amber */
-  --accent: #a78bfa;        /* accent */
-  --particle: #f6a5c0;      /* soft pink */
-  --glass: rgba(31,41,55,0.04);
-  --border: rgba(31,41,55,0.06);
+ --bg:#f3f5fa; --panel:#fff; --muted:#9aa4b2; --text:#1f2937;
+ --soft1:#cbb6ff; --soft2:#ffd7b5; --soft3:#ffe58a; --accent:#a78bfa;
+ --particle:#f6a5c0; --glass:rgba(31,41,55,0.04); --border:rgba(31,41,55,0.06);
 }
 [data-theme="dark"]{
-  --bg:#0b0f14;
-  --panel:#0f1720;
-  --muted:#93a0b2;
-  --text:#e6eef8;
-  --soft1:#7b61ff;
-  --soft2:#ffb27a;
-  --soft3:#ffcf5c;
-  --accent:#b794ff;
-  --particle:#ff92b0;
-  --glass: rgba(255,255,255,0.03);
-  --border: rgba(255,255,255,0.06);
+ --bg:#0b0f14; --panel:#0f1720; --muted:#93a0b2; --text:#e6eef8;
+ --soft1:#7b61ff; --soft2:#ffb27a; --soft3:#ffcf5c; --accent:#b794ff;
+ --particle:#ff92b0; --glass: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.06);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
-.app{display:grid;grid-template-rows:72px 120px 1fr;gap:12px;padding:14px;height:100vh}
-.header{display:flex;align-items:center;justify-content:space-between;padding:0 18px}
-.brand{font-weight:800;font-size:1.2rem}
-.brand span{color:var(--soft3)}
-.controls{display:flex;gap:8px;align-items:center}
-.btn{padding:8px 14px;border-radius:999px;border:none;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--soft2),var(--soft3));color:var(--text)}
-.small{padding:8px 10px;border-radius:10px;background:transparent;border:1px solid var(--border);color:var(--text);cursor:pointer}
-.status{font-size:.85rem;color:var(--muted)}
-.clock{display:flex;align-items:center;justify-content:center}
-.clock-card{display:flex;align-items:center;gap:14px;padding:12px 18px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,0.04)}
-#time{font-size:1.6rem;font-weight:800;letter-spacing:2px}
-#date{font-size:.85rem;color:var(--muted)}
-.main{display:grid;grid-template-columns:1.6fr 1fr;grid-template-rows:1fr 1fr;gap:14px;padding:6px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px;position:relative;overflow:hidden;min-height:140px}
-.title{font-size:.82rem;color:var(--muted);letter-spacing:1.2px;margin-bottom:8px}
-.canvas{width:100%;height:100%;min-height:160px}
-#weekly3d{min-height:380px}
-.tasks{height:100%;overflow:auto;padding-right:8px;max-height:520px}
-.task{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:12px;background:var(--glass);margin-bottom:8px}
-.done{border-left:4px solid var(--accent)}
-.badge{padding:6px 12px;border-radius:999px;font-weight:800;font-size:.75rem}
-.ok{background:var(--accent);color:#fff}
-.wait{background:#e2e8f0;color:var(--text)}
-.tooltip{position:fixed;pointer-events:none;padding:10px 14px;border-radius:10px;background:rgba(0,0,0,0.78);color:#fff;z-index:9999;display:none;transform:translate(-50%,-120%);font-weight:700}
-.controls-panel{display:flex;gap:8px;align-items:center}
-.particle-control{display:flex;gap:6px;align-items:center}
-.legend{display:flex;gap:8px;align-items:center;font-size:.85rem;color:var(--muted)}
-.legend .dot{width:10px;height:10px;border-radius:50%}
-.legend .dot1{background:var(--soft2)} .dot2{background:var(--soft1)}
-.mini-charts{display:flex;gap:12px;align-items:stretch}
-.mini-charts canvas{flex:1;min-height:120px}
-.footer-controls{position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
-.labels-row{display:flex;justify-content:center;gap:18px;margin-top:6px;flex-wrap:wrap;color:var(--muted);font-weight:700}
-label.smallmuted{font-size:.8rem;color:var(--muted)}
-@media (max-width:980px){
-  .main{grid-template-columns:1fr;grid-template-rows:auto auto auto}
-  #weekly3d{min-height:260px}
-}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;}
+.app{display:grid;grid-template-rows:70px 110px 1fr;gap:12px;padding:12px;height:100vh;}
+.header{display:flex;justify-content:space-between;align-items:center;padding:0 18px;}
+.brand{font-weight:800;font-size:1.2rem;}
+.brand span{color:var(--soft3);}
+.controls{display:flex;gap:6px;}
+.small{padding:6px 12px;border-radius:10px;background:transparent;border:1px solid var(--border);cursor:pointer;color:var(--text);}
+.clock{display:flex;justify-content:center;align-items:center;}
+.clock-card{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,0.04);}
+#time{font-size:1.6rem;font-weight:800;letter-spacing:2px;}
+#date{font-size:.85rem;color:var(--muted);}
+.main{display:grid;grid-template-columns:1.6fr 1fr;grid-template-rows:1fr 1fr;gap:12px;padding:6px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px;position:relative;overflow:hidden;min-height:140px;}
+.title{font-size:.82rem;color:var(--muted);letter-spacing:1.2px;margin-bottom:8px;}
+.canvas{width:100%;height:100%;min-height:160px;}
+.tasks{height:100%;overflow:auto;padding-right:8px;max-height:520px;}
+.task{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:12px;background:var(--glass);margin-bottom:8px;}
+.done{border-left:4px solid var(--accent);}
+.badge{padding:6px 12px;border-radius:999px;font-weight:800;font-size:.75rem;}
+.ok{background:var(--accent);color:#fff;}
+.wait{background:#e2e8f0;color:var(--text);}
+.tooltip{position:fixed;pointer-events:none;padding:10px 14px;border-radius:10px;background:rgba(0,0,0,0.78);color:#fff;z-index:9999;display:none;transform:translate(-50%,-120%);font-weight:700;}
+.labels-row{display:flex;justify-content:center;gap:18px;margin-top:6px;flex-wrap:wrap;color:var(--muted);font-weight:700;}
 </style>
 </head>
 <body data-theme="light">
 <div class="app">
-  <div class="header">
-    <div style="display:flex;gap:12px;align-items:center">
-      <div class="brand">STOCK TEAM <span>| VCB</span></div>
-      <div class="status" id="dataStatus">Loading data…</div>
-    </div>
-    <div class="controls">
-      <button id="themeBtn" class="small">Toggle theme</button>
-      <button id="fsBtn" class="small">Fullscreen</button>
-      <button id="playBtn" class="small">Pause</button>
-      <button id="reloadBtn" class="small">Reload data</button>
-      <button id="snapshotBtn" class="small">Snapshot</button>
-    </div>
-  </div>
+ <div class="header">
+   <div class="brand">STOCK TEAM <span>| VCB</span></div>
+   <div class="controls">
+     <button id="themeBtn" class="small">Toggle Theme</button>
+     <button id="fsBtn" class="small">Fullscreen</button>
+     <button id="reloadBtn" class="small">Reload Data</button>
+   </div>
+ </div>
 
-  <div class="clock">
-    <div class="clock-card">
-      <div id="hourglass" style="width:120px;height:92px" class="canvas" aria-hidden="true"></div>
-      <div>
-        <div id="time">00:00:00</div>
-        <div id="date">Loading…</div>
-        <div class="smallmuted" id="metaInfo" style="margin-top:6px">Target — —</div>
-      </div>
-    </div>
-  </div>
+ <div class="clock">
+   <div class="clock-card">
+     <div id="hourglass" class="canvas" style="width:100px;height:100px"></div>
+     <div>
+       <div id="time">00:00:00</div>
+       <div id="date">Loading…</div>
+     </div>
+   </div>
+ </div>
 
-  <div class="main">
-    <div class="card" style="grid-row:span 2">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="title">WEEKLY VOLUME · 3D WATERFALL + PARTICLES</div>
-        <div style="margin-left:auto" class="legend">
-          <div class="dot dot1"></div><div>Bars</div><div class="dot dot2"></div><div>Particles</div>
-        </div>
-      </div>
-      <div id="weekly3d" class="canvas"></div>
-      <div class="labels-row" id="weekLabels"></div>
-      <div class="footer-controls">
-        <div class="controls-panel">
-          <label class="smallmuted">Particles</label>
-          <input id="particleCount" type="range" min="100" max="2000" value="700" />
-        </div>
-        <div class="controls-panel">
-          <label class="smallmuted">Speed</label>
-          <input id="speedRange" type="range" min="0.2" max="2.5" step="0.1" value="1" />
-        </div>
-      </div>
-    </div>
+ <div class="main">
+   <div class="card" style="grid-row:span 2">
+     <div class="title">Weekly Volume · 3D Waterfall + Particles</div>
+     <div id="weekly3d" class="canvas"></div>
+     <div class="labels-row" id="weekLabels"></div>
+   </div>
 
-    <div class="card">
-      <div class="title">COUNTING PROGRESS · 3D DONUT + MINI CHARTS</div>
-      <div id="donut3d" class="canvas"></div>
-      <div style="margin-top:12px">
-        <div class="mini-charts">
-          <canvas id="miniLine"></canvas>
-          <canvas id="miniDoughnut"></canvas>
-        </div>
-      </div>
-    </div>
+   <div class="card">
+     <div class="title">Counting Progress · 3D Donut + Mini Charts</div>
+     <div id="donut3d" class="canvas"></div>
+     <div style="margin-top:12px">
+       <canvas id="miniLine" height="80"></canvas>
+       <canvas id="miniDoughnut" height="80"></canvas>
+     </div>
+   </div>
 
-    <div class="card">
-      <div class="title">DAILY & WEEKLY TASKS</div>
-      <div style="display:flex;gap:12px">
-        <div style="flex:1">
-          <h4 style="font-size:.86rem;margin-bottom:8px;color:var(--muted)">Daily</h4>
-          <div class="tasks" id="dailyTasks"></div>
-        </div>
-        <div style="flex:1">
-          <h4 style="font-size:.86rem;margin-bottom:8px;color:var(--muted)">Weekly</h4>
-          <div class="tasks" id="weeklyTasks"></div>
-        </div>
-      </div>
-    </div>
-  </div>
+   <div class="card">
+     <div class="title">Daily & Weekly Tasks</div>
+     <div style="display:flex;gap:12px">
+       <div style="flex:1">
+         <h4 style="color:var(--muted);margin-bottom:6px">Daily</h4>
+         <div class="tasks" id="dailyTasks"></div>
+       </div>
+       <div style="flex:1">
+         <h4 style="color:var(--muted);margin-bottom:6px">Weekly</h4>
+         <div class="tasks" id="weeklyTasks"></div>
+       </div>
+     </div>
+   </div>
+ </div>
 </div>
-
-<div id="tooltip" class="tooltip" aria-hidden="true"></div>
+<div id="tooltip" class="tooltip"></div>
 
 <script type="module-shim">
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 
-/* --------------------------
-   CONFIG & UI refs
----------------------------*/
-const DATA_PATH = './data/dashboard.json'; // <--- place your JSON here
-const dataStatus = document.getElementById('dataStatus');
-const metaInfo = document.getElementById('metaInfo');
+/* ------------------------
+   UTILS
+------------------------*/
+function safeParseJSON(txt){
+  if(!txt) return null;
+  if(txt.charCodeAt(0) === 0xFEFF) txt=txt.slice(1);
+  return JSON.parse(txt);
+}
+async function loadJSON(path){
+  try{
+    const r = await fetch(path, {cache:'no-cache'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const txt = await r.text();
+    return safeParseJSON(txt);
+  }catch(e){ console.warn(e); return null; }
+}
+
 const dailyTasksEl = document.getElementById('dailyTasks');
 const weeklyTasksEl = document.getElementById('weeklyTasks');
 const weekLabelsEl = document.getElementById('weekLabels');
 const tooltip = document.getElementById('tooltip');
 
-const themeBtn = document.getElementById('themeBtn');
-const fsBtn = document.getElementById('fsBtn');
-const playBtn = document.getElementById('playBtn');
-const reloadBtn = document.getElementById('reloadBtn');
-const snapshotBtn = document.getElementById('snapshotBtn');
-const particleCountRange = document.getElementById('particleCount');
-const speedRange = document.getElementById('speedRange');
-
-let animationRunning = true;
-let speedFactor = Number(speedRange.value);
-let particleCount = Number(particleCountRange.value);
-
-themeBtn.addEventListener('click', ()=> document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark');
-fsBtn.addEventListener('click', ()=> { if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen().catch(()=>{}); });
-playBtn.addEventListener('click', ()=> { animationRunning = !animationRunning; playBtn.innerText = animationRunning ? 'Pause' : 'Resume'; });
-reloadBtn.addEventListener('click', ()=> loadAndBuild());
-snapshotBtn.addEventListener('click', snapshotWeekly);
-
-particleCountRange.addEventListener('input', ()=> {
-  particleCount = Number(particleCountRange.value);
-  if (weeklyParticlesManager) weeklyParticlesManager.setCount(particleCount);
-});
-speedRange.addEventListener('input', ()=> speedFactor = Number(speedRange.value));
-
-/* Responsive DPR */
-const DPR = ()=> Math.min(window.devicePixelRatio || 1, 2);
-
-/* --------------------------
-   Robust JSON parsing (balanced braces, BOM removal)
----------------------------*/
-function safeParseJSON(text){
-  if (!text || typeof text !== 'string') throw new Error('Empty text');
-  // Remove BOM
-  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-  // Remove control characters that are not whitespace (leave \t \n \r)
-  text = text.replace(/[^\x09\x0A\x0D\x20-\uFFFF]/g, '');
-  // Find first { or [
-  const firstIdx = Math.min(...['{','['].map(c=>{const i=text.indexOf(c); return i===-1?Infinity:i;}));
-  if (firstIdx === Infinity) throw new Error('No JSON start found');
-  // Find matching end via stack, respecting strings & escapes
-  const stack=[];
-  let inString=false, stringChar=null, escaped=false;
-  let endIdx=-1;
-  for (let i=firstIdx;i<text.length;i++){
-    const ch = text[i];
-    if (inString){
-      if (escaped){ escaped=false; continue; }
-      if (ch === '\\'){ escaped=true; continue; }
-      if (ch === stringChar){ inString=false; stringChar=null; continue; }
-      continue;
-    } else {
-      if (ch === '"' || ch === "'"){ inString=true; stringChar=ch; continue; }
-      if (ch === '{' || ch === '['){ stack.push(ch); continue; }
-      if (ch === '}' || ch === ']'){
-        if (stack.length===0) continue;
-        const last = stack.pop();
-        if (stack.length===0){ endIdx = i; break; }
-      }
-    }
-  }
-  if (endIdx === -1) throw new Error('Could not find JSON end (unbalanced braces)');
-  const candidate = text.slice(firstIdx, endIdx+1).trim();
-  return JSON.parse(candidate);
-}
-
-/* --------------------------
-   Fetch dashboard.json robustly
----------------------------*/
-async function fetchDashboard(){
-  try {
-    const res = await fetch(DATA_PATH, {cache:'no-cache'});
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const txt = await res.text();
-    const json = safeParseJSON(txt);
-    dataStatus.innerText = `Loaded data/dashboard.json • ${json.metadata && json.metadata.timestamp ? json.metadata.timestamp : ''}`;
-    return json;
-  } catch (e) {
-    console.warn('dashboard.json load failed — using fallback', e);
-    dataStatus.innerText = `Using fallback data (dashboard.json error: ${e.message})`;
-    return null;
-  }
-}
-
-/* --------------------------
-   Default fallback (used if fetch fails)
----------------------------*/
-const fallback = {
-  metadata: { target: 1193, timestamp: new Date().toLocaleTimeString('en-GB') },
-  counting: [
-    {"area":"MPR","qty":14622},{"area":"PB1","qty":4329},{"area":"PB2","qty":795},
-    {"area":"PB3","qty":772},{"area":"PB4","qty":164},{"area":"PBSRES","qty":5197},
-    {"area":"MP","qty":25612},{"area":"MIX","qty":33087},{"area":"MS","qty":21512},
-    {"area":"MSX","qty":28798},{"area":"FM","qty":2308},{"area":"HP","qty":561},{"area":"Total:","qty":137369}
-  ],
-  dailyTasks: [
-    {"name":"Aged stock report 7AM","status":"Completed"},
-    {"name":"Aged stock report 3PM","status":"Not started"},
-    {"name":"Returns Adjustments","status":"Not started"}
-  ],
-  weeklyTasks: [
-    {"name":"(Weekly) SLA","status":"Not started"},
-    {"name":"(once a month) Shrinkage for Period","status":"Completed"}
-  ],
-  history: [
-    {"week":"W32","total":6901},{"week":"W33","total":5447},{"week":"W34","total":4524},
-    {"week":"W35","total":2068},{"week":"W36","total":1100},{"week":"W37","total":3200},
-    {"week":"W38","total":4800},{"week":"W39","total":6000},{"week":"W40","total":7300}
-  ]
-};
-
-/* --------------------------
-   Render tasks to DOM
----------------------------*/
+/* ------------------------
+   RENDER TASKS
+------------------------*/
 function renderTasks(daily, weekly){
-  dailyTasksEl.innerHTML = ''; weeklyTasksEl.innerHTML = '';
-  (daily || []).forEach(t=>{
-    const div = document.createElement('div'); div.className = `task ${t.status === 'Completed' ? 'done' : ''}`;
-    const statusText = t.status === 'Completed' ? 'READY' : (t.status || 'PENDING').toUpperCase();
-    div.innerHTML = `<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${statusText}</span>`;
+  dailyTasksEl.innerHTML=''; weeklyTasksEl.innerHTML='';
+  daily.forEach(t=>{
+    const div=document.createElement('div'); div.className=`task ${t.status==='Completed'?'done':''}`;
+    div.innerHTML=`<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${t.status==='Completed'?'READY':'PENDING'}</span>`;
     dailyTasksEl.appendChild(div);
   });
-  (weekly || []).forEach(t=>{
-    const div = document.createElement('div'); div.className = `task ${t.status === 'Completed' ? 'done' : ''}`;
-    const statusText = t.status === 'Completed' ? 'READY' : (t.status || 'PENDING').toUpperCase();
-    div.innerHTML = `<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${statusText}</span>`;
+  weekly.forEach(t=>{
+    const div=document.createElement('div'); div.className=`task ${t.status==='Completed'?'done':''}`;
+    div.innerHTML=`<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${t.status==='Completed'?'READY':'PENDING'}</span>`;
     weeklyTasksEl.appendChild(div);
   });
 }
 
-/* --------------------------
-   Clock + meta info
----------------------------*/
+/* ------------------------
+   CLOCK
+------------------------*/
 setInterval(()=>{
-  const d = new Date();
-  document.getElementById('time').innerText = d.toLocaleTimeString('en-GB',{hour12:false});
-  document.getElementById('date').innerText = d.toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long'});
-}, 1000);
+  const d=new Date();
+  document.getElementById('time').innerText=d.toLocaleTimeString('en-GB',{hour12:false});
+  document.getElementById('date').innerText=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+},1000);
 
-/* --------------------------
-   WEEKLY 3D (bars + particles) with labels row
----------------------------*/
-let weeklyRenderer, weeklyScene, weeklyCamera, weeklyControls, weeklyBars = [];
-let weeklyParticlesManager = null; // manager object to update particle count & behavior
-
-function createWeeklyScene(history){
-  // remove old renderer canvas
-  if (weeklyRenderer && weeklyRenderer.domElement && weeklyRenderer.domElement.parentElement === document.getElementById('weekly3d')){
-    document.getElementById('weekly3d').removeChild(weeklyRenderer.domElement);
-  }
-
-  const container = document.getElementById('weekly3d');
-  weeklyScene = new THREE.Scene();
-  weeklyCamera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 200);
+/* ------------------------
+   THREE.JS WEEKLY 3D
+------------------------*/
+let weeklyRenderer, weeklyScene, weeklyCamera, weeklyBars=[];
+async function createWeekly3D(history){
+  const container=document.getElementById('weekly3d');
+  weeklyScene=new THREE.Scene();
+  weeklyCamera=new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight,0.1,100);
   weeklyCamera.position.set(0,12,20);
 
-  weeklyRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  weeklyRenderer.setPixelRatio(DPR());
-  weeklyRenderer.setSize(container.clientWidth, container.clientHeight);
+  weeklyRenderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  weeklyRenderer.setSize(container.clientWidth,container.clientHeight);
   container.appendChild(weeklyRenderer.domElement);
 
-  weeklyScene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-  dir.position.set(6,18,10);
-  dir.color = new THREE.Color('#ffb27a'); // gentle warm light
+  weeklyScene.add(new THREE.AmbientLight(0xffffff,0.5));
+  const dir=new THREE.DirectionalLight(0xffffff,0.7); dir.position.set(5,12,10);
   weeklyScene.add(dir);
 
-  // build bars
-  const values = (history || []).map(h => Number(h.total || 0));
-  const labels = (history || []).map(h => h.week || '');
-  const max = Math.max(...values, 1);
-  weeklyBars = [];
+  const values=history.map(h=>Number(h.total||0));
+  const labels=history.map(h=>h.week||'');
+  const max=Math.max(...values,1);
+  weeklyBars=[];
+
   values.forEach((v,i)=>{
-    const h = (v/max) * 7 + 0.4;
-    const mat = new THREE.MeshStandardMaterial({color: new THREE.Color('#ffd7b5'), metalness:0.2, roughness:0.6});
-    const box = new THREE.Mesh(new THREE.BoxGeometry(1.4, h, 1.2), mat);
-    box.position.set((i - (values.length-1)/2) * 2.2, h/2, 0);
+    const h=(v/max)*7 +0.4;
+    const mat=new THREE.MeshStandardMaterial({color:0xffb703});
+    const box=new THREE.Mesh(new THREE.BoxGeometry(1.4,h,1.2),mat);
+    box.position.set((i-(values.length-1)/2)*2.2,h/2,0);
     weeklyScene.add(box);
-    weeklyBars.push({mesh: box, height: h, value: v, label: labels[i]});
+    weeklyBars.push({mesh:box,height:h,value:v,label:labels[i]});
   });
 
-  // labels row (HTML)
-  weekLabelsEl.innerHTML = '';
+  // labels
+  weekLabelsEl.innerHTML='';
   labels.forEach(l=>{
-    const el = document.createElement('div'); el.innerText = l; el.style.opacity = '0.9'; el.style.fontWeight = '700';
-    weekLabelsEl.appendChild(el);
-  });
-
-  // particles manager
-  weeklyParticlesManager = createParticles(weeklyScene, particleCount);
-
-  weeklyControls = new OrbitControls(weeklyCamera, weeklyRenderer.domElement);
-  weeklyControls.enableDamping = true; weeklyControls.enableZoom = true;
-
-  // pointer + ray
-  const ray = new THREE.Raycaster();
-  const mouseN = new THREE.Vector2();
-  container.addEventListener('pointermove', (ev)=>{
-    const rect = container.getBoundingClientRect();
-    mouseN.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
-    mouseN.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
-    container._lastPointer = {clientX: ev.clientX, clientY: ev.clientY};
-  });
-
-  // resize
-  window.addEventListener('resize', ()=> {
-    if (!weeklyRenderer) return;
-    weeklyRenderer.setSize(container.clientWidth, container.clientHeight);
-    weeklyCamera.aspect = container.clientWidth / container.clientHeight;
-    weeklyCamera.updateProjectionMatrix();
+    const el=document.createElement('div'); el.innerText=l; weekLabelsEl.appendChild(el);
   });
 
   // animate
-  let t = 0;
+  const controls=new OrbitControls(weeklyCamera, weeklyRenderer.domElement);
+  controls.enableDamping=true;
   function animate(){
     requestAnimationFrame(animate);
-    t += 0.016 * speedFactor;
-    weeklyParticlesManager.update(t, speedFactor);
-    weeklyBars.forEach(b => {
-      b.mesh.position.y += (b.height/2 - b.mesh.position.y) * 0.06 * speedFactor;
-    });
-    weeklyCamera.position.x = 12 * Math.sin(t/4);
-    weeklyCamera.position.z = 12 * Math.cos(t/4);
+    weeklyBars.forEach(b=>{ b.mesh.position.y += (b.height/2 - b.mesh.position.y)*0.05; });
+    weeklyCamera.position.x=12*Math.sin(Date.now()*0.001);
+    weeklyCamera.position.z=12*Math.cos(Date.now()*0.001);
     weeklyCamera.lookAt(0,3,0);
-    weeklyControls.update();
-
-    // raycast
-    ray.setFromCamera(mouseN, weeklyCamera);
-    const intersects = ray.intersectObjects(weeklyBars.map(b => b.mesh));
-    if (intersects.length > 0 && container._lastPointer) {
-      const hit = weeklyBars.find(b => b.mesh === intersects[0].object);
-      tooltip.style.display = 'block';
-      tooltip.style.left = (container._lastPointer.clientX + 12) + 'px';
-      tooltip.style.top = (container._lastPointer.clientY - 10) + 'px';
-      tooltip.innerText = `${hit.label} — ${hit.value.toLocaleString()}`;
-    } else {
-      tooltip.style.display = 'none';
-    }
-
-    if (animationRunning) weeklyRenderer.render(weeklyScene, weeklyCamera);
-    else weeklyRenderer.render(weeklyScene, weeklyCamera);
+    controls.update();
+    weeklyRenderer.render(weeklyScene, weeklyCamera);
   }
   animate();
 }
 
-/* --------------------------
-   Particle system (Points) with per-particle velocities
-   - manager provides setCount and update
----------------------------*/
-function createParticles(scene, count){
-  let positions = new Float32Array(count * 3);
-  let velocities = new Float32Array(count * 3);
-  for (let i=0;i<count;i++){
-    const x = (Math.random()-0.5) * 14;
-    const y = Math.random()*12 + 3;
-    const z = (Math.random()-0.5) * 6;
-    positions[i*3] = x; positions[i*3+1] = y; positions[i*3+2] = z;
-    velocities[i*3] = 0; velocities[i*3+1] = - (0.01 + Math.random()*0.06); velocities[i*3+2] = 0;
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  const mat = new THREE.PointsMaterial({size:0.14, color: new THREE.Color('--particle')});
-  // Use a gentle pastel color
-  mat.color = new THREE.Color('#f6a5c0');
-  const points = new THREE.Points(geo, mat);
-  scene.add(points);
-
-  function update(t, speed){
-    const posAttr = geo.getAttribute('position');
-    for (let i=0;i<posAttr.count;i++){
-      let y = posAttr.array[i*3+1];
-      let vy = velocities[i*3+1];
-      y += vy * (1 + speed*0.2);
-      if (y < 0.1) {
-        // reset to top
-        y = Math.random()*10 + 6;
-        posAttr.array[i*3] = (Math.random()-0.5) * 14;
-        posAttr.array[i*3+2] = (Math.random()-0.5) * 6;
-        velocities[i*3+1] = - (0.01 + Math.random()*0.06);
-      }
-      posAttr.array[i*3+1] = y;
-    }
-    posAttr.needsUpdate = true;
-    // gentle rotation
-    points.rotation.y += 0.001 * speed;
-  }
-
-  function setCount(newCount){
-    // remove old and recreate simpler (safe)
-    scene.remove(points);
-    return createParticles(scene, newCount);
-  }
-
-  return { update, setCount, _points: points };
+/* ------------------------
+   INIT
+------------------------*/
+async function init(){
+  const data=await loadJSON('data/dashboard.json') || {
+    metadata:{target:1193,timestamp:'--'},
+    counting:[{area:'MPR',qty:14622},{area:'PB1',qty:4329}],
+    dailyTasks:[{name:'Aged stock report 7AM',status:'Completed'}],
+    weeklyTasks:[{name:'(Weekly) SLA',status:'Not started'}],
+    history:[{week:'W32',total:6901},{week:'W33',total:5447}]
+  };
+  renderTasks(data.dailyTasks,data.weeklyTasks);
+  createWeekly3D(data.history);
 }
-
-/* --------------------------
-   DONUT 3D + mini charts
----------------------------*/
-let donutRenderer, miniLineChart, miniDoughChart;
-function createDonutAndMini(counting, history){
-  // remove old
-  const container = document.getElementById('donut3d');
-  if (donutRenderer && donutRenderer.domElement && donutRenderer.domElement.parentElement === container){
-    container.removeChild(donutRenderer.domElement);
-  }
-
-  const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
-  cam.position.set(0,0,8);
-
-  donutRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  donutRenderer.setPixelRatio(DPR());
-  donutRenderer.setSize(container.clientWidth, container.clientHeight);
-  container.appendChild(donutRenderer.domElement);
-
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-  const pl = new THREE.PointLight(0xffffff, 0.8); pl.position.set(3,4,3); scene.add(pl);
-
-  const items = (counting || []).filter(c=> (c.area||'').toLowerCase().indexOf('total') === -1);
-  const total = items.reduce((s,it)=>s + (Number(it.qty)||0), 0);
-  const arc = Math.min(2*Math.PI, Math.max(0.3, 2*Math.PI * Math.min(total/30000, 1)));
-
-  const tor = new THREE.Mesh(
-    new THREE.TorusGeometry(2.3, 0.5, 24, 100, arc),
-    new THREE.MeshStandardMaterial({color: new THREE.Color('#a78bfa'), metalness:0.5, roughness:0.35})
-  );
-  scene.add(tor);
-
-  function onResize(){ donutRenderer.setSize(container.clientWidth, container.clientHeight); cam.aspect = container.clientWidth/container.clientHeight; cam.updateProjectionMatrix(); }
-  window.addEventListener('resize', onResize);
-
-  function loop(){
-    requestAnimationFrame(loop);
-    tor.rotation.y += 0.01 * speedFactor;
-    donutRenderer.render(scene, cam);
-  }
-  loop();
-
-  // Chart.js mini
-  try {
-    const labels = (history || []).map(h=>h.week||'');
-    const values = (history || []).map(h=>Number(h.total||0));
-    if (miniLineChart) miniLineChart.destroy();
-    miniLineChart = new Chart(document.getElementById('miniLine').getContext('2d'), {
-      type: 'line',
-      data: { labels, datasets: [{ data: values, borderColor: '#7b61ff', backgroundColor: 'rgba(167,139,250,0.12)', tension:0.32, borderWidth:2, pointRadius:3 }]},
-      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}, y:{grid:{display:false},ticks:{display:false}}} }
-    });
-
-    const used = Math.min(total, 30000);
-    const rem = Math.max(0, 30000 - used);
-    if (miniDoughChart) miniDoughChart.destroy();
-    miniDoughChart = new Chart(document.getElementById('miniDoughnut').getContext('2d'), {
-      type:'doughnut',
-      data:{ labels:['Used','Remaining'], datasets:[{ data:[used, rem], backgroundColor:['#ffd7b5','#d1c4ff'] }]},
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
-    });
-  } catch (e) { console.warn('Chart small error', e); }
-}
-
-/* --------------------------
-   Snapshot helper
----------------------------*/
-function snapshotWeekly(){
-  try {
-    if (weeklyRenderer && weeklyRenderer.domElement) {
-      const url = weeklyRenderer.domElement.toDataURL('image/png');
-      const a = document.createElement('a'); a.href = url; a.download = 'weekly_snapshot.png'; document.body.appendChild(a); a.click(); a.remove();
-    } else alert('Weekly canvas not ready yet.');
-  } catch (e) { console.error(e); alert('Snapshot failed.'); }
-}
-
-/* --------------------------
-   Orchestrator: load data and build visuals
----------------------------*/
-async function loadAndBuild(){
-  const json = await fetchDashboard();
-  const data = json || fallback;
-
-  // meta
-  metaInfo.innerText = `Target • ${data.metadata && data.metadata.target ? data.metadata.target : '-'}`;
-
-  // tasks
-  renderTasks(data.dailyTasks || [], data.weeklyTasks || []);
-
-  // history (weeks)
-  const history = Array.isArray(data.history) && data.history.length ? data.history.slice(0,9) : (data.counting || []).slice(0,9).map((c,i)=>({week:c.area || 'A'+i, total:Number(c.qty)||0}));
-
-  // create scenes
-  createWeeklyScene(history);
-  createDonutAndMini(data.counting || [], history);
-
-  // set particle manager count
-  if (weeklyParticlesManager) weeklyParticlesManager.setCount = weeklyParticlesManager.setCount || null;
-}
-
-window.addEventListener('blur', ()=> animationRunning = false);
-window.addEventListener('focus', ()=> animationRunning = true);
-
-/* initial load */
-loadAndBuild();
-
+init();
 </script>
 </body>
 </html>
