@@ -1,240 +1,325 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stock Team | 3D Mission Control</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STOCK TEAM | VCB Mission Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+      }
+    }
+    </script>
 
-<script async src="https://ga.jspm.io/npm:es-module-shims@1.8.1/dist/es-module-shims.js"></script>
-<script type="importmap-shim">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
-    "three/": "https://cdn.jsdelivr.net/npm/three@0.158.0/"
-  }
-}
-</script>
+    <style>
+        :root {
+            --bg: #fdfaf6; --card: #ffffff; --text: #1a1a1a;
+            --accent: #ff9a8b; --secondary: #abecd6; --gold: #f6d365;
+            --border: rgba(0,0,0,0.05); --glass: rgba(255,255,255,0.8);
+        }
+        [data-theme="dark"] {
+            --bg: #080a0f; --card: #11151c; --text: #e0e6ed;
+            --accent: #ff7e5f; --secondary: #4facfe; --gold: #feb47b;
+            --border: rgba(255,255,255,0.05); --glass: rgba(17,21,28,0.8);
+        }
 
-<style>
-:root{
- --bg:#f9f5f0; --panel:#fff; --text:#1f2937;
- --soft1:#cbb6ff; --soft2:#ffd7b5; --soft3:#ffe58a; --accent:#a78bfa;
- --particle:#f6a5c0; --glass:rgba(31,41,55,0.04); --border:rgba(31,41,55,0.06);
-}
-[data-theme="dark"]{
- --bg:#0b0f14; --panel:#0f1720; --text:#e6eef8;
- --soft1:#7b61ff; --soft2:#ffb27a; --soft3:#ffcf5c; --accent:#b794ff;
- --particle:#ff92b0; --glass: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.06);
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;}
-.app{display:grid;grid-template-rows:70px 110px 1fr;gap:12px;padding:12px;height:100vh;}
-.header{display:flex;justify-content:space-between;align-items:center;padding:0 18px;}
-.brand{font-weight:800;font-size:1.2rem;}
-.brand span{color:var(--soft3);}
-.controls{display:flex;gap:6px;}
-.small{padding:6px 12px;border-radius:10px;background:transparent;border:1px solid var(--border);cursor:pointer;color:var(--text);}
-.clock{display:flex;justify-content:center;align-items:center;}
-.clock-card{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,0.04);}
-#time{font-size:1.6rem;font-weight:800;letter-spacing:2px;}
-#date{font-size:.85rem;color:var(--text);}
-.main{display:grid;grid-template-columns:1.6fr 1fr;grid-template-rows:1fr 1fr;gap:12px;padding:6px;}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px;position:relative;overflow:hidden;min-height:140px;}
-.title{font-size:.82rem;color:var(--text);letter-spacing:1.2px;margin-bottom:8px;}
-.canvas{width:100%;height:100%;min-height:160px;}
-.tasks{height:100%;overflow:auto;padding-right:8px;max-height:520px;}
-.task{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:12px;background:var(--glass);margin-bottom:8px;}
-.done{border-left:4px solid var(--accent);}
-.badge{padding:6px 12px;border-radius:999px;font-weight:800;font-size:.75rem;}
-.ok{background:var(--accent);color:#fff;}
-.wait{background:#e2e8f0;color:var(--text);}
-.tooltip{position:fixed;pointer-events:none;padding:10px 14px;border-radius:10px;background:rgba(0,0,0,0.78);color:#fff;z-index:9999;display:none;transform:translate(-50%,-120%);font-weight:700;}
-.labels-row{display:flex;justify-content:center;gap:18px;margin-top:6px;flex-wrap:wrap;color:var(--text);font-weight:700;}
-</style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            height: 100vh; 
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-rows: 70px 1fr;
+            height: 100vh;
+            padding: 15px;
+            gap: 15px;
+        }
+
+        /* Top Navigation */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background: var(--card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        .brand { font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px; }
+        .brand span { color: var(--accent); }
+
+        .btn-group { display: flex; gap: 10px; }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+        /* Main Content Grid */
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 380px;
+            gap: 15px;
+        }
+
+        .panel {
+            background: var(--card);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .panel-title { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; color: #888; }
+
+        /* 3D Container */
+        .canvas-container { flex: 1; width: 100%; min-height: 200px; border-radius: 15px; overflow: hidden; }
+
+        /* Clock Widget */
+        .clock-box { text-align: right; }
+        #time { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+        #date { font-size: 0.85rem; color: #777; font-weight: 500; }
+
+        /* Tasks Styling */
+        .task-list { overflow-y: auto; flex: 1; padding-right: 8px; }
+        .task-list::-webkit-scrollbar { width: 4px; }
+        .task-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .task-item {
+            background: var(--bg);
+            padding: 12px 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+        .task-item.done { border-left: 5px solid var(--secondary); background: rgba(171, 236, 214, 0.1); }
+        
+        .badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+        .badge.ready { background: var(--secondary); color: #1a4a3a; }
+        .badge.pending { background: var(--border); color: #777; }
+
+        .kpi-big { font-size: 3.5rem; font-weight: 800; color: var(--accent); }
+    </style>
 </head>
 <body data-theme="light">
 
-<div class="app">
- <div class="header">
-   <div class="brand">STOCK TEAM <span>| VCB</span></div>
-   <div class="controls">
-     <button id="themeBtn" class="small">Toggle Theme</button>
-     <button id="fsBtn" class="small">Fullscreen</button>
-     <button id="reloadBtn" class="small">Reload Data</button>
-   </div>
- </div>
+<div class="dashboard">
+    <nav class="nav">
+        <div class="brand">STOCK TEAM <span>| VCB</span></div>
+        <div class="clock-box">
+            <div id="time">00:00:00</div>
+            <div id="date">Tuesday, 23 Dec</div>
+        </div>
+        <div class="btn-group">
+            <button class="btn" onclick="toggleTheme()">Theme</button>
+            <button class="btn" onclick="toggleFS()">Fullscreen</button>
+        </div>
+    </nav>
 
- <div class="clock">
-   <div class="clock-card">
-     <div id="hourglass" class="canvas" style="width:100px;height:100px"></div>
-     <div>
-       <div id="time">00:00:00</div>
-       <div id="date">Loading…</div>
-     </div>
-   </div>
- </div>
+    <div class="content">
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Target Monitoring</div>
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <span class="panel-title">Daily Count</span>
+                <div class="kpi-big" id="count-val">0</div>
+                <div id="donut3d" class="canvas-container"></div>
+            </div>
+        </div>
 
- <div class="main">
-   <div class="card" style="grid-row:span 2">
-     <div class="title">Weekly Volume · 3D Waterfall + Particles</div>
-     <div id="weekly3d" class="canvas"></div>
-     <div class="labels-row" id="weekLabels"></div>
-   </div>
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Weekly Performance Trend</div>
+            </div>
+            <div id="weekly3d" class="canvas-container"></div>
+        </div>
 
-   <div class="card">
-     <div class="title">Counting Progress · 3D Donut + Mini Charts</div>
-     <div id="donut3d" class="canvas"></div>
-     <div style="margin-top:12px">
-       <canvas id="miniLine" height="80"></canvas>
-       <canvas id="miniDoughnut" height="80"></canvas>
-     </div>
-   </div>
-
-   <div class="card">
-     <div class="title">Daily & Weekly Tasks</div>
-     <div style="display:flex;gap:12px">
-       <div style="flex:1">
-         <h4 style="color:var(--text);margin-bottom:6px">Daily</h4>
-         <div class="tasks" id="dailyTasks"></div>
-       </div>
-       <div style="flex:1">
-         <h4 style="color:var(--text);margin-bottom:6px">Weekly</h4>
-         <div class="tasks" id="weeklyTasks"></div>
-       </div>
-     </div>
-   </div>
- </div>
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Operation Feed</div>
+            </div>
+            <h4 style="margin: 10px 0; font-size: 0.8rem;">Daily Checklist</h4>
+            <div class="task-list" id="dailyTasks"></div>
+            
+            <h4 style="margin: 20px 0 10px 0; font-size: 0.8rem;">Weekly Strategic</h4>
+            <div class="task-list" id="weeklyTasks"></div>
+        </div>
+    </div>
 </div>
-<div id="tooltip" class="tooltip"></div>
 
-<script type="module-shim">
-import * as THREE from "three";
-import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
+<script type="module">
+    import * as THREE from 'three';
 
-/* ------------------------
-   UTILS
-------------------------*/
-function safeParseJSON(txt){
-  if(!txt) return null;
-  txt = txt.trim();
-  if(txt.charCodeAt(0)===0xFEFF) txt=txt.slice(1);
-  return JSON.parse(txt);
-}
-async function loadJSON(path){
-  try{
-    const r=await fetch(path,{cache:'no-cache'});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const txt=await r.text();
-    return safeParseJSON(txt);
-  }catch(e){ console.warn('JSON load failed — using fallback defaults',e); return null; }
-}
+    // -- STATE & DATA --
+    const state = {
+        target: 1193,
+        counting: 754, // Exemplu de progres
+        history: [
+            {w: 'W31', q: 4500}, {w: 'W32', q: 5200}, 
+            {w: 'W33', q: 4800}, {w: 'W34', q: 6100}
+        ],
+        daily: [
+            {n: 'Aged stock report 7AM', s: 'Completed'},
+            {n: 'Returns Adjustments', s: 'Pending'},
+            {n: 'PI First Count', s: 'Pending'}
+        ],
+        weekly: [
+            {n: 'Monthly Shrinkage', s: 'Completed'},
+            {n: 'Strategic ORM', s: 'Pending'}
+        ]
+    };
 
-/* ------------------------
-   TASKS RENDER
-------------------------*/
-function renderTasks(daily,weekly){
-  const dailyEl=document.getElementById('dailyTasks');
-  const weeklyEl=document.getElementById('weeklyTasks');
-  dailyEl.innerHTML=''; weeklyEl.innerHTML='';
-  daily.forEach(t=>{
-    const div=document.createElement('div'); div.className=`task ${t.status==='Completed'?'done':''}`;
-    div.innerHTML=`<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${t.status==='Completed'?'READY':'PENDING'}</span>`;
-    dailyEl.appendChild(div);
-  });
-  weekly.forEach(t=>{
-    const div=document.createElement('div'); div.className=`task ${t.status==='Completed'?'done':''}`;
-    div.innerHTML=`<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${t.status==='Completed'?'READY':'PENDING'}</span>`;
-    weeklyEl.appendChild(div);
-  });
-}
+    // -- CLOCK --
+    setInterval(() => {
+        const d = new Date();
+        document.getElementById('time').innerText = d.toLocaleTimeString('en-GB', {hour12:false});
+        document.getElementById('date').innerText = d.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'});
+    }, 1000);
 
-/* ------------------------
-   CLOCK
-------------------------*/
-setInterval(()=>{
-  const d=new Date();
-  document.getElementById('time').innerText=d.toLocaleTimeString('en-GB',{hour12:false});
-  document.getElementById('date').innerText=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-},1000);
+    // -- UI RENDER --
+    function renderTasks() {
+        const dEl = document.getElementById('dailyTasks');
+        const wEl = document.getElementById('weeklyTasks');
+        document.getElementById('count-val').innerText = state.counting.toLocaleString();
 
-/* ------------------------
-   WEEKLY 3D CHART
-------------------------*/
-let weeklyScene,weeklyCamera,weeklyRenderer,weeklyBars=[];
-async function createWeekly3D(history){
-  const container=document.getElementById('weekly3d');
-  weeklyScene=new THREE.Scene();
-  weeklyCamera=new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight,0.1,100);
-  weeklyCamera.position.set(0,12,20);
+        const createItem = t => `
+            <div class="task-item ${t.s === 'Completed' ? 'done' : ''}">
+                <span style="font-size:0.85rem; font-weight:600;">${t.n}</span>
+                <span class="badge ${t.s === 'Completed' ? 'ready' : 'pending'}">${t.s === 'Completed' ? 'READY' : 'WAIT'}</span>
+            </div>
+        `;
+        dEl.innerHTML = state.daily.map(createItem).join('');
+        wEl.innerHTML = state.weekly.map(createItem).join('');
+    }
 
-  weeklyRenderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
-  weeklyRenderer.setSize(container.clientWidth,container.clientHeight);
-  container.appendChild(weeklyRenderer.domElement);
+    // -- THREE.JS DONUT (3D PROGRESS) --
+    function initDonut3D() {
+        const container = document.getElementById('donut3d');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
 
-  weeklyScene.add(new THREE.AmbientLight(0xffffff,0.5));
-  const dir=new THREE.DirectionalLight(0xffffff,0.7); dir.position.set(5,12,10); weeklyScene.add(dir);
+        const group = new THREE.Group();
+        scene.add(group);
 
-  const values=history.map(h=>Number(h.total||0));
-  const labels=history.map(h=>h.week||'');
-  const max=Math.max(...values,1);
-  weeklyBars=[];
+        const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
+        const material = new THREE.MeshPhongMaterial({ 
+            color: 0xff9a8b, 
+            shininess: 100,
+            transparent: true,
+            opacity: 0.8
+        });
+        const torus = new THREE.Mesh(geometry, material);
+        group.add(torus);
 
-  values.forEach((v,i)=>{
-    const h=(v/max)*7+0.4;
-    const mat=new THREE.MeshStandardMaterial({color:0xffb703});
-    const box=new THREE.Mesh(new THREE.BoxGeometry(1.4,h,1.2),mat);
-    box.position.set((i-(values.length-1)/2)*2.2,h/2,0);
-    weeklyScene.add(box);
-    weeklyBars.push({mesh:box,height:h,value:v,label:labels[i]});
-  });
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
-  // labels
-  const labelsEl=document.getElementById('weekLabels'); labelsEl.innerHTML='';
-  labels.forEach(l=>{
-    const el=document.createElement('div'); el.innerText=l; labelsEl.appendChild(el);
-  });
+        camera.position.z = 30;
 
-  const controls=new OrbitControls(weeklyCamera,weeklyRenderer.domElement);
-  controls.enableDamping=true;
-  function animate(){
-    requestAnimationFrame(animate);
-    weeklyBars.forEach(b=>{ b.mesh.position.y += (b.height/2-b.mesh.position.y)*0.05; });
-    weeklyCamera.position.x=12*Math.sin(Date.now()*0.001);
-    weeklyCamera.position.z=12*Math.cos(Date.now()*0.001);
-    weeklyCamera.lookAt(0,3,0);
-    controls.update();
-    weeklyRenderer.render(weeklyScene,weeklyCamera);
-  }
-  animate();
-}
+        function animate() {
+            requestAnimationFrame(animate);
+            group.rotation.y += 0.01;
+            group.rotation.x += 0.005;
+            renderer.render(scene, camera);
+        }
+        animate();
+    }
 
-/* ------------------------
-   INIT
-------------------------*/
-async function init(){
-  const data=await loadJSON('data/dashboard.json') || {
-    metadata:{target:1193,timestamp:'--'},
-    counting:[{area:'MPR',qty:14622},{area:'PB1',qty:4329}],
-    dailyTasks:[{name:'Aged stock report 7AM',status:'Completed'}],
-    weeklyTasks:[{name:'(Weekly) SLA',status:'Not started'}],
-    history:[{week:'W32',total:6901},{week:'W33',total:5447}]
-  };
-  renderTasks(data.dailyTasks,data.weeklyTasks);
-  createWeekly3D(data.history);
-}
-init();
+    // -- THREE.JS BARS (WEEKLY TREND) --
+    function initBars3D() {
+        const container = document.getElementById('weekly3d');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
 
-/* ------------------------
-   CONTROLS
-------------------------*/
-document.getElementById('themeBtn').addEventListener('click',()=>{ 
-  document.body.dataset.theme=document.body.dataset.theme==='dark'?'light':'dark';
-});
-document.getElementById('fsBtn').addEventListener('click',()=>{
-  if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen();
-});
-document.getElementById('reloadBtn').addEventListener('click',()=>init());
+        const maxVal = Math.max(...state.history.map(h => h.q));
+        
+        state.history.forEach((data, i) => {
+            const h = (data.q / maxVal) * 15;
+            const geo = new THREE.BoxGeometry(3, h, 3);
+            const mat = new THREE.MeshPhongMaterial({ color: 0x4facfe });
+            const bar = new THREE.Mesh(geo, mat);
+            bar.position.x = (i - 1.5) * 6;
+            bar.position.y = h / 2 - 5;
+            scene.add(bar);
+        });
+
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 10, 7.5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+        camera.position.set(0, 5, 25);
+        camera.lookAt(0, 0, 0);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            scene.rotation.y += 0.002;
+            renderer.render(scene, camera);
+        }
+        animate();
+    }
+
+    window.toggleTheme = () => {
+        const b = document.body;
+        b.dataset.theme = b.dataset.theme === 'dark' ? 'light' : 'dark';
+    };
+
+    window.toggleFS = () => {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+    };
+
+    renderTasks();
+    initDonut3D();
+    initBars3D();
 </script>
+
 </body>
 </html>
