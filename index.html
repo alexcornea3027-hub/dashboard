@@ -3,64 +3,60 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Stock Team | 3D Mission Control</title>
+<title>Stock Team | 3D Mission Control — Professional</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<!-- Chart.js (non-module global) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 <style>
 :root{
- --bg:#05070d;
- --panel:rgba(255,255,255,.07);
- --border:rgba(255,255,255,.15);
+ --bg:#0f1216;
+ --panel:rgba(255,255,255,.05);
+ --border:rgba(255,255,255,.09);
  --text:#fff;
+ --warm1:#ffb703;
+ --warm2:#ff8c42;
+ --accent:#ff6b6b;
  --cyan:#4fd1c5;
- --amber:#ffb703;
 }
 [data-theme="light"]{
- --bg:#f3f5fa;
+ --bg:#f7f8fb;
  --panel:#fff;
- --border:#d0d6e0;
+ --border:#d6dce8;
  --text:#111;
 }
-*{margin:0;padding:0;box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
-.app{height:100vh;display:grid;grid-template-rows:70px 110px 1fr}
-.top{display:flex;justify-content:space-between;align-items:center;padding:0 30px}
-.logo{font-size:1.4rem;font-weight:800}
-.logo span{color:var(--amber)}
-button{padding:10px 18px;border:none;border-radius:50px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--amber),#ff8c42);margin-left:8px}
-.clock{display:flex;justify-content:center;align-items:center}
-.clock-card{display:flex;align-items:center;gap:18px;padding:18px 36px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 20px 40px rgba(0,0,0,.5)}
-#time{font-size:2.2rem;font-weight:800;letter-spacing:3px}
-#date{font-size:.8rem;color:var(--amber)}
-.main{padding:20px;display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 1fr;gap:20px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:18px;overflow:hidden;position:relative}
-h3{font-size:.75rem;letter-spacing:2px;color:#888;margin-bottom:12px}
-.tasks{height:100%;overflow-y:auto;padding-right:6px}
-.tasks::-webkit-scrollbar{width:6px}
-.tasks::-webkit-scrollbar-thumb{background:var(--border)}
-.task{padding:12px 14px;margin-bottom:10px;border-radius:14px;background:rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center}
+.app{display:grid;grid-template-rows:68px 110px 1fr;gap:12px;padding:12px;height:100vh}
+.top{display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+.logo{font-weight:800;font-size:1.2rem}
+.logo span{color:var(--warm1)}
+.controls{display:flex;gap:8px;align-items:center}
+.btn{padding:8px 14px;border-radius:999px;border:none;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--warm1),var(--warm2));color:#111}
+.small{padding:8px 10px;border-radius:10px;background:transparent;border:1px solid var(--border);color:var(--text);cursor:pointer}
+.clock{display:flex;align-items:center;justify-content:center}
+.clock-card{display:flex;align-items:center;gap:14px;padding:12px 18px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+#time{font-size:1.6rem;font-weight:800;letter-spacing:2px}
+#date{font-size:.8rem;color:var(--warm1)}
+.main{display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 1fr;gap:14px;padding:6px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:14px;position:relative;overflow:hidden}
+h3{font-size:.78rem;color:#bdbdbd;letter-spacing:1.6px;margin-bottom:8px}
+.canvas3d{width:100%;height:100%;min-height:140px}
+#weekly3d{min-height:360px}
+.tasks{height:100%;overflow:auto;padding-right:6px}
+.task{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);margin-bottom:10px}
 .done{border-left:4px solid var(--cyan)}
-.badge{font-size:.65rem;padding:6px 12px;border-radius:24px;font-weight:800}
+.badge{padding:6px 12px;border-radius:999px;font-weight:800;font-size:.75rem}
 .ok{background:var(--cyan);color:#000}
 .wait{background:#aaa;color:#000}
-.canvas3d{width:100%;height:100%;min-height:160px}
-#weekly3d{height:100%;min-height:340px}
-.tooltip {
- position:fixed;
- padding:8px 12px;
- background:rgba(0,0,0,0.8);
- color:#fff;
- border-radius:6px;
- font-size:.85rem;
- pointer-events:none;
- transform:translate(-50%,-120%);
- white-space:nowrap;
- z-index:9999;
- display:none;
-}
-@media (max-width:900px){
+.tooltip{position:fixed;pointer-events:none;padding:8px 12px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;z-index:9999;display:none;transform:translate(-50%,-120%)}
+.mini-charts{display:flex;gap:12px;align-items:stretch}
+.mini-charts canvas{flex:1;min-height:120px}
+.footer-controls{position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
+@media (max-width:920px){
  .main{grid-template-columns:1fr;grid-template-rows:auto auto auto}
- .clock-card{padding:12px 18px}
+ #weekly3d{min-height:260px}
 }
 </style>
 </head>
@@ -68,15 +64,18 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888;margin-bottom:12px}
 <div class="app">
   <div class="top">
     <div class="logo">STOCK TEAM <span>| VCB</span></div>
-    <div>
-      <button id="themeBtn">DARK / LIGHT</button>
-      <button id="fsBtn">FULLSCREEN</button>
+    <div class="controls">
+      <button id="themeBtn" class="small">DARK / LIGHT</button>
+      <button id="fsBtn" class="small">FULLSCREEN</button>
+      <button id="reloadBtn" class="small" title="Reload data.json">RELOAD DATA</button>
+      <button id="playBtn" class="small">PAUSE</button>
+      <button id="snapshotBtn" class="small">EXPORT WEEKLY PNG</button>
     </div>
   </div>
 
-  <div class="clock">
+  <div class="clock" aria-hidden="false">
     <div class="clock-card">
-      <div id="hourglass" class="canvas3d" style="width:120px;height:80px;"></div>
+      <div id="hourglass" style="width:120px;height:88px" class="canvas3d" aria-hidden="true"></div>
       <div>
         <div id="time">00:00:00</div>
         <div id="date">LOADING…</div>
@@ -86,13 +85,24 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888;margin-bottom:12px}
 
   <div class="main">
     <div class="card" style="grid-row:span 2">
-      <h3>WEEKLY VOLUME · 3D WATERFALL + PARTICLES + HEATMAP</h3>
+      <h3>WEEKLY VOLUME · 3D WATERFALL + PARTICLES + TOOLTIP</h3>
       <div id="weekly3d" class="canvas3d"></div>
+      <div class="footer-controls">
+        <button id="fpsSlow" class="small" title="Lower animation speed">SLOW</button>
+        <button id="fpsNormal" class="small" title="Normal speed">NORMAL</button>
+        <button id="fpsFast" class="small" title="Faster">FAST</button>
+      </div>
     </div>
 
     <div class="card">
       <h3>COUNTING PROGRESS · 3D DONUT</h3>
       <div id="donut3d" class="canvas3d"></div>
+      <div style="margin-top:8px">
+        <div class="mini-charts">
+          <canvas id="miniLine"></canvas>
+          <canvas id="miniDoughnut"></canvas>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -102,309 +112,461 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888;margin-bottom:12px}
   </div>
 </div>
 
-<!-- Tooltip element -->
 <div id="tooltip" class="tooltip" aria-hidden="true"></div>
 
+<!-- Main module script: uses full CDN module URLs for Three & OrbitControls -->
 <script type="module">
-/*
-  Clean, robust single-file implementation.
-  - Uses ES module imports of Three.js and OrbitControls from jsDelivr
-  - Responsive canvas resizing
-  - Fixed tooltip & raycasting math
-  - English UI strings
-  - Safe checks to avoid runtime errors
-*/
-
+/* -------------------------
+  Professional 3D dashboard
+  - Fixed module imports (no bare specifiers)
+  - Loads data from data.json with fallback
+  - Warm palette, animations, controls
+  - Safe error handling
+---------------------------*/
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/controls/OrbitControls.js";
 
 /* -------------------------
-   UI Interactions
-   ------------------------- */
+   Utility & UI refs
+---------------------------*/
 const themeBtn = document.getElementById('themeBtn');
 const fsBtn = document.getElementById('fsBtn');
+const reloadBtn = document.getElementById('reloadBtn');
+const playBtn = document.getElementById('playBtn');
+const snapshotBtn = document.getElementById('snapshotBtn');
+const tooltip = document.getElementById('tooltip');
+const tasksContainer = document.getElementById('tasks');
+const timeEl = document.getElementById('time');
+const dateEl = document.getElementById('date');
+const weeklyEl = document.getElementById('weekly3d');
+const donutEl = document.getElementById('donut3d');
+const hourglassEl = document.getElementById('hourglass');
+const miniLineCtx = document.getElementById('miniLine').getContext('2d');
+const miniDoughCtx = document.getElementById('miniDoughnut').getContext('2d');
 
-themeBtn.addEventListener('click', () => {
-  document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
-});
-fsBtn.addEventListener('click', () => {
-  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
-  else document.exitFullscreen().catch(()=>{});
+let animationRunning = true;
+let speedFactor = 1; // modify with controls: 0.5 / 1 / 2
+
+themeBtn.addEventListener('click', ()=> document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark');
+fsBtn.addEventListener('click', ()=> { if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen().catch(()=>{}); });
+playBtn.addEventListener('click', ()=> { animationRunning = !animationRunning; playBtn.innerText = animationRunning ? 'PAUSE' : 'PLAY'; });
+reloadBtn.addEventListener('click', ()=> loadDataAndBuild());
+document.getElementById('fpsSlow').addEventListener('click', ()=> speedFactor = 0.6);
+document.getElementById('fpsNormal').addEventListener('click', ()=> speedFactor = 1);
+document.getElementById('fpsFast').addEventListener('click', ()=> speedFactor = 1.8);
+
+/* Snapshot the weekly canvas to PNG */
+snapshotBtn.addEventListener('click', ()=>{
+  try {
+    if (weeklyRenderer && weeklyRenderer.domElement) {
+      const dataURL = weeklyRenderer.domElement.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = dataURL;
+      a.download = 'weekly_snapshot.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  } catch (e) {
+    console.error('Snapshot failed', e);
+    alert('Snapshot failed — open console for details.');
+  }
 });
 
 /* -------------------------
-   Data (example)
-   ------------------------- */
-const weekly = [6901, 5447, 4524, 2068, 1100];
-const tasks = [
-  { t: "Aged stock report 07:00", s: "Completed" },
-  { t: "Aged stock report 15:00", s: "Pending" },
-  { t: "Returns adjustments", s: "Pending" },
-  { t: "Physical inventory: first count", s: "Pending" },
-  { t: "SLA master sync", s: "Pending" },
-  { t: "High value audit", s: "Pending" }
-];
+   Data loading (data.json fallback)
+   - expects structure:
+     { "weekly":[...numbers...], "tasks":[{t:"", s:""}] }
+---------------------------*/
+const defaultData = {
+  weekly: [6901,5447,4524,2068,1100],
+  tasks: [
+    { t: "Aged stock report 07:00", s: "Completed" },
+    { t: "Aged stock report 15:00", s: "Pending" },
+    { t: "Returns adjustments", s: "Pending" },
+    { t: "PI First Count", s: "Pending" },
+    { t: "SLA Master Sync", s: "Pending" },
+    { t: "High Value Audit", s: "Pending" }
+  ]
+};
 
-/* Populate tasks (English labels) */
-const tb = document.getElementById("tasks");
-tb.innerHTML = "";
-tasks.forEach(x=>{
-  const div = document.createElement('div');
-  div.className = `task ${x.s==="Completed"?"done":""}`;
-  div.innerHTML = `<span>${x.t}</span><span class="badge ${x.s==="Completed"?"ok":"wait"}">${x.s==="Completed"?"READY":"PENDING"}</span>`;
-  tb.appendChild(div);
-});
+async function loadDataFromJSON(){
+  try {
+    const r = await fetch('./data.json', {cache: "no-cache"});
+    if (!r.ok) throw new Error('no data.json');
+    const j = await r.json();
+    if (!j.weekly || !j.tasks) throw new Error('invalid data.json');
+    return j;
+  } catch (e) {
+    // fallback to embedded defaults
+    return defaultData;
+  }
+}
 
 /* -------------------------
-   Clock + Hourglass 3D
-   ------------------------- */
-const timeEl = document.getElementById("time");
-const dateEl = document.getElementById("date");
-const hgEl = document.getElementById("hourglass");
+   Tasks rendering (keeps logic the same)
+---------------------------*/
+function renderTasks(tasks){
+  tasksContainer.innerHTML = '';
+  tasks.forEach(x=>{
+    const d = document.createElement('div');
+    d.className = `task ${x.s === 'Completed' ? 'done' : ''}`;
+    const statusText = x.s === 'Completed' ? 'READY' : (x.s || 'Pending').toUpperCase();
+    d.innerHTML = `<span>${x.t}</span><span class="badge ${x.s === 'Completed' ? 'ok' : 'wait'}">${statusText}</span>`;
+    tasksContainer.appendChild(d);
+  });
+}
 
-let lastMin = null;
-let hgMesh = null; // will be set by 3D init
-
+/* -------------------------
+   Clock (updates every second) + hourglass rotation trigger each minute
+---------------------------*/
+let lastMinute = null;
 setInterval(()=>{
   const d = new Date();
-  timeEl.innerText = d.toLocaleTimeString("en-GB",{hour12:false});
-  dateEl.innerText = d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
-  if (d.getMinutes() !== lastMin) {
-    lastMin = d.getMinutes();
-    if (hgMesh) {
-      hgMesh.rotation.y += Math.PI; // flip on minute change
-    }
+  timeEl.innerText = d.toLocaleTimeString('en-GB',{hour12:false});
+  dateEl.innerText = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  if (d.getMinutes() !== lastMinute) {
+    lastMinute = d.getMinutes();
+    if (hourglassGroup) hourglassGroup.rotation.y += Math.PI; // flip on each minute
   }
-},1000);
+}, 1000);
 
-// Hourglass scene
+/* -------------------------
+   THREE.JS: Shared helpers & pixelRatio clamp
+---------------------------*/
+function safePixelRatio(){
+  return Math.min(window.devicePixelRatio || 1, 2);
+}
+
+/* -------------------------
+   Hourglass scene (small) — uses points for sand & cones
+---------------------------*/
+let hourglassGroup = null;
 (function initHourglass(){
-  const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(50, hgEl.clientWidth / hgEl.clientHeight, 0.1, 50);
-  cam.position.set(0,1.5,3);
+  try {
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(50, hourglassEl.clientWidth / hourglassEl.clientHeight, 0.1, 50);
+    cam.position.set(0, 1.5, 3);
 
-  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(hgEl.clientWidth, hgEl.clientHeight);
-  hgEl.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+    renderer.setPixelRatio(safePixelRatio());
+    renderer.setSize(hourglassEl.clientWidth, hourglassEl.clientHeight);
+    hourglassEl.appendChild(renderer.domElement);
 
-  // Build the hourglass geometry (two cones) and rotating sand particles.
-  const material = new THREE.MeshStandardMaterial({color:0xffb703, metalness:0.6, roughness:0.25});
-  const geomTop = new THREE.ConeGeometry(0.35, 0.9, 32);
-  const geomBot = new THREE.ConeGeometry(0.35, 0.9, 32);
-  geomBot.rotateX(Math.PI);
+    // geometry + particles
+    const mat = new THREE.MeshStandardMaterial({color:0xffb703, metalness:0.4, roughness:0.25});
+    const gTop = new THREE.ConeGeometry(0.35, 0.9, 32);
+    const gBot = new THREE.ConeGeometry(0.35, 0.9, 32);
+    gBot.rotateX(Math.PI);
 
-  hgMesh = new THREE.Group();
-  const top = new THREE.Mesh(geomTop, material);
-  const bot = new THREE.Mesh(geomBot, material);
-  top.position.y = 0.45;
-  bot.position.y = -0.45;
-  hgMesh.add(top, bot);
+    hourglassGroup = new THREE.Group();
+    const top = new THREE.Mesh(gTop, mat); top.position.y = 0.44;
+    const bot = new THREE.Mesh(gBot, mat); bot.position.y = -0.44;
+    hourglassGroup.add(top, bot);
 
-  // sand particles (small points)
-  const sandGeo = new THREE.BufferGeometry();
-  const sandCount = 140;
-  const sandPos = new Float32Array(sandCount * 3);
-  for (let i = 0; i < sandCount; i++) {
-    sandPos[i*3] = (Math.random()-0.5)*0.18;
-    sandPos[i*3+1] = Math.random()*0.7-0.35;
-    sandPos[i*3+2] = (Math.random()-0.5)*0.18;
+    // sand
+    const sandGeo = new THREE.BufferGeometry();
+    const sandN = 120;
+    const sandPos = new Float32Array(sandN * 3);
+    for (let i = 0; i < sandN; i++){
+      sandPos[i*3] = (Math.random()-0.5)*0.18;
+      sandPos[i*3+1] = Math.random()*0.7 - 0.35;
+      sandPos[i*3+2] = (Math.random()-0.5)*0.18;
+    }
+    sandGeo.setAttribute('position', new THREE.BufferAttribute(sandPos, 3));
+    const sandMat = new THREE.PointsMaterial({size:0.035, sizeAttenuation:true, color:0xffb703});
+    const sandPts = new THREE.Points(sandGeo, sandMat);
+    hourglassGroup.add(sandPts);
+
+    scene.add(hourglassGroup);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const p = new THREE.PointLight(0xffb703, 1.0); p.position.set(3,3,3); scene.add(p);
+
+    function onResize(){
+      const w = hourglassEl.clientWidth, h = hourglassEl.clientHeight;
+      renderer.setSize(w,h);
+      cam.aspect = w/h;
+      cam.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', onResize);
+
+    function animate(){
+      requestAnimationFrame(animate);
+      // only animate when running
+      sandPts.rotation.y += 0.009 * speedFactor;
+      if (animationRunning) renderer.render(scene, cam);
+      else renderer.render(scene, cam);
+    }
+    animate();
+  } catch (e) {
+    console.error('Hourglass init error', e);
   }
-  sandGeo.setAttribute('position', new THREE.BufferAttribute(sandPos, 3));
-  const sandMat = new THREE.PointsMaterial({color:0xffb703, size:0.04, sizeAttenuation:true});
-  const sandPoints = new THREE.Points(sandGeo, sandMat);
-  hgMesh.add(sandPoints);
-
-  scene.add(hgMesh);
-  scene.add(new THREE.AmbientLight(0xffffff, .6));
-  const l = new THREE.PointLight(0xffb703, 1.2);
-  l.position.set(4,4,4);
-  scene.add(l);
-
-  function onResize(){
-    const w = hgEl.clientWidth;
-    const h = hgEl.clientHeight;
-    renderer.setSize(w, h);
-    cam.aspect = w/h;
-    cam.updateProjectionMatrix();
-  }
-  window.addEventListener('resize', onResize);
-
-  function anim(){
-    requestAnimationFrame(anim);
-    sandPoints.rotation.y += 0.008;
-    renderer.render(scene, cam);
-  }
-  anim();
 })();
 
 /* -------------------------
-   WEEKLY 3D: bars + particles + tooltip
-   ------------------------- */
-(function initWeekly3D(){
-  const container = document.getElementById('weekly3d');
-  const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 200);
-  cam.position.set(0,12,20);
+   WEEKLY 3D: waterfall + particles + tooltip
+   - build scene and update bar heights when new data arrives
+---------------------------*/
+let weeklyRenderer, weeklyScene, weeklyCamera, weeklyControls;
+let weeklyBars = []; // {mesh,height,value}
+let weeklyParticles;
+function createWeeklyScene(initialWeekly){
+  // clean up previous renderer if exists
+  if (weeklyRenderer && weeklyRenderer.domElement && weeklyRenderer.domElement.parentElement === weeklyEl){
+    // remove old canvas
+    weeklyEl.removeChild(weeklyRenderer.domElement);
+  }
+  weeklyScene = new THREE.Scene();
+  weeklyCamera = new THREE.PerspectiveCamera(50, weeklyEl.clientWidth / weeklyEl.clientHeight, 0.1, 200);
+  weeklyCamera.position.set(0, 12, 20);
 
-  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  container.appendChild(renderer.domElement);
+  weeklyRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  weeklyRenderer.setPixelRatio(safePixelRatio());
+  weeklyRenderer.setSize(weeklyEl.clientWidth, weeklyEl.clientHeight);
+  weeklyEl.appendChild(weeklyRenderer.domElement);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-  const dirLight = new THREE.DirectionalLight(0x4fd1c5, 1.2);
-  dirLight.position.set(5, 12, 10);
-  scene.add(dirLight);
+  weeklyScene.add(new THREE.AmbientLight(0xffffff, 0.4));
+  const dir = new THREE.DirectionalLight(0xffb703, 1.05);
+  dir.position.set(5, 12, 10); weeklyScene.add(dir);
 
-  // Bars (waterfall)
-  const max = Math.max(...weekly);
-  const bars = [];
-  weekly.forEach((v, i) => {
+  // create bars from data
+  const max = Math.max(...initialWeekly);
+  weeklyBars = [];
+  initialWeekly.forEach((v,i) => {
     const h = (v / max) * 7 + 0.3;
-    const mat = new THREE.MeshStandardMaterial({color:0x4fd1c5, metalness:0.5, roughness:0.25});
+    const mat = new THREE.MeshStandardMaterial({color: 0xff8c42, metalness:0.45, roughness:0.28});
     const box = new THREE.Mesh(new THREE.BoxGeometry(1.2, h, 1.2), mat);
-    box.position.set((i - (weekly.length-1)/2) * 2.2, h/2, 0);
-    scene.add(box);
-    bars.push({mesh: box, height: h, value: v});
+    box.position.set((i - (initialWeekly.length-1)/2) * 2.2, h/2, 0);
+    weeklyScene.add(box);
+    weeklyBars.push({mesh: box, height: h, value: v});
   });
 
-  // Particles
+  // particles
   const pgeo = new THREE.BufferGeometry();
-  const pcount = 600;
+  const pcount = 700;
   const positions = new Float32Array(pcount * 3);
-  for (let i = 0; i < pcount; i++){
-    positions[i*3] = (Math.random()-0.5) * 12;
-    positions[i*3+1] = Math.random() * 10 + 3;
-    positions[i*3+2] = (Math.random()-0.5) * 6;
+  for (let i=0;i<pcount;i++){
+    positions[i*3] = (Math.random()-0.5)*14;
+    positions[i*3+1] = Math.random()*10 + 3;
+    positions[i*3+2] = (Math.random()-0.5)*6;
   }
-  pgeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  const pmaterial = new THREE.PointsMaterial({color:0xffb703, size:0.12, sizeAttenuation:true});
-  const particles = new THREE.Points(pgeo, pmaterial);
-  scene.add(particles);
+  pgeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  const pmat = new THREE.PointsMaterial({size:0.12, sizeAttenuation:true, color:0xffb703});
+  weeklyParticles = new THREE.Points(pgeo, pmat);
+  weeklyScene.add(weeklyParticles);
 
-  // Controls
-  const controls = new OrbitControls(cam, renderer.domElement);
-  controls.enableDamping = true;
-  controls.enableZoom = true;
+  // controls
+  weeklyControls = new OrbitControls(weeklyCamera, weeklyRenderer.domElement);
+  weeklyControls.enableDamping = true;
+  weeklyControls.enableZoom = true;
 
-  // Raycasting setup for tooltip
+  // pointer + raycast for tooltip (use container coords)
   const raycaster = new THREE.Raycaster();
-  const mouseN = new THREE.Vector2(); // normalized coords
-  let lastPointer = {x:0, y:0, clientX:0, clientY:0};
-
-  // Listen to pointer move on container to get correct coordinates
-  container.addEventListener('pointermove', (ev) => {
-    const rect = container.getBoundingClientRect();
+  const mouse = new THREE.Vector2();
+  weeklyEl.addEventListener('pointermove', (ev) => {
+    const rect = weeklyEl.getBoundingClientRect();
     const x = ev.clientX - rect.left;
     const y = ev.clientY - rect.top;
-    mouseN.x = ( x / rect.width ) * 2 - 1;
-    mouseN.y = - ( y / rect.height ) * 2 + 1;
-    lastPointer.clientX = ev.clientX;
-    lastPointer.clientY = ev.clientY;
+    mouse.x = (x / rect.width) * 2 - 1;
+    mouse.y = - (y / rect.height) * 2 + 1;
+    // local pointer store
+    weeklyEl._lastPointer = {clientX: ev.clientX, clientY: ev.clientY};
   });
 
-  // Tooltip element
-  const tooltip = document.getElementById('tooltip');
-
-  // Resize handling
   function onResize(){
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    renderer.setSize(w, h);
-    cam.aspect = w / h;
-    cam.updateProjectionMatrix();
+    const w = weeklyEl.clientWidth, h = weeklyEl.clientHeight;
+    weeklyRenderer.setSize(w,h);
+    weeklyCamera.aspect = w/h;
+    weeklyCamera.updateProjectionMatrix();
   }
   window.addEventListener('resize', onResize);
 
+  // animation loop
   let t = 0;
   function animate(){
     requestAnimationFrame(animate);
-    controls.update();
-    t += 0.02;
-
-    // subtle bar easing so they sit nicely
-    bars.forEach(b => {
-      b.mesh.position.y += (b.height/2 - b.mesh.position.y) * 0.06;
+    t += 0.02 * speedFactor;
+    // update particles rotation & bar easing
+    weeklyParticles.rotation.y = t/5;
+    weeklyBars.forEach(b=>{
+      b.mesh.position.y += (b.height/2 - b.mesh.position.y) * 0.06 * speedFactor;
     });
+    weeklyCamera.position.x = 12 * Math.sin(t/5);
+    weeklyCamera.position.z = 12 * Math.cos(t/5);
+    weeklyCamera.lookAt(0, 3, 0);
+    weeklyControls.update();
 
-    particles.rotation.y = t/5;
-
-    // move camera orbiting around center
-    cam.position.x = 12 * Math.sin(t/5);
-    cam.position.z = 12 * Math.cos(t/5);
-    cam.lookAt(0, 3, 0);
-
-    // raycast against bar meshes
-    raycaster.setFromCamera(mouseN, cam);
-    const intersects = raycaster.intersectObjects(bars.map(b => b.mesh));
-    if (intersects.length > 0) {
-      const hit = bars.find(b => b.mesh === intersects[0].object);
-      if (hit) {
-        tooltip.style.display = 'block';
-        tooltip.style.left = (lastPointer.clientX) + 'px';
-        tooltip.style.top = (lastPointer.clientY - 10) + 'px';
-        tooltip.innerText = `Value: ${hit.value}`;
-      } else {
-        tooltip.style.display = 'none';
-      }
+    // raycast
+    raycaster.setFromCamera(mouse, weeklyCamera);
+    const intersects = raycaster.intersectObjects(weeklyBars.map(b=>b.mesh));
+    if (intersects.length > 0 && weeklyEl._lastPointer) {
+      const hit = weeklyBars.find(b => b.mesh === intersects[0].object);
+      tooltip.style.display = 'block';
+      tooltip.style.left = (weeklyEl._lastPointer.clientX + 12) + 'px';
+      tooltip.style.top = (weeklyEl._lastPointer.clientY - 10) + 'px';
+      tooltip.innerText = `Value: ${hit.value}`;
     } else {
       tooltip.style.display = 'none';
     }
 
-    renderer.render(scene, cam);
+    if (animationRunning) weeklyRenderer.render(weeklyScene, weeklyCamera);
+    else weeklyRenderer.render(weeklyScene, weeklyCamera); // still render for UI responsiveness
   }
   animate();
-})();
+}
+
+/* Update weekly bars smoothly with new data (preserve meshes if possible) */
+function updateWeeklyData(newWeekly){
+  try {
+    if (!weeklyBars || weeklyBars.length === 0) {
+      createWeeklyScene(newWeekly);
+      return;
+    }
+    const max = Math.max(...newWeekly);
+    // if length changed, rebuild
+    if (newWeekly.length !== weeklyBars.length) {
+      createWeeklyScene(newWeekly);
+      return;
+    }
+    newWeekly.forEach((v,i)=>{
+      const targetH = (v/max)*7 + 0.3;
+      weeklyBars[i].height = targetH;
+      weeklyBars[i].value = v;
+      // update position x in case index mapping changes
+      weeklyBars[i].mesh.geometry = new THREE.BoxGeometry(1.2, targetH, 1.2);
+      weeklyBars[i].mesh.position.y = targetH/2;
+    });
+  } catch (e) {
+    console.error('updateWeeklyData error', e);
+  }
+}
 
 /* -------------------------
-   DONUT (3D TORUS) - shows counting progress
-   ------------------------- */
-(function initDonut3D(){
-  const el = document.getElementById('donut3d');
-  const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(50, el.clientWidth / el.clientHeight, 0.1, 100);
-  cam.position.set(0, 0, 8);
+   DONUT 3D (Torus) and mini Chart.js charts
+---------------------------*/
+let donutRenderer, donutScene, donutCam;
+function createDonutAndMiniCharts(weekly){
+  // donut 3D
+  if (donutRenderer && donutRenderer.domElement && donutRenderer.domElement.parentElement === donutEl){
+    donutEl.removeChild(donutRenderer.domElement);
+  }
 
-  const renderer = new THREE.WebGLRenderer({alpha:true, antialias:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(el.clientWidth, el.clientHeight);
-  el.appendChild(renderer.domElement);
+  donutScene = new THREE.Scene();
+  donutCam = new THREE.PerspectiveCamera(50, donutEl.clientWidth / donutEl.clientHeight, 0.1, 100);
+  donutCam.position.set(0,0,8);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  const l = new THREE.PointLight(0xffb703, 1.2);
-  l.position.set(4, 4, 4);
-  scene.add(l);
+  donutRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  donutRenderer.setPixelRatio(safePixelRatio());
+  donutRenderer.setSize(donutEl.clientWidth, donutEl.clientHeight);
+  donutEl.appendChild(donutRenderer.domElement);
+
+  donutScene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  const pl = new THREE.PointLight(0xffb703, 1.1); pl.position.set(4,4,4); donutScene.add(pl);
 
   const total = weekly.reduce((a,b)=>a+b, 0);
-  // Map total to a visible arc (clamped).
   const maxTotal = 30000;
-  const fraction = Math.min(total / maxTotal, 1);
+  const fraction = Math.min(total/maxTotal, 1);
   const arc = fraction * Math.PI * 2;
 
   const tor = new THREE.Mesh(
     new THREE.TorusGeometry(2.6, 0.55, 32, 160, arc),
-    new THREE.MeshStandardMaterial({color:0xffb703, metalness:0.6, roughness:0.25})
+    new THREE.MeshStandardMaterial({color:0xff8c42, metalness:0.6, roughness:0.25})
   );
-  scene.add(tor);
+  donutScene.add(tor);
 
   function onResize(){
-    const w = el.clientWidth;
-    const h = el.clientHeight;
-    renderer.setSize(w,h);
-    cam.aspect = w/h;
-    cam.updateProjectionMatrix();
+    const w = donutEl.clientWidth, h = donutEl.clientHeight;
+    donutRenderer.setSize(w,h);
+    donutCam.aspect = w/h; donutCam.updateProjectionMatrix();
   }
   window.addEventListener('resize', onResize);
 
   function anim(){
     requestAnimationFrame(anim);
-    tor.rotation.y += 0.01;
-    renderer.render(scene, cam);
+    tor.rotation.y += 0.012 * speedFactor;
+    donutRenderer.render(donutScene, donutCam);
   }
   anim();
-})();
 
+  // Mini charts using Chart.js (warm palette)
+  try {
+    // line: weekly trend
+    if (window.miniLineChart) window.miniLineChart.destroy();
+    window.miniLineChart = new Chart(miniLineCtx, {
+      type: 'line',
+      data: {
+        labels: weekly.map((_,i)=>`W${i+1}`),
+        datasets: [{
+          label: 'Weekly',
+          data: weekly,
+          tension: 0.35,
+          borderWidth: 2,
+          borderColor: '#ff8c42',
+          backgroundColor: 'rgba(255,140,66,0.12)',
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins:{legend:{display:false}},
+        scales:{x:{grid:{display:false}}, y:{grid:{display:false}, ticks:{display:false}}}
+      }
+    });
+
+    // doughnut: percentage of maxTotal usage
+    if (window.miniDoughChart) window.miniDoughChart.destroy();
+    const totalVal = weekly.reduce((a,b)=>a+b,0);
+    const used = Math.min(totalVal, maxTotal);
+    const remaining = Math.max(0, maxTotal - totalVal);
+    window.miniDoughChart = new Chart(miniDoughCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Used','Remaining'],
+        datasets: [{
+          data: [used, remaining],
+          backgroundColor: ['#ffb703','#333333'],
+          hoverOffset: 4
+        }]
+      },
+      options: {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
+    });
+  } catch(e){ console.warn('Chart.js error', e); }
+}
+
+/* -------------------------
+   Orchestrator: load data and build UI
+---------------------------*/
+async function loadDataAndBuild(){
+  const data = await loadDataFromJSON();
+  // ensure basic shape
+  const weekly = Array.isArray(data.weekly) ? data.weekly.slice() : defaultData.weekly.slice();
+  const tasks = Array.isArray(data.tasks) ? data.tasks.slice() : defaultData.tasks.slice();
+
+  // render tasks (keeps same logic)
+  renderTasks(tasks);
+
+  // build weekly 3D (or update)
+  if (!weeklyBars || weeklyBars.length === 0) createWeeklyScene(weekly);
+  else updateWeeklyData(weekly);
+
+  // create donut + mini charts (rebuild)
+  createDonutAndMiniCharts(weekly);
+}
+
+// initial load
+loadDataAndBuild();
+
+/* -------------------------
+   Update loop: we rely on each scene's own RAF loops
+   but allow global controls (pause/play) and speedFactor
+---------------------------*/
+window.addEventListener('blur', ()=> animationRunning = false);
+window.addEventListener('focus', ()=> animationRunning = true);
+
+/* export references for debugging (optional) */
+window.__dashboard = {
+  createWeeklyScene, updateWeeklyData, createDonutAndMiniCharts, loadDataAndBuild
+};
 </script>
 </body>
 </html>
