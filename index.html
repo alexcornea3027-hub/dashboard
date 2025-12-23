@@ -2,266 +2,311 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>StockTeam VCB | Aura Pearl 3D</title>
+    <title>STOCK TEAM VCB | 3D AURA</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0b0e14;
-            --card: rgba(23, 28, 38, 0.7);
-            --p-mint: #b2f7ef;  /* Mentă pastel */
-            --p-rose: #ffb7b2;  /* Roz pastel */
-            --p-blue: #b2d8ff;  /* Albastru celest */
-            --p-gold: #fdf0d5;  /* Auriu șampanie */
-            --text: #e8e9eb;
+            --bg: #040608;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+            --mint: #00f2ff;
+            --rose: #ff758c;
+            --gold: #ffcc33;
+            --font: 'Outfit', sans-serif;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: var(--font);
             background: var(--bg);
-            background-image: radial-gradient(at top right, #161b26, transparent);
-            color: var(--text);
+            background-image: radial-gradient(circle at 20% 30%, #111827 0%, transparent 40%),
+                              radial-gradient(circle at 80% 70%, #0f172a 0%, transparent 40%);
+            color: #fff;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5vh;
+            padding: 2vh;
             overflow: hidden;
-        }
-
-        /* HEADER WIDGET - CLEAN 3D */
-        header {
-            height: 12vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 2vh;
-        }
-
-        .clock-3d {
-            background: var(--card);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px 50px;
-            border-radius: 25px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 0 15px rgba(178, 216, 255, 0.1);
-            backdrop-filter: blur(10px);
-        }
-        #time { font-size: 3rem; font-weight: 800; color: #fff; line-height: 1; letter-spacing: 2px; }
-        #date { font-size: 0.9rem; color: var(--p-blue); text-transform: uppercase; font-weight: 600; margin-top: 5px; }
-
-        /* MAIN GRID CONFIGURATION */
-        main {
-            flex: 1;
-            display: grid;
-            grid-template-rows: 20vh 28vh 1fr;
-            gap: 2vh;
-            min-height: 0;
-        }
-
-        .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; }
-        .row-charts { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2vh; }
-
-        /* CARDS */
-        .card {
-            background: var(--card);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 20px;
-            padding: 20px;
-            position: relative;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
-            justify-content: center;
         }
 
-        .label { font-size: 0.75rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 1.5px; }
-        .value { font-size: 2.5rem; font-weight: 800; margin: 5px 0; }
-
-        /* 3D FLOATING CHART WRAP */
-        .donut-mini {
-            position: absolute;
-            right: 20px;
-            width: 80px;
-            height: 80px;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
-        }
-
-        /* TASK ITEMS - SOFT COLORS */
-        .task-list { flex: 1; overflow-y: auto; padding-right: 5px; margin-top: 10px; }
-        .task-list::-webkit-scrollbar { width: 4px; }
-        .task-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-
-        .task-item {
-            background: rgba(255,255,255,0.03);
-            padding: 12px 18px;
-            border-radius: 12px;
-            margin-bottom: 8px;
+        /* TOP BAR */
+        .top-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 6vh;
+            margin-bottom: 2vh;
+            padding: 0 10px;
+        }
+        .logo { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; }
+        .logo span { color: var(--gold); }
+        
+        .fs-btn {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 10px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+            font-weight: 600;
+        }
+        .fs-btn:hover { background: #fff; color: #000; transform: scale(1.05); }
+
+        /* CENTER CLOCK 3D */
+        .hero-clock {
+            height: 14vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+            margin-bottom: 2vh;
+        }
+        .clock-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            padding: 10px 60px;
+            border-radius: 100px;
+            text-align: center;
+            transform: rotateX(15deg);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: float 6s infinite ease-in-out;
+        }
+        #time { font-size: 3.5rem; font-weight: 800; line-height: 1; letter-spacing: 4px; }
+        #date { color: var(--gold); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* GRID LAYOUT */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-rows: 22vh 28vh 1fr;
+            gap: 2vh;
+            min-height: 0;
+        }
+        .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; }
+        .row-mix { display: grid; grid-template-columns: 1fr 2fr; gap: 2vh; }
+
+        /* 3D CARDS */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 20px;
+            position: relative;
+            backdrop-filter: blur(20px);
+            transition: transform 0.4s ease, border-color 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .card:hover { 
+            transform: translateY(-5px) perspective(1000px) rotateX(2deg); 
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .card-label { font-size: 0.75rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1.5px; }
+        .card-val { font-size: 2.8rem; font-weight: 800; margin: 5px 0; }
+
+        /* CHART ELEMENTS */
+        .donut-box {
+            position: absolute;
+            right: 20px;
+            width: 95px;
+            height: 95px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+        }
+
+        /* LISTS */
+        .list-wrap { flex: 1; overflow-y: auto; margin-top: 15px; padding-right: 8px; }
+        .list-wrap::-webkit-scrollbar { width: 4px; }
+        .list-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .task-tile {
+            background: rgba(255,255,255,0.02);
+            padding: 14px 20px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid transparent;
             transition: 0.3s;
         }
-        .task-item.is-done { background: rgba(178, 247, 239, 0.05); border-left: 4px solid var(--p-mint); }
-        
-        .status-badge {
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 4px 12px;
-            border-radius: 20px;
-            letter-spacing: 0.5px;
+        .task-tile.ready { 
+            background: linear-gradient(90deg, rgba(0,242,255,0.05), transparent);
+            border-left: 4px solid var(--mint);
         }
-        .bg-done { background: var(--p-mint); color: #0b0e14; }
-        .bg-wait { background: rgba(255,255,255,0.05); color: #6b7280; }
+        .badge {
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 5px 15px;
+            border-radius: 50px;
+            letter-spacing: 1px;
+        }
+        .b-ready { background: var(--mint); color: #000; box-shadow: 0 0 20px rgba(0,242,255,0.3); }
+        .b-wait { background: rgba(255,255,255,0.05); color: #666; }
+
+        @keyframes float {
+            0%, 100% { transform: rotateX(15deg) translateY(0); }
+            50% { transform: rotateX(15deg) translateY(-10px); }
+        }
 
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="clock-3d">
+    <nav class="top-nav">
+        <div class="logo">STOCK TEAM <span>| VCB</span></div>
+        <button class="fs-btn" onclick="toggleFS()">FULLSCREEN</button>
+    </nav>
+
+    <div class="hero-clock">
+        <div class="clock-card">
             <div id="time">00:00:00</div>
-            <div id="date">Tuesday, 23 December</div>
+            <div id="date">LOADING TERMINAL...</div>
         </div>
-    </header>
+    </div>
 
     <main>
         <div class="row">
             <div class="card">
-                <span class="label">Count Progress</span>
-                <span class="value" id="v-daily" style="color: var(--p-mint);">0</span>
-                <div class="donut-mini"><canvas id="c1"></canvas></div>
-                <span style="font-size: 0.7rem; color: #6b7280;">Target: 1,193</span>
+                <span class="card-label">Counting Progress</span>
+                <span class="card-val" id="v1" style="color: var(--mint);">0</span>
+                <div class="donut-box"><canvas id="c1"></canvas></div>
+                <span style="font-size: 0.7rem; color: #555;">Target: 1,193 Locations</span>
             </div>
             <div class="card">
-                <span class="label">Daily Tasks</span>
-                <span class="value" id="v-dtasks" style="color: var(--p-rose);">0/0</span>
-                <div class="donut-mini"><canvas id="c2"></canvas></div>
-                <span style="font-size: 0.7rem; color: #6b7280;">Operations</span>
+                <span class="card-label">Daily Operations</span>
+                <span class="card-val" id="v2" style="color: var(--rose);">0/0</span>
+                <div class="donut-box"><canvas id="c2"></canvas></div>
+                <span style="font-size: 0.7rem; color: #555;">Today's Checklist</span>
             </div>
             <div class="card">
-                <span class="label">Weekly Tasks</span>
-                <span class="value" id="v-wtasks" style="color: var(--p-blue);">0/0</span>
-                <div class="donut-mini"><canvas id="c3"></canvas></div>
-                <span style="font-size: 0.7rem; color: #6b7280;">Strategic</span>
-            </div>
-        </div>
-
-        <div class="row-charts">
-            <div class="card">
-                <span class="label" style="color: var(--p-mint);">Area Productivity</span>
-                <div style="flex:1; margin-top:10px;"><canvas id="bar-prod"></canvas></div>
-            </div>
-            <div class="card">
-                <span class="label" style="color: var(--p-blue);">Volume History</span>
-                <div style="flex:1; margin-top:10px;"><canvas id="line-hist"></canvas></div>
+                <span class="card-label">Weekly Strategic</span>
+                <span class="card-val" id="v3" style="color: var(--gold);">0/0</span>
+                <div class="donut-box"><canvas id="c3"></canvas></div>
+                <span style="font-size: 0.7rem; color: #555;">Compliance Goals</span>
             </div>
         </div>
 
-        <div class="row" style="grid-template-columns: 1.5fr 1fr;">
+        <div class="row-mix">
             <div class="card">
-                <span class="label">Daily Feed</span>
-                <div class="task-list" id="list-d"></div>
+                <span class="card-label" style="color: var(--mint);">Productivity Area Map</span>
+                <div style="flex:1; margin-top:10px;"><canvas id="bar-chart"></canvas></div>
             </div>
             <div class="card">
-                <span class="label">Weekly Feed</span>
-                <div class="task-list" id="list-w"></div>
+                <span class="card-label" style="color: var(--gold);">Global Performance Trend</span>
+                <div style="flex:1; margin-top:10px;"><canvas id="line-chart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="card" style="grid-column: span 2;">
+                <span class="card-label">Operation Live Feed</span>
+                <div class="list-wrap" id="list-d"></div>
+            </div>
+            <div class="card">
+                <span class="card-label">Weekly Checklist</span>
+                <div class="list-wrap" id="list-w"></div>
             </div>
         </div>
     </main>
 
     <script>
-        // DATELE TALE REALE (MODEL)
-        const db = {
-            metadata: { target: 1193 },
+        const store = {
             counting: [
                 {area: "MPR", qty: 146}, {area: "PB1", qty: 43}, {area: "PB2", qty: 79}, {area: "PB3", qty: 77},
                 {area: "PB4", qty: 16}, {area: "PBSRES", qty: 51}, {area: "MP", qty: 256}, {area: "MIX", qty: 330},
                 {area: "MS", qty: 215}, {area: "MSX", qty: 287}, {area: "FM", qty: 23}, {area: "HP", qty: 5}
             ],
-            dailyTasks: [
-                {t: "Aged stock report 7AM", s: "Completed"},
-                {t: "Aged stock report 3PM", s: "Not started"},
-                {t: "PI 1st count", s: "Not started"},
-                {t: "SLA Update", s: "Not started"}
+            daily: [
+                {t: "Aged stock report 7AM", s: "Completed"}, {t: "Aged stock report 3PM", s: "Not started"},
+                {t: "Returns Adjustments", s: "Not started"}, {t: "PI First Count", s: "Not started"},
+                {t: "SLA Master Sync", s: "Not started"}, {t: "High Value Audit", s: "Not started"}
             ],
-            weeklyTasks: [
-                {t: "Monthly Shrinkage", s: "Completed"},
-                {t: "Weekly ORM", s: "Not started"}
+            weekly: [
+                {t: "Monthly Shrinkage", s: "Completed"}, {t: "Strategic ORM", s: "Not started"}, {t: "SIS Data Report", s: "Not started"}
             ],
             history: [
                 {w: "W30", q: 6901}, {w: "W31", q: 5447}, {w: "W32", q: 4524}, {w: "W33", q: 2068}, {w: "W34", q: 1100}
             ]
         };
 
-        function start() {
+        function toggleFS() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+
+        function init() {
             // CLOCK
             setInterval(() => {
                 const n = new Date();
                 document.getElementById('time').innerText = n.toLocaleTimeString('en-GB', {hour12:false});
-                document.getElementById('date').innerText = n.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'short'});
+                document.getElementById('date').innerText = n.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'});
             }, 1000);
 
-            // KPIs
-            const dSum = db.counting.reduce((a, b) => a + b.qty, 0);
-            document.getElementById('v-daily').innerText = dSum.toLocaleString();
+            const dSum = store.counting.reduce((a, b) => a + b.qty, 0);
+            document.getElementById('v1').innerText = dSum.toLocaleString();
             
-            const dd = db.dailyTasks.filter(x => x.s === "Completed").length;
-            document.getElementById('v-dtasks').innerText = `${dd}/${db.dailyTasks.length}`;
+            const dd = store.daily.filter(x => x.s === "Completed").length;
+            document.getElementById('v2').innerText = `${dd}/${store.daily.length}`;
             
-            const wd = db.weeklyTasks.filter(x => x.s === "Completed").length;
-            document.getElementById('v-wtasks').innerText = `${wd}/${db.weeklyTasks.length}`;
+            const wd = store.weekly.filter(x => x.s === "Completed").length;
+            document.getElementById('v3').innerText = `${wd}/${store.weekly.length}`;
 
-            // CHARTS 3D EFFECT
+            // CHARTS WOW
             const donut = (id, val, target, col) => {
                 new Chart(document.getElementById(id), {
                     type: 'doughnut',
-                    data: { datasets: [{ data: [val, target-val], backgroundColor: [col, '#1a1f26'], borderWidth: 0 }] },
-                    options: { cutout: '85%', plugins: { tooltip: false }, animation: { duration: 2000 } }
+                    data: { datasets: [{ data: [val, Math.max(0, target-val)], backgroundColor: [col, 'rgba(255,255,255,0.05)'], borderWidth: 0 }] },
+                    options: { cutout: '82%', plugins: { tooltip: false }, animation: { duration: 2500, animateRotate: true } }
                 });
             };
-            donut('c1', dSum, db.metadata.target, '#b2f7ef');
-            donut('c2', dd, db.dailyTasks.length, '#ffb7b2');
-            donut('c3', wd, db.weeklyTasks.length, '#b2d8ff');
+            donut('c1', dSum, 1193, '#00f2ff');
+            donut('c2', dd, store.daily.length, '#ff758c');
+            donut('c3', wd, store.weekly.length, '#ffcc33');
 
-            // BAR CHART
-            new Chart(document.getElementById('bar-prod'), {
+            // BAR
+            new Chart(document.getElementById('bar-chart'), {
                 type: 'bar',
                 data: {
-                    labels: db.counting.map(x => x.area),
-                    datasets: [{ data: db.counting.map(x => x.qty), backgroundColor: '#b2f7ef', borderRadius: 8 }]
+                    labels: store.counting.map(x => x.area),
+                    datasets: [{ data: store.counting.map(x => x.qty), backgroundColor: '#00f2ff', borderRadius: 10 }]
                 },
-                options: { maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#6b7280', font: {size: 9} } } } }
+                options: { maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#444', font: {size: 9} } } } }
             });
 
-            // LINE CHART
-            new Chart(document.getElementById('line-hist'), {
+            // LINE
+            new Chart(document.getElementById('line-chart'), {
                 type: 'line',
                 data: {
-                    labels: db.history.map(x => x.w),
-                    datasets: [{ data: db.history.map(x => x.q), borderColor: '#b2d8ff', tension: 0.4, fill: true, backgroundColor: 'rgba(178, 216, 255, 0.05)', pointRadius: 2 }]
+                    labels: store.history.map(x => x.w),
+                    datasets: [{ data: store.history.map(x => x.q), borderColor: '#ffcc33', tension: 0.4, fill: true, backgroundColor: 'rgba(255, 204, 51, 0.05)', pointRadius: 3 }]
                 },
-                options: { maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#6b7280' } } } }
+                options: { maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#444' } } } }
             });
 
-            // RENDER LISTS
+            // FEEDS
             const render = (id, list) => {
                 const el = document.getElementById(id);
                 list.forEach(item => {
                     const done = item.s === "Completed";
                     el.innerHTML += `
-                        <div class="task-item ${done ? 'is-done' : ''}">
-                            <span style="font-size: 0.85rem; font-weight: 500;">${item.t}</span>
-                            <span class="status-badge ${done ? 'bg-done' : 'bg-wait'}">${done ? 'READY' : 'PENDING'}</span>
+                        <div class="task-tile ${done ? 'ready' : ''}">
+                            <span style="font-size: 0.9rem; font-weight: 400;">${item.t}</span>
+                            <span class="badge ${done ? 'b-ready' : 'b-wait'}">${done ? 'READY' : 'PENDING'}</span>
                         </div>
                     `;
                 });
             };
-            render('list-d', db.dailyTasks);
-            render('list-w', db.weeklyTasks);
+            render('list-d', store.daily);
+            render('list-w', store.weekly);
         }
 
-        window.onload = start;
+        window.onload = init;
     </script>
 </body>
 </html>
