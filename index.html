@@ -76,83 +76,110 @@ export default function VCBStockTeamDashboard() {
   }, []);
 
   const overview = useMemo(() => {
-    if (!data) return null;
-    const totalLocations = data.piData.reduce((s, r) => s + (r['Total locations'] || 0), 0);
-    const counted = data.piData.reduce((s, r) => s + (r.Counted || 0), 0);
-    const aboveTarget = data.piData.reduce((s, r) => s + (r['Above target'] || 0), 0);
-    const behindTarget = data.piData.reduce((s, r) => s + (r['Behind targe'] || 0), 0);
+    if (!data) return { totalLocations: 0, counted: 0, aboveTarget: 0, behindTarget: 0 };
+    const totalLocations = (data.piData || []).reduce((s, r) => s + (Number(r['Total locations']) || 0), 0);
+    const counted = (data.piData || []).reduce((s, r) => s + (Number(r.Counted) || 0), 0);
+    const aboveTarget = (data.piData || []).reduce((s, r) => s + (Number(r['Above target']) || 0), 0);
+    const behindTarget = (data.piData || []).reduce((s, r) => s + (Number(r['Behind targe']) || 0), 0);
     return { totalLocations, counted, aboveTarget, behindTarget };
   }, [data]);
 
   const dailyTaskStatus = useMemo(() => {
-    if (!data) return [];
+    if (!data || !data.dailyTask) return [];
     const counts = {};
-    data.dailyTask.forEach((t) => {
-      const s = t.Status || 'Unknown';
+    (data.dailyTask || []).forEach((t) => {
+      const s = (t.Status || 'Unknown').trim();
       counts[s] = (counts[s] || 0) + 1;
     });
     return Object.keys(counts).map((k, i) => ({ name: k, value: counts[k], color: WARM_PALETTE[i % WARM_PALETTE.length] }));
   }, [data]);
 
   const weeklyTaskStatus = useMemo(() => {
-    if (!data) return [];
+    if (!data || !data.weeklyTask) return [];
     const counts = {};
-    data.weeklyTask.forEach((t) => {
-      const s = t.Status || 'Unknown';
+    (data.weeklyTask || []).forEach((t) => {
+      const s = (t.Status || 'Unknown').trim();
       counts[s] = (counts[s] || 0) + 1;
     });
     return Object.keys(counts).map((k, i) => ({ name: k, value: counts[k], color: WARM_PALETTE[(i + 2) % WARM_PALETTE.length] }));
   }, [data]);
 
   const weeklyVolumes = useMemo(() => {
-    if (!data) return [];
-    // weeklyPiData: map Week No -> Weekly Qty
-    return data.weeklyPiData
-      .map((r) => ({ week: r['Week No'] || r['Week No'] === 0 ? r['Week No'] : String(r['Week No']), qty: r['Weekly Qty'] || 0 }))
-      .sort((a, b) => (a.week > b.week ? 1 : -1));
+    if (!data || !data.weeklyPiData) return [];
+    // Map each row to numeric week and qty, sort by week number
+    const mapped = (data.weeklyPiData || []).map((r) => {
+      // ensure numeric week if possible
+      const weekNoRaw = r['Week No'];
+      const week = typeof weekNoRaw === 'number' ? weekNoRaw : Number(weekNoRaw);
+      return { week: Number.isFinite(week) ? week : String(weekNoRaw), qty: Number(r['Weekly Qty'] || 0) };
+    });
+    mapped.sort((a, b) => {
+      const aw = typeof a.week === 'number' ? a.week : parseInt(a.week, 10) || 0;
+      const bw = typeof b.week === 'number' ? b.week : parseInt(b.week, 10) || 0;
+      return aw - bw;
+    });
+    return mapped;
   }, [data]);
 
   const filteredDailyTasks = useMemo(() => {
-    if (!data) return [];
+    if (!data || !data.dailyTask) return [];
     const q = taskSearch.trim().toLowerCase();
-    return data.dailyTask.filter((t) => {
+    return (data.dailyTask || []).filter((t) => {
       if (!q) return true;
       return (t.Task || '').toLowerCase().includes(q) || (t.Status || '').toLowerCase().includes(q);
     });
   }, [data, taskSearch]);
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="text-center">
-        <div className="animate-spin mb-4" style={{ borderTop: '4px solid rgba(0,0,0,0.1)', borderRight: '4px solid rgba(0,0,0,0.1)', borderBottom: '4px solid rgba(0,0,0,0.1)', borderLeft: '4px solid #D97706', borderRadius: '50%', width: 48, height: 48 }} />
-        <div className="text-muted">Loading dashboard data from <code>/data/dashboard.json</code> ...</div>
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="text-center">
+          <div
+            className="animate-spin mb-4"
+            style={{
+              borderTop: '4px solid rgba(0,0,0,0.1)',
+              borderRight: '4px solid rgba(0,0,0,0.1)',
+              borderBottom: '4px solid rgba(0,0,0,0.1)',
+              borderLeft: '4px solid #D97706',
+              borderRadius: '50%',
+              width: 48,
+              height: 48,
+            }}
+          />
+          <div className="text-muted">Loading dashboard data from <code>/data/dashboard.json</code> ...</div>
+        </div>
       </div>
-    </div>
-  );
+    );
 
-  if (error) return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="bg-white p-6 rounded-lg shadow-md max-w-xl">
-        <h3 className="text-lg font-semibold mb-2">Failed to load dashboard data</h3>
-        <p className="mb-4">{error}</p>
-        <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md border" onClick={() => window.location.reload()}>
-          <RefreshCw size={16} /> Reload
-        </button>
+  if (error)
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="bg-white p-6 rounded-lg shadow-md max-w-xl">
+          <h3 className="text-lg font-semibold mb-2">Failed to load dashboard data</h3>
+          <p className="mb-4">{error}</p>
+          <button className="inline-flex items-center gap-2 px-4 py-2 rounded-md border" onClick={() => window.location.reload()}>
+            <RefreshCw size={16} /> Reload
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="p-6 font-sans bg-gray-50 min-h-screen">
       <header className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-amber-800">VCB StockTeam Dashboard</h1>
-          <p className="text-sm text-gray-600">Snapshot date: <strong>{data.piData[0]?.Date || '-'}</strong></p>
+          <p className="text-sm text-gray-600">Snapshot date: <strong>{data?.piData?.[0]?.Date || '-'}</strong></p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center border rounded-md px-3 py-1 bg-white">
             <Search size={16} />
-            <input placeholder="Search tasks..." value={taskSearch} onChange={(e) => setTaskSearch(e.target.value)} className="ml-2 outline-none" />
+            <input
+              placeholder="Search tasks..."
+              value={taskSearch}
+              onChange={(e) => setTaskSearch(e.target.value)}
+              className="ml-2 outline-none"
+            />
           </div>
           <motion.button whileTap={{ scale: 0.95 }} onClick={() => window.location.reload()} className="px-3 py-2 rounded-md bg-amber-500 text-white">Refresh</motion.button>
         </div>
@@ -163,7 +190,7 @@ export default function VCBStockTeamDashboard() {
         <Card title="Total locations" value={humanNumber(overview.totalLocations)} sub={`Counted: ${humanNumber(overview.counted)}`} />
         <Card title="Counted" value={humanNumber(overview.counted)} sub={`Above target: ${humanNumber(Math.round(overview.aboveTarget))}`} />
         <Card title="Above target (sum)" value={humanNumber(Math.round(overview.aboveTarget))} sub={`Behind target: ${humanNumber(Math.round(overview.behindTarget))}`} />
-        <Card title="Completion %" value={`${((overview.counted / Math.max(overview.totalLocations,1)) * 100).toFixed(1)}%`} sub={`Based on total locations`} />
+        <Card title="Completion %" value={`${((overview.counted / Math.max(overview.totalLocations || 1, 1)) * 100).toFixed(1)}%`} sub={`Based on total locations`} />
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -183,14 +210,14 @@ export default function VCBStockTeamDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {data.piData.map((r, i) => (
-                  <tr key={r.Area} className={`${i % 2 ? 'bg-gray-50' : ''}`}>
+                {(data.piData || []).map((r, i) => (
+                  <tr key={r.Area || i} className={`${i % 2 ? 'bg-gray-50' : ''}`}>
                     <td className="py-2 font-medium">{r.Area}</td>
                     <td>{humanNumber(r['Total locations'])}</td>
                     <td>{humanNumber(r.Counted)}</td>
-                    <td>{r['Above target'] ? r['Above target'].toFixed(2) : 0}</td>
-                    <td>{r['Behind targe'] ? r['Behind targe'].toFixed(2) : 0}</td>
-                    <td>{r['Behind %'] ? (r['Behind %'] * 100).toFixed(2) + '%' : '0%'}</td>
+                    <td>{typeof r['Above target'] === 'number' ? r['Above target'].toFixed(2) : String(r['Above target'] || 0)}</td>
+                    <td>{typeof r['Behind targe'] === 'number' ? r['Behind targe'].toFixed(2) : String(r['Behind targe'] || 0)}</td>
+                    <td>{typeof r['Behind %'] === 'number' ? (r['Behind %'] * 100).toFixed(2) + '%' : (r['Behind %'] ? String(r['Behind %']) : '0%')}</td>
                   </tr>
                 ))}
               </tbody>
@@ -255,7 +282,7 @@ export default function VCBStockTeamDashboard() {
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <div className="bg-white rounded-2xl shadow p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-medium">Daily Tasks ({data.dailyTask.length})</h3>
+            <h3 className="text-lg font-medium">Daily Tasks ({(data.dailyTask || []).length})</h3>
             <div className="text-sm text-gray-500">Showing {filteredDailyTasks.length}</div>
           </div>
 
@@ -275,7 +302,7 @@ export default function VCBStockTeamDashboard() {
         <div className="bg-white rounded-2xl shadow p-4">
           <h3 className="text-lg font-medium mb-3">Weekly Tasks</h3>
           <div className="space-y-2">
-            {data.weeklyTask.map((t, i) => (
+            {(data.weeklyTask || []).map((t, i) => (
               <div key={i} className="flex items-center justify-between p-3 rounded-md border">
                 <div>
                   <div className="font-medium">{t.Task}</div>
