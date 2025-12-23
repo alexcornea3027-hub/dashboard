@@ -142,7 +142,7 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888}
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/controls/OrbitControls.js";
 
-/* GLOBAL BUTTONS */
+/* BUTTONS */
 window.toggleTheme=()=>document.body.dataset.theme=document.body.dataset.theme==="dark"?"light":"dark";
 window.toggleFS=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
 
@@ -194,37 +194,44 @@ setInterval(()=>{
   const h=(v/max)*7+.3;
   const mat=new THREE.MeshStandardMaterial({color:0x4fd1c5,metalness:.5,roughness:.25});
   const bar=new THREE.Mesh(new THREE.BoxGeometry(1,h,1),mat);
-  bar.position.set((i-2)*2,h/2+10,0);
-  bar.position.y=10; // start above
+  bar.position.set((i-2)*2,10,0); // start above
   scene.add(bar); bars.push({bar,h,i});
  });
 
  // PARTICLES
  const pgeo=new THREE.BufferGeometry();
  const count=500;
-const positions=new Float32Array(count*3);
-for(let i=0;i<count;i++){positions[i*3]=(Math.random()-0.5)*10;positions[i*3+1]=Math.random()*10+5;positions[i*3+2]=(Math.random()-0.5)*5);}
-pgeo.setAttribute('position',new THREE.BufferAttribute(positions,3));
-const pmaterial=new THREE.PointsMaterial({color:0xffb703,size:0.15});
-const particles=new THREE.Points(pgeo,pmaterial);scene.add(particles);
+ const positions=new Float32Array(count*3);
+ for(let i=0;i<count;i++){
+   positions[i*3]=(Math.random()-0.5)*10;
+   positions[i*3+1]=Math.random()*10+5;
+   positions[i*3+2]=(Math.random()-0.5)*5;
+ }
+ pgeo.setAttribute('position',new THREE.BufferAttribute(positions,3));
+ const pmaterial=new THREE.PointsMaterial({color:0xffb703,size:0.15});
+ const particles=new THREE.Points(pgeo,pmaterial);
+ scene.add(particles);
 
  const controls=new OrbitControls(cam,renderer.domElement);
  controls.enableDamping=true; controls.enableZoom=false;
 
  let t=0;
- (function animate(){
+ function animate(){
   requestAnimationFrame(animate);
   controls.update();
   t+=0.02;
   particles.rotation.y=t/5;
   bars.forEach(b=>{
-   const delay=b.i*0.3;
-   b.bar.position.y=Math.min(10+b.h,(b.bar.position.y+0.1*(10+b.h-b.bar.position.y))); 
+   const targetY=b.h/2;
+   b.bar.position.y += (targetY-b.bar.position.y)*0.05; // smooth cascade
   });
-  // cinematic camera orbit
-  cam.position.x=12*Math.sin(t/5); cam.position.z=12*Math.cos(t/5); cam.lookAt(0,5,0);
+  // cinematic orbit camera
+  cam.position.x=12*Math.sin(t/5);
+  cam.position.z=12*Math.cos(t/5);
+  cam.lookAt(0,3,0);
   renderer.render(scene,cam);
- })();
+ }
+ animate();
 })();
 
 /* DONUT 3D */
@@ -246,11 +253,12 @@ const particles=new THREE.Points(pgeo,pmaterial);scene.add(particles);
  );
  scene.add(tor);
 
- (function anim(){
+ function anim(){
   requestAnimationFrame(anim);
   tor.rotation.y+=0.01;
   renderer.render(scene,cam);
- })();
+ }
+ anim();
 })();
 </script>
 </body>
