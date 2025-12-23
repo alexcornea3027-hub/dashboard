@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Stock Team | 3D Mission Control — PRO</title>
+<title>Stock Team | 3D Mission Control — POLISHED</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 
-<!-- POLYFILL for import maps on older browsers (recommended for GitHub Pages) -->
+<!-- es-module-shims polyfill for import maps (safe for GitHub Pages) -->
 <script async src="https://ga.jspm.io/npm:es-module-shims@1.8.1/dist/es-module-shims.js"></script>
 
-<!-- importmap-shim for es-module-shims (fallback-friendly). Maps bare "three" to CDN ESM build -->
+<!-- import map shim: maps "three" to CDN ESM -->
 <script type="importmap-shim">
 {
   "imports": {
@@ -19,60 +19,48 @@
 }
 </script>
 
-<!-- Chart.js UMD -->
+<!-- Chart.js UMD (global) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <style>
 :root{
-  --bg:#0f1216;
-  --panel:rgba(255,255,255,.04);
-  --border:rgba(255,255,255,.07);
-  --text:#fff;
-  --warm1:#ffb703;
-  --warm2:#ff8c42;
-  --accent:#ff6b6b;
-  --cyan:#4fd1c5;
-  --glass: rgba(255,255,255,0.03);
+  --bg:#0f1216; --panel:rgba(255,255,255,.04); --border:rgba(255,255,255,.07); --text:#fff;
+  --warm1:#ffb703; --warm2:#ff8c42; --accent:#ff6b6b; --cyan:#4fd1c5;
 }
 [data-theme="light"]{
-  --bg:#f7f8fb;
-  --panel:#fff;
-  --border:#d6dce8;
-  --text:#111;
+  --bg:#f7f8fb; --panel:#fff; --border:#d6dce8; --text:#111;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
-.container{display:grid;grid-template-rows:72px 110px 1fr;gap:12px;padding:12px;height:100vh}
+.app{display:grid;grid-template-rows:72px 110px 1fr;gap:12px;padding:12px;height:100vh}
 .header{display:flex;align-items:center;justify-content:space-between;padding:0 18px}
 .brand{font-weight:800;font-size:1.2rem}
 .brand span{color:var(--warm1)}
 .controls{display:flex;gap:8px;align-items:center}
 .btn{padding:8px 14px;border-radius:999px;border:none;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--warm1),var(--warm2));color:#111}
 .small{padding:8px 10px;border-radius:10px;background:transparent;border:1px solid var(--border);color:var(--text);cursor:pointer}
+.status{font-size:.85rem;color:#ddd;margin-left:12px}
 .clock{display:flex;align-items:center;justify-content:center}
 .clock-card{display:flex;align-items:center;gap:14px;padding:12px 18px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.4)}
 #time{font-size:1.6rem;font-weight:800;letter-spacing:2px}
 #date{font-size:.8rem;color:var(--warm1)}
 .main{display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:1fr 1fr;gap:14px;padding:6px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px;position:relative;overflow:hidden}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px;position:relative;overflow:hidden;min-height:140px}
 .title{font-size:.78rem;color:#bdbdbd;letter-spacing:1.6px;margin-bottom:8px}
-.canvas{width:100%;height:100%;min-height:140px}
-#weekly3d{min-height:380px}
-.tasks{height:100%;overflow:auto;padding-right:8px}
-.task{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);margin-bottom:10px}
+.canvas{width:100%;height:100%;min-height:160px}
+#weekly3d{min-height:360px}
+.tasks{height:100%;overflow:auto;padding-right:8px;max-height:420px}
+.task{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.02);margin-bottom:8px}
 .done{border-left:4px solid var(--cyan)}
 .badge{padding:6px 12px;border-radius:999px;font-weight:800;font-size:.75rem}
 .ok{background:var(--cyan);color:#000}
 .wait{background:#aaa;color:#000}
-.tooltip{position:fixed;pointer-events:none;padding:8px 12px;border-radius:8px;background:rgba(0,0,0,0.82);color:#fff;z-index:9999;display:none;transform:translate(-50%,-120%);font-weight:600}
+.tooltip{position:fixed;pointer-events:none;padding:8px 12px;border-radius:8px;background:rgba(0,0,0,0.88);color:#fff;z-index:9999;display:none;transform:translate(-50%,-120%);font-weight:600}
 .mini-charts{display:flex;gap:12px;align-items:stretch}
 .mini-charts canvas{flex:1;min-height:120px}
 .footer-controls{position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
-.headerline{display:flex;align-items:center;gap:12px}
-.legend-dot{width:10px;height:10px;border-radius:50%}
-.legend-warm{background:var(--warm2)}
-.legend-amber{background:var(--warm1)}
+.notice{position:absolute;left:12px;top:12px;background:rgba(0,0,0,0.45);padding:6px 10px;border-radius:8px;font-size:.82rem}
 @media (max-width:960px){
   .main{grid-template-columns:1fr;grid-template-rows:auto auto auto}
   #weekly3d{min-height:260px}
@@ -80,453 +68,423 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);heig
 </style>
 </head>
 <body data-theme="dark">
-<div class="container">
-  <div class="header">
-    <div class="brand">STOCK TEAM <span>| VCB</span></div>
-    <div class="controls">
-      <button id="themeBtn" class="small">DARK / LIGHT</button>
-      <button id="fsBtn" class="small">FULLSCREEN</button>
-      <button id="playBtn" class="small">PAUSE</button>
-      <button id="reloadBtn" class="small">RELOAD DATA</button>
-      <button id="snapshotBtn" class="small">EXPORT WEEKLY PNG</button>
+  <div class="app">
+    <div class="header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="brand">STOCK TEAM <span>| VCB</span></div>
+        <div class="status" id="dataStatus">Loading data…</div>
+      </div>
+      <div class="controls">
+        <button id="themeBtn" class="small">DARK / LIGHT</button>
+        <button id="fsBtn" class="small">FULLSCREEN</button>
+        <button id="playBtn" class="small">PAUSE</button>
+        <button id="reloadBtn" class="small">RELOAD</button>
+        <button id="snapshotBtn" class="small">SNAPSHOT</button>
+      </div>
+    </div>
+
+    <div class="clock" aria-hidden="false">
+      <div class="clock-card">
+        <div id="hourglass" style="width:120px;height:88px" class="canvas" aria-hidden="true"></div>
+        <div>
+          <div id="time">00:00:00</div>
+          <div id="date">LOADING…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="card" style="grid-row:span 2">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="title">WEEKLY VOLUME · 3D WATERFALL + PARTICLES</div>
+          <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+            <div style="width:10px;height:10px;border-radius:50%;background:var(--warm2)"></div><small style="color:#ccc">Bars</small>
+            <div style="width:10px;height:10px;border-radius:50%;background:var(--warm1);margin-left:8px"></div><small style="color:#ccc">Particles</small>
+          </div>
+        </div>
+        <div id="weekly3d" class="canvas"></div>
+        <div class="footer-controls">
+          <button id="fpsSlow" class="small">SLOW</button>
+          <button id="fpsNormal" class="small">NORMAL</button>
+          <button id="fpsFast" class="small">FAST</button>
+        </div>
+        <div class="notice" id="weeklyNote" style="display:none"></div>
+      </div>
+
+      <div class="card">
+        <div class="title">COUNTING PROGRESS · 3D DONUT</div>
+        <div id="donut3d" class="canvas"></div>
+        <div style="margin-top:10px">
+          <div class="mini-charts">
+            <canvas id="miniLine"></canvas>
+            <canvas id="miniDoughnut"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="title">DAILY & WEEKLY TASKS</div>
+        <div style="display:flex;gap:12px">
+          <div style="flex:1">
+            <h4 style="font-size:.85rem;margin-bottom:8px;color:#ddd">Daily</h4>
+            <div class="tasks" id="dailyTasks"></div>
+          </div>
+          <div style="flex:1">
+            <h4 style="font-size:.85rem;margin-bottom:8px;color:#ddd">Weekly</h4>
+            <div class="tasks" id="weeklyTasks"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="clock">
-    <div class="clock-card">
-      <div id="hourglass" style="width:120px;height:88px" class="canvas" aria-hidden="true"></div>
-      <div>
-        <div id="time">00:00:00</div>
-        <div id="date">LOADING…</div>
-      </div>
-    </div>
-  </div>
+  <div id="tooltip" class="tooltip" aria-hidden="true"></div>
 
-  <div class="main">
-    <div class="card" style="grid-row:span 2">
-      <div class="headerline">
-        <div class="title">WEEKLY VOLUME · 3D WATERFALL + PARTICLES</div>
-        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-          <div class="legend-dot legend-warm"></div><small>Volume bars</small>
-          <div class="legend-dot legend-amber" style="margin-left:8px"></div><small>Particles</small>
-        </div>
-      </div>
-      <div id="weekly3d" class="canvas"></div>
-      <div class="footer-controls">
-        <button id="fpsSlow" class="small">SLOW</button>
-        <button id="fpsNormal" class="small">NORMAL</button>
-        <button id="fpsFast" class="small">FAST</button>
-      </div>
-    </div>
+  <!-- Module script uses importmap-shim via es-module-shims -->
+  <script type="module-shim">
+  import * as THREE from "three";
+  import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-    <div class="card">
-      <div class="title">COUNTING PROGRESS · 3D DONUT</div>
-      <div id="donut3d" class="canvas"></div>
-      <div style="margin-top:10px">
-        <div class="mini-charts">
-          <canvas id="miniLine"></canvas>
-          <canvas id="miniDoughnut"></canvas>
-        </div>
-      </div>
-    </div>
+  const dataPath = './data/dashboard.json';
+  const dataStatus = document.getElementById('dataStatus');
+  const dailyTasksEl = document.getElementById('dailyTasks');
+  const weeklyTasksEl = document.getElementById('weeklyTasks');
+  const tooltip = document.getElementById('tooltip');
 
-    <div class="card">
-      <div class="title">DAILY & WEEKLY TASKS</div>
-      <div style="display:flex;gap:12px">
-        <div style="flex:1">
-          <h4 style="font-size:.85rem;margin-bottom:8px;color:#ddd">Daily</h4>
-          <div class="tasks" id="dailyTasks"></div>
-        </div>
-        <div style="flex:1">
-          <h4 style="font-size:.85rem;margin-bottom:8px;color:#ddd">Weekly</h4>
-          <div class="tasks" id="weeklyTasks"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+  const themeBtn = document.getElementById('themeBtn');
+  const fsBtn = document.getElementById('fsBtn');
+  const playBtn = document.getElementById('playBtn');
+  const reloadBtn = document.getElementById('reloadBtn');
+  const snapshotBtn = document.getElementById('snapshotBtn');
 
-<div id="tooltip" class="tooltip" aria-hidden="true"></div>
+  const weeklyEl = document.getElementById('weekly3d');
+  const donutEl = document.getElementById('donut3d');
+  const hourglassEl = document.getElementById('hourglass');
+  const miniLineCtx = document.getElementById('miniLine').getContext('2d');
+  const miniDoughCtx = document.getElementById('miniDoughnut').getContext('2d');
+  const weeklyNote = document.getElementById('weeklyNote');
 
-<!-- Main module: uses importmap-shim (es-module-shims) for wide compatibility -->
-<script type="module-shim">
-/* 3D Dashboard — robust and fixed:
- - Uses import maps (mapped by importmap-shim) so "three" resolves
- - Loads data from ./data/dashboard.json (falls back gracefully)
- - Fixes DirectionalLight position bug (use light.position.set(...))
- - Warm palette, animations, controls
-*/
+  let animationRunning = true;
+  let speedFactor = 1;
+  let weeklyRenderer, weeklyScene, weeklyCamera, weeklyControls, weeklyBars = [], weeklyParticles;
+  let donutRenderer;
+  let hourglassGroup = null;
 
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+  themeBtn.addEventListener('click', ()=> document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark');
+  fsBtn.addEventListener('click', ()=> { if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen().catch(()=>{}); });
+  playBtn.addEventListener('click', ()=> { animationRunning = !animationRunning; playBtn.innerText = animationRunning ? 'PAUSE' : 'PLAY'; });
+  reloadBtn.addEventListener('click', ()=> loadAndBuild());
+  document.getElementById('fpsSlow').addEventListener('click', ()=> speedFactor = 0.55);
+  document.getElementById('fpsNormal').addEventListener('click', ()=> speedFactor = 1);
+  document.getElementById('fpsFast').addEventListener('click', ()=> speedFactor = 1.8);
 
-/* UI refs */
-const themeBtn = document.getElementById('themeBtn');
-const fsBtn = document.getElementById('fsBtn');
-const playBtn = document.getElementById('playBtn');
-const reloadBtn = document.getElementById('reloadBtn');
-const snapshotBtn = document.getElementById('snapshotBtn');
-const tooltip = document.getElementById('tooltip');
-const timeEl = document.getElementById('time');
-const dateEl = document.getElementById('date');
-const weeklyEl = document.getElementById('weekly3d');
-const donutEl = document.getElementById('donut3d');
-const hourglassEl = document.getElementById('hourglass');
-const dailyTasksEl = document.getElementById('dailyTasks');
-const weeklyTasksEl = document.getElementById('weeklyTasks');
-const miniLineCtx = document.getElementById('miniLine').getContext('2d');
-const miniDoughCtx = document.getElementById('miniDoughnut').getContext('2d');
-
-let animationRunning = true;
-let speedFactor = 1;
-
-/* Controls */
-themeBtn.addEventListener('click', ()=> document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark');
-fsBtn.addEventListener('click', ()=> { if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen().catch(()=>{}); });
-playBtn.addEventListener('click', ()=> { animationRunning = !animationRunning; playBtn.innerText = animationRunning ? 'PAUSE' : 'PLAY'; });
-reloadBtn.addEventListener('click', ()=> loadAndBuild());
-document.getElementById('fpsSlow').addEventListener('click', ()=> speedFactor = 0.55);
-document.getElementById('fpsNormal').addEventListener('click', ()=> speedFactor = 1);
-document.getElementById('fpsFast').addEventListener('click', ()=> speedFactor = 1.8);
-
-/* Snapshot */
-snapshotBtn.addEventListener('click', ()=> {
-  try {
-    if (weeklyRenderer && weeklyRenderer.domElement) {
-      const dataUrl = weeklyRenderer.domElement.toDataURL('image/png');
-      const a = document.createElement('a'); a.href = dataUrl; a.download = 'weekly_snapshot.png'; document.body.appendChild(a); a.click(); a.remove();
-    }
-  } catch (e) { console.error(e); alert('Snapshot failed — see console'); }
-});
-
-/* Safe device pixel ratio */
-const DPR = ()=> Math.min(window.devicePixelRatio || 1, 2);
-
-/* DATA: try to fetch data/dashboard.json — fallback to defaults */
-const dataPath = './data/dashboard.json';
-
-const defaultData = {
-  metadata: { target: 1193, timestamp: new Date().toLocaleTimeString('en-GB') },
-  counting: [
-    {area:"MPR", qty:14622},{area:"PB1",qty:4329},{area:"PB2",qty:795},{area:"PB3",qty:772},
-    {area:"PB4",qty:164},{area:"PBSRES",qty:5197},{area:"MP",qty:25612},{area:"MIX",qty:33087},
-    {area:"MS",qty:21512},{area:"MSX",qty:28798},{area:"FM",qty:2308},{area:"HP",qty:561},
-    {area:"Total:",qty:137369}
-  ],
-  dailyTasks: [
-    {name:"Aged stock report 7AM", status:"Completed"},
-    {name:"Aged stock report 3PM", status:"Not started"},
-    {name:"Returns Adjustments", status:"Not started"},
-    {name:"PI First Count", status:"Not started"}
-  ],
-  weeklyTasks: [
-    {name:"(Weekly) SLA", status:"Not started"},
-    {name:"(Weekly) SIS report", status:"Not started"},
-    {name:"(once a month) Shrinkage for Period", status:"Completed"}
-  ],
-  history: [
-    {week:"W1", total:6901},{week:"W2",total:5447},{week:"W3",total:4524},{week:"W4",total:2068},
-    {week:"W5",total:1100},{week:"W6",total:3200},{week:"W7",total:4800},{week:"W8",total:6000},{week:"W9",total:7300}
-  ]
-};
-
-async function fetchDashboard(){
-  try {
-    const res = await fetch(dataPath, {cache:'no-cache'});
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const j = await res.json();
-    // minimal validation
-    if (!j.history || !Array.isArray(j.history)) throw new Error('Invalid JSON schema');
-    return j;
-  } catch (e) {
-    console.warn('dashboard.json load failed — using defaultData', e);
-    return defaultData;
-  }
-}
-
-/* Render tasks */
-function renderTasks(daily, weekly){
-  dailyTasksEl.innerHTML = '';
-  weeklyTasksEl.innerHTML = '';
-  daily.forEach(t=>{
-    const div = document.createElement('div'); div.className = `task ${t.status==='Completed'?'done':''}`;
-    div.innerHTML = `<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${t.status==='Completed'?'READY':'PENDING'}</span>`;
-    dailyTasksEl.appendChild(div);
+  snapshotBtn.addEventListener('click', ()=>{
+    try {
+      if (weeklyRenderer && weeklyRenderer.domElement) {
+        const url = weeklyRenderer.domElement.toDataURL('image/png');
+        const a = document.createElement('a'); a.href = url; a.download = 'weekly.png'; document.body.appendChild(a); a.click(); a.remove();
+      }
+    } catch(e){ console.error('snapshot', e); alert('Snapshot failed — see console.'); }
   });
-  weekly.forEach(t=>{
-    const div = document.createElement('div'); div.className = `task ${t.status==='Completed'?'done':''}`;
-    div.innerHTML = `<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${t.status==='Completed'?'READY':'PENDING'}</span>`;
-    weeklyTasksEl.appendChild(div);
-  });
-}
 
-/* Clock + hourglass flip each minute */
-let lastMin = null;
-setInterval(()=> {
-  const d = new Date();
-  timeEl.innerText = d.toLocaleTimeString('en-GB',{hour12:false});
-  dateEl.innerText = d.toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long'});
-  if (d.getMinutes() !== lastMin) {
-    lastMin = d.getMinutes();
-    if (hourglassGroup) hourglassGroup.rotation.y += Math.PI;
-  }
-}, 1000);
+  const DPR = ()=> Math.min(window.devicePixelRatio || 1, 2);
 
-/* ---------- HOURGLASS (mini) ---------- */
-let hourglassGroup = null;
-(function initHourglass(){
-  try {
-    const scene = new THREE.Scene();
-    const cam = new THREE.PerspectiveCamera(45, hourglassEl.clientWidth / hourglassEl.clientHeight, 0.1, 50);
-    cam.position.set(0,1.5,3);
-
-    const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-    renderer.setPixelRatio(DPR());
-    renderer.setSize(hourglassEl.clientWidth, hourglassEl.clientHeight);
-    hourglassEl.appendChild(renderer.domElement);
-
-    const mat = new THREE.MeshStandardMaterial({color:0xffb703, metalness:0.4, roughness:0.25});
-    const gTop = new THREE.ConeGeometry(0.32, 0.8, 32);
-    const gBot = new THREE.ConeGeometry(0.32, 0.8, 32); gBot.rotateX(Math.PI);
-
-    hourglassGroup = new THREE.Group();
-    const top = new THREE.Mesh(gTop, mat); top.position.y = 0.38;
-    const bot = new THREE.Mesh(gBot, mat); bot.position.y = -0.38;
-    hourglassGroup.add(top, bot);
-
-    // sand particles
-    const sandGeo = new THREE.BufferGeometry();
-    const N = 110;
-    const positions = new Float32Array(N*3);
-    for (let i=0;i<N;i++){
-      positions[i*3] = (Math.random()-0.5)*0.16;
-      positions[i*3+1] = Math.random()*0.6 - 0.3;
-      positions[i*3+2] = (Math.random()-0.5)*0.16;
+  // Robust text -> JSON parser: strips BOM and leading/trailing junk (HTML/errors)
+  function safeParseJSON(text){
+    try {
+      // Remove BOM if present
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      // Find first JSON opening char
+      const first = Math.min( ...['{','['].map(c=>{ const i = text.indexOf(c); return i === -1 ? Infinity : i; }) );
+      const lastCandidates = ['}', ']'].map(c=>text.lastIndexOf(c)).filter(i=>i>=0);
+      const last = Math.max(...lastCandidates, -1);
+      if (first === Infinity || last === -1 || last < first) throw new Error('No JSON object found in fetched text');
+      const clean = text.slice(first, last+1).trim();
+      return JSON.parse(clean);
+    } catch (e) {
+      throw e;
     }
-    sandGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const sandPts = new THREE.Points(sandGeo, new THREE.PointsMaterial({size:0.035, color:0xffb703, sizeAttenuation:true}));
-    hourglassGroup.add(sandPts);
+  }
 
-    scene.add(hourglassGroup);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const pl = new THREE.PointLight(0xffb703, 1.0); pl.position.set(3,3,3); scene.add(pl);
+  async function fetchDashboard(){
+    try {
+      const res = await fetch(dataPath, {cache:'no-cache'});
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const txt = await res.text();
+      const json = safeParseJSON(txt);
+      console.info('dashboard.json loaded successfully');
+      dataStatus.innerText = `Loaded data/dashboard.json • ${json.metadata && json.metadata.timestamp ? json.metadata.timestamp : ''}`;
+      return json;
+    } catch (e) {
+      console.warn('dashboard.json load failed — using fallback defaults', e);
+      dataStatus.innerText = `Using fallback data (dashboard.json error: ${e.message})`;
+      return null;
+    }
+  }
+
+  // fallback defaults (used if JSON fails)
+  const defaults = {
+    metadata:{target:1193, timestamp:new Date().toLocaleTimeString('en-GB')},
+    counting:[
+      {"area":"MPR","qty":14622},{"area":"PB1","qty":4329},{"area":"PB2","qty":795},
+      {"area":"PB3","qty":772},{"area":"PB4","qty":164},{"area":"PBSRES","qty":5197},
+      {"area":"MP","qty":25612},{"area":"MIX","qty":33087},{"area":"MS","qty":21512},
+      {"area":"MSX","qty":28798},{"area":"FM","qty":2308},{"area":"HP","qty":561},{"area":"Total:","qty":137369}
+    ],
+    dailyTasks:[
+      {"name":"Aged stock report 7AM","status":"Completed"},{"name":"Aged stock report 3PM","status":"Not started"}
+    ],
+    weeklyTasks:[
+      {"name":"(Weekly) SLA","status":"Not started"},{"name":"(once a month) Shrinkage for Period","status":"Completed"}
+    ],
+    history:[
+      {"week":"W1","total":6901},{"week":"W2","total":5447},{"week":"W3","total":4524},
+      {"week":"W4","total":2068},{"week":"W5","total":1100},{"week":"W6","total":3200},
+      {"week":"W7","total":4800},{"week":"W8","total":6000},{"week":"W9","total":7300}
+    ]
+  };
+
+  function renderTasks(daily, weekly){
+    dailyTasksEl.innerHTML = ''; weeklyTasksEl.innerHTML = '';
+    (daily || []).forEach(t=>{
+      const d = document.createElement('div'); d.className = `task ${t.status==='Completed'?'done':''}`;
+      d.innerHTML = `<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${t.status==='Completed'?'READY':(t.status||'PENDING').toUpperCase()}</span>`;
+      dailyTasksEl.appendChild(d);
+    });
+    (weekly || []).forEach(t=>{
+      const d = document.createElement('div'); d.className = `task ${t.status==='Completed'?'done':''}`;
+      d.innerHTML = `<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${t.status==='Completed'?'READY':(t.status||'PENDING').toUpperCase()}</span>`;
+      weeklyTasksEl.appendChild(d);
+    });
+  }
+
+  // Clock update
+  let lastMinute = null;
+  setInterval(()=>{
+    const d = new Date();
+    document.getElementById('time').innerText = d.toLocaleTimeString('en-GB',{hour12:false});
+    document.getElementById('date').innerText = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+    if (d.getMinutes() !== lastMinute) {
+      lastMinute = d.getMinutes();
+      if (hourglassGroup) hourglassGroup.rotation.y += Math.PI;
+    }
+  }, 1000);
+
+  /* ---------- Hourglass (mini) ---------- */
+  (function initHourglass(){
+    try {
+      const scene = new THREE.Scene();
+      const cam = new THREE.PerspectiveCamera(45, hourglassEl.clientWidth/hourglassEl.clientHeight, 0.1, 50);
+      cam.position.set(0,1.6,3);
+      const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+      renderer.setPixelRatio(DPR());
+      renderer.setSize(hourglassEl.clientWidth, hourglassEl.clientHeight);
+      hourglassEl.appendChild(renderer.domElement);
+
+      const mat = new THREE.MeshStandardMaterial({color:0xffb703, metalness:0.4, roughness:0.25});
+      const gTop = new THREE.ConeGeometry(0.32,0.8,24);
+      const gBot = new THREE.ConeGeometry(0.32,0.8,24); gBot.rotateX(Math.PI);
+      hourglassGroup = new THREE.Group();
+      const top = new THREE.Mesh(gTop,mat); top.position.y = 0.38;
+      const bot = new THREE.Mesh(gBot,mat); bot.position.y = -0.38;
+      hourglassGroup.add(top,bot);
+
+      const sandGeo = new THREE.BufferGeometry();
+      const N = 110; const pos = new Float32Array(N*3);
+      for (let i=0;i<N;i++){ pos[i*3] = (Math.random()-0.5)*0.16; pos[i*3+1] = Math.random()*0.6 - 0.3; pos[i*3+2] = (Math.random()-0.5)*0.16; }
+      sandGeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+      const sand = new THREE.Points(sandGeo, new THREE.PointsMaterial({size:0.035, color:0xffb703, sizeAttenuation:true}));
+      hourglassGroup.add(sand);
+
+      scene.add(hourglassGroup);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      const pl = new THREE.PointLight(0xffb703, 1.0); pl.position.set(3,3,3); scene.add(pl);
+
+      function onResize(){ renderer.setSize(hourglassEl.clientWidth, hourglassEl.clientHeight); cam.aspect = hourglassEl.clientWidth/hourglassEl.clientHeight; cam.updateProjectionMatrix(); }
+      window.addEventListener('resize', onResize);
+
+      function loop(){ requestAnimationFrame(loop); sand.rotation.y += 0.009 * speedFactor; renderer.render(scene, cam); }
+      loop();
+    } catch (e) { console.error('hourglass init', e); }
+  })();
+
+  /* ---------- Weekly 3D builder ---------- */
+  function createWeeklyScene(historyArr){
+    // clear prev canvas if any
+    if (weeklyRenderer && weeklyRenderer.domElement && weeklyRenderer.domElement.parentElement === weeklyEl) weeklyEl.removeChild(weeklyRenderer.domElement);
+
+    weeklyScene = new THREE.Scene();
+    weeklyCamera = new THREE.PerspectiveCamera(50, weeklyEl.clientWidth / weeklyEl.clientHeight, 0.1, 200);
+    weeklyCamera.position.set(0,12,20);
+
+    weeklyRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+    weeklyRenderer.setPixelRatio(DPR());
+    weeklyRenderer.setSize(weeklyEl.clientWidth, weeklyEl.clientHeight);
+    weeklyEl.appendChild(weeklyRenderer.domElement);
+
+    weeklyScene.add(new THREE.AmbientLight(0xffffff, 0.45));
+    const dir = new THREE.DirectionalLight(0xff8c42, 0.95);
+    dir.position.set(5,12,10);
+    weeklyScene.add(dir);
+
+    // create bars from history totals
+    const values = (historyArr || []).map(h => Number(h.total || 0));
+    const labels = (historyArr || []).map(h => h.week || '');
+    const max = Math.max(...values, 1);
+    weeklyBars = [];
+    values.forEach((v,i) => {
+      const h = (v / max) * 7 + 0.3;
+      const mat = new THREE.MeshStandardMaterial({color:0xff8c42, metalness:0.36, roughness:0.28});
+      const box = new THREE.Mesh(new THREE.BoxGeometry(1.4, h, 1.2), mat);
+      box.position.set((i - (values.length-1)/2) * 2.2, h/2, 0);
+      weeklyScene.add(box);
+      weeklyBars.push({mesh:box, height:h, value:v, label:labels[i]});
+    });
+
+    // particles
+    const pgeo = new THREE.BufferGeometry();
+    const pcount = Math.min(1400, Math.max(200, Math.floor((window.innerWidth/1000)*900)));
+    const positions = new Float32Array(pcount*3);
+    for (let i=0;i<pcount;i++){
+      positions[i*3] = (Math.random()-0.5) * 16;
+      positions[i*3+1] = Math.random() * 10 + 3;
+      positions[i*3+2] = (Math.random()-0.5) * 6;
+    }
+    pgeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    weeklyParticles = new THREE.Points(pgeo, new THREE.PointsMaterial({size:0.12, sizeAttenuation:true, color:0xffb703}));
+    weeklyScene.add(weeklyParticles);
+
+    weeklyControls = new OrbitControls(weeklyCamera, weeklyRenderer.domElement);
+    weeklyControls.enableDamping = true;
+    weeklyControls.enableZoom = true;
+
+    // pointer/raycast
+    const ray = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    weeklyEl.addEventListener('pointermove', (ev)=> {
+      const r = weeklyEl.getBoundingClientRect();
+      const x = ev.clientX - r.left;
+      const y = ev.clientY - r.top;
+      mouse.x = (x/r.width) * 2 - 1;
+      mouse.y = - (y/r.height) * 2 + 1;
+      weeklyEl._lastPointer = {clientX: ev.clientX, clientY: ev.clientY};
+    });
 
     function onResize(){
-      renderer.setSize(hourglassEl.clientWidth, hourglassEl.clientHeight);
-      cam.aspect = hourglassEl.clientWidth / hourglassEl.clientHeight; cam.updateProjectionMatrix();
+      weeklyRenderer.setSize(weeklyEl.clientWidth, weeklyEl.clientHeight);
+      weeklyCamera.aspect = weeklyEl.clientWidth / weeklyEl.clientHeight; weeklyCamera.updateProjectionMatrix();
     }
     window.addEventListener('resize', onResize);
 
-    function loop(){
-      requestAnimationFrame(loop);
-      sandPts.rotation.y += 0.009 * speedFactor;
-      renderer.render(scene, cam);
+    let t = 0;
+    function animate(){
+      requestAnimationFrame(animate);
+      t += 0.02 * speedFactor;
+      weeklyParticles.rotation.y = t/5;
+      weeklyBars.forEach(b=>{ b.mesh.position.y += (b.height/2 - b.mesh.position.y) * 0.06 * speedFactor; });
+      weeklyCamera.position.x = 12 * Math.sin(t/5);
+      weeklyCamera.position.z = 12 * Math.cos(t/5);
+      weeklyCamera.lookAt(0, 3, 0);
+      weeklyControls.update();
+
+      // raycast for tooltip
+      ray.setFromCamera(mouse, weeklyCamera);
+      const intersects = ray.intersectObjects(weeklyBars.map(b=>b.mesh));
+      if (intersects.length > 0 && weeklyEl._lastPointer) {
+        const hit = weeklyBars.find(b=>b.mesh === intersects[0].object);
+        tooltip.style.display = 'block';
+        tooltip.style.left = (weeklyEl._lastPointer.clientX + 12) + 'px';
+        tooltip.style.top = (weeklyEl._lastPointer.clientY - 10) + 'px';
+        tooltip.innerText = `${hit.label || ''} — ${hit.value}`;
+      } else {
+        tooltip.style.display = 'none';
+      }
+
+      if (animationRunning) weeklyRenderer.render(weeklyScene, weeklyCamera);
+      else weeklyRenderer.render(weeklyScene, weeklyCamera);
     }
-    loop();
-  } catch (e) {
-    console.error('Hourglass init error', e);
-  }
-})();
-
-/* ---------- WEEKLY 3D (waterfall + particles + tooltip) ---------- */
-let weeklyRenderer, weeklyScene, weeklyCamera, weeklyControls;
-let weeklyBars = [], weeklyParticles;
-function createWeeklyScene(historyArr){
-  // remove previous canvas if exists
-  if (weeklyRenderer && weeklyRenderer.domElement && weeklyRenderer.domElement.parentElement === weeklyEl) {
-    weeklyEl.removeChild(weeklyRenderer.domElement);
+    animate();
   }
 
-  weeklyScene = new THREE.Scene();
-  weeklyCamera = new THREE.PerspectiveCamera(50, weeklyEl.clientWidth / weeklyEl.clientHeight, 0.1, 200);
-  weeklyCamera.position.set(0, 12, 20);
+  /* ---------- Donut 3D + mini charts ---------- */
+  function createDonutAndMini(countingArr, historyArr){
+    if (donutRenderer && donutRenderer.domElement && donutRenderer.domElement.parentElement === donutEl) donutEl.removeChild(donutRenderer.domElement);
 
-  weeklyRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  weeklyRenderer.setPixelRatio(DPR());
-  weeklyRenderer.setSize(weeklyEl.clientWidth, weeklyEl.clientHeight);
-  weeklyEl.appendChild(weeklyRenderer.domElement);
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(50, donutEl.clientWidth/donutEl.clientHeight, 0.1, 100);
+    cam.position.set(0,0,8);
 
-  weeklyScene.add(new THREE.AmbientLight(0xffffff, 0.45));
-  const dirLight = new THREE.DirectionalLight(0xff8c42, 0.9);
-  dirLight.position.set(5,12,10); // CORRECT: set light position via position.set(...)
-  weeklyScene.add(dirLight);
-
-  // build bars from history totals
-  const values = historyArr.map(h=>Number(h.total || 0));
-  const labels = historyArr.map(h=>h.week || '');
-  const max = Math.max(...values, 1);
-  weeklyBars = [];
-  values.forEach((v,i)=>{
-    const h = (v/max)*7 + 0.3;
-    const mat = new THREE.MeshStandardMaterial({color:0xff8c42, metalness:0.35, roughness:0.28});
-    const boxGeom = new THREE.BoxGeometry(1.4, h, 1.2);
-    const box = new THREE.Mesh(boxGeom, mat);
-    box.position.set((i - (values.length-1)/2) * 2.2, h/2, 0);
-    weeklyScene.add(box);
-    weeklyBars.push({mesh: box, height: h, value: v, label: labels[i]});
-  });
-
-  // particles
-  const pgeo = new THREE.BufferGeometry();
-  const pcount = 900;
-  const ppositions = new Float32Array(pcount * 3);
-  for (let i=0;i<pcount;i++){
-    ppositions[i*3] = (Math.random()-0.5) * 16;
-    ppositions[i*3+1] = Math.random() * 10 + 3;
-    ppositions[i*3+2] = (Math.random()-0.5) * 6;
-  }
-  pgeo.setAttribute('position', new THREE.BufferAttribute(ppositions, 3));
-  weeklyParticles = new THREE.Points(pgeo, new THREE.PointsMaterial({size:0.12, color:0xffb703, sizeAttenuation:true}));
-  weeklyScene.add(weeklyParticles);
-
-  weeklyControls = new OrbitControls(weeklyCamera, weeklyRenderer.domElement);
-  weeklyControls.enableDamping = true;
-  weeklyControls.enableZoom = true;
-
-  // raycasting + pointer
-  const ray = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-  weeklyEl.addEventListener('pointermove', (ev) => {
-    const rect = weeklyEl.getBoundingClientRect();
-    const x = ev.clientX - rect.left;
-    const y = ev.clientY - rect.top;
-    mouse.x = (x / rect.width) * 2 - 1;
-    mouse.y = - (y / rect.height) * 2 + 1;
-    weeklyEl._lastPointer = {clientX: ev.clientX, clientY: ev.clientY};
-  });
-
-  function onResize(){
-    weeklyRenderer.setSize(weeklyEl.clientWidth, weeklyEl.clientHeight);
-    weeklyCamera.aspect = weeklyEl.clientWidth / weeklyEl.clientHeight; weeklyCamera.updateProjectionMatrix();
-  }
-  window.addEventListener('resize', onResize);
-
-  let t = 0;
-  function animate(){
-    requestAnimationFrame(animate);
-    t += 0.02 * speedFactor;
-    weeklyParticles.rotation.y = t/5;
-    weeklyBars.forEach(b => {
-      b.mesh.position.y += (b.height/2 - b.mesh.position.y) * 0.06 * speedFactor;
-    });
-    weeklyCamera.position.x = 12 * Math.sin(t/5);
-    weeklyCamera.position.z = 12 * Math.cos(t/5);
-    weeklyCamera.lookAt(0, 3, 0);
-    weeklyControls.update();
-
-    // tooltip via raycast
-    ray.setFromCamera(mouse, weeklyCamera);
-    const intersects = ray.intersectObjects(weeklyBars.map(b=>b.mesh));
-    if (intersects.length > 0 && weeklyEl._lastPointer) {
-      const hit = weeklyBars.find(b => b.mesh === intersects[0].object);
-      tooltip.style.display = 'block';
-      tooltip.style.left = (weeklyEl._lastPointer.clientX + 12) + 'px';
-      tooltip.style.top = (weeklyEl._lastPointer.clientY - 10) + 'px';
-      tooltip.innerText = `${hit.label || ''} — ${hit.value}`;
-    } else {
-      tooltip.style.display = 'none';
-    }
-
-    if (animationRunning) weeklyRenderer.render(weeklyScene, weeklyCamera);
-    else weeklyRenderer.render(weeklyScene, weeklyCamera);
-  }
-  animate();
-}
-
-/* ---------- DONUT 3D + mini charts ---------- */
-let donutRenderer;
-function createDonutAndMini(countingArr, historyArr){
-  // destroy previous canvas if exists
-  if (donutRenderer && donutRenderer.domElement && donutRenderer.domElement.parentElement === donutEl) donutEl.removeChild(donutRenderer.domElement);
-
-  const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(50, donutEl.clientWidth / donutEl.clientHeight, 0.1, 100);
-  cam.position.set(0, 0, 8);
-
-  donutRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  donutRenderer.setPixelRatio(DPR());
-  donutRenderer.setSize(donutEl.clientWidth, donutEl.clientHeight);
-  donutEl.appendChild(donutRenderer.domElement);
-
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  const pl = new THREE.PointLight(0xffb703, 1.0); pl.position.set(4,4,4); scene.add(pl);
-
-  // compute totals (exclude "Total:" row if present)
-  const items = countingArr.filter(c => (c.area || '').toLowerCase().indexOf('total') === -1);
-  const total = items.reduce((s, it) => s + (Number(it.qty) || 0), 0);
-  const maxTotal = Math.max(1, total);
-  const fraction = Math.min(total / Math.max(100000, maxTotal), 1); // scale visual arc
-  const arc = Math.max(0.2, Math.min(2 * Math.PI * (total / Math.max(30000, maxTotal)), Math.PI * 2));
-
-  const tor = new THREE.Mesh(
-    new THREE.TorusGeometry(2.6, 0.55, 32, 160, arc),
-    new THREE.MeshStandardMaterial({color:0xff8c42, metalness:0.6, roughness:0.25})
-  );
-  scene.add(tor);
-
-  function onResize(){
+    donutRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+    donutRenderer.setPixelRatio(DPR());
     donutRenderer.setSize(donutEl.clientWidth, donutEl.clientHeight);
-    cam.aspect = donutEl.clientWidth / donutEl.clientHeight; cam.updateProjectionMatrix();
+    donutEl.appendChild(donutRenderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const pl = new THREE.PointLight(0xffb703, 1.0); pl.position.set(4,4,4); scene.add(pl);
+
+    const items = (countingArr || []).filter(c=> (c.area || '').toLowerCase().indexOf('total') === -1);
+    const total = items.reduce((s,it)=> s + (Number(it.qty)||0), 0);
+    const arc = Math.min(2*Math.PI, Math.max(0.2, 2*Math.PI * Math.min(total/30000, 1)));
+
+    const tor = new THREE.Mesh(
+      new THREE.TorusGeometry(2.6, 0.55, 32, 160, arc),
+      new THREE.MeshStandardMaterial({color:0xff8c42, metalness:0.6, roughness:0.25})
+    );
+    scene.add(tor);
+
+    function onResize(){ donutRenderer.setSize(donutEl.clientWidth, donutEl.clientHeight); cam.aspect = donutEl.clientWidth / donutEl.clientHeight; cam.updateProjectionMatrix(); }
+    window.addEventListener('resize', onResize);
+
+    function loop(){ requestAnimationFrame(loop); tor.rotation.y += 0.01 * speedFactor; donutRenderer.render(scene, cam); }
+    loop();
+
+    // Mini charts (Chart.js)
+    try {
+      if (window.miniLineChart) window.miniLineChart.destroy();
+      const histVals = (historyArr || []).map(h=>Number(h.total||0));
+      const labels = (historyArr || []).map(h=>h.week || '');
+      window.miniLineChart = new Chart(miniLineCtx, {
+        type:'line',
+        data:{ labels, datasets:[{data:histVals, borderColor:'#ff8c42', backgroundColor:'rgba(255,140,66,0.12)', tension:0.35, borderWidth:2, pointRadius:3}] },
+        options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}, y:{grid:{display:false}, ticks:{display:false}}}}
+      });
+
+      if (window.miniDoughChart) window.miniDoughChart.destroy();
+      window.miniDoughChart = new Chart(miniDoughCtx, {
+        type:'doughnut',
+        data:{ labels:['Used','Remaining'], datasets:[{ data:[Math.min(total,30000), Math.max(0,30000-total)], backgroundColor:['#ffb703','#333333'] }] },
+        options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
+      });
+    } catch (e) { console.warn('mini charts error', e); }
   }
-  window.addEventListener('resize', onResize);
 
-  function loop(){
-    requestAnimationFrame(loop);
-    tor.rotation.y += 0.01 * speedFactor;
-    donutRenderer.render(scene, cam);
+  /* ---------- Orchestrator: load data and build UI ---------- */
+  async function loadAndBuild(){
+    const json = await fetchDashboard();
+    const data = json || defaults;
+
+    // Render tasks
+    renderTasks(data.dailyTasks || [], data.weeklyTasks || []);
+
+    // Use history if present, else attempt to use counting totals as fallback
+    let history = Array.isArray(data.history) && data.history.length ? data.history.slice(0,9) : null;
+    if (!history) {
+      const fallback = (data.counting || []).slice(0,9).map((c,i)=>({week: c.area || 'A'+i, total: Number(c.qty)||0}));
+      history = fallback;
+    }
+
+    weeklyNote.style.display = 'none';
+    createWeeklyScene(history);
+    createDonutAndMini(data.counting || [], history);
   }
-  loop();
 
-  // Chart.js mini charts
-  try {
-    if (window.miniLineChart) window.miniLineChart.destroy();
-    const histValues = historyArr.map(h => Number(h.total || 0));
-    const labels = historyArr.map(h => h.week || '');
-    window.miniLineChart = new Chart(miniLineCtx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{label:'History', data: histValues, tension:0.35, borderColor:'#ff8c42', backgroundColor:'rgba(255,140,66,0.12)', borderWidth:2, pointRadius:3}]
-      },
-      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}, y:{grid:{display:false},ticks:{display:false}}}}
-    });
+  // initial start
+  loadAndBuild();
 
-    if (window.miniDoughChart) window.miniDoughChart.destroy();
-    window.miniDoughChart = new Chart(miniDoughCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Used','Remaining'],
-        datasets: [{ data: [Math.min(total,30000), Math.max(0,30000-total)], backgroundColor: ['#ffb703','#333333'] }]
-      },
-      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
-    });
-  } catch (e) {
-    console.warn('Mini charts error', e);
-  }
-}
+  // graceful pause on blur
+  window.addEventListener('blur', ()=> animationRunning = false);
+  window.addEventListener('focus', ()=> animationRunning = true);
 
-/* ---------- Orchestrator: load data, render everything ---------- */
-async function loadAndBuild(){
-  const data = await fetchDashboard();
-
-  // render tasks (daily & weekly)
-  renderTasks(data.dailyTasks || [], data.weeklyTasks || []);
-
-  // use history for weekly bars; if history empty, fallback to last 9 totals from counting (rare)
-  const history = Array.isArray(data.history) && data.history.length ? data.history.slice(0,9) : (data.counting || []).slice(0,9).map((c,i)=>({week:`${c.area||'A'+i}`, total:Number(c.qty)||0}));
-
-  // build 3D scenes (creates or replaces canvases)
-  createWeeklyScene(history);
-  createDonutAndMini(data.counting || [], history);
-}
-
-/* initial load */
-loadAndBuild();
-
-/* keep animation toggles sensible */
-window.addEventListener('blur', ()=> animationRunning = false);
-window.addEventListener('focus', ()=> animationRunning = true);
-
-</script>
+  </script>
 </body>
 </html>
