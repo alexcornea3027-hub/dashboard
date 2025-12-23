@@ -1,283 +1,255 @@
 {
-  "Metadata": {
-    "Project": "StockTeam VCB",
-    "Daily_Target": 1193,
-    "Timestamp": "23.12.2025, 12:58:09"
+  "metadata": {
+    "target": 1193,
+    "lastUpdate": "13:05:14"
   },
-  "Counting_Stats": [
+  "dailyStats": [
     {
-      "Area": "Area",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 0,
-      "Status_Behind_Pct": "Behind the target %"
+      "area": "Area",
+      "dailyQty": 0,
+      "targetStatus": "Behind the target %"
     },
     {
-      "Area": "MPR",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 14622,
-      "Status_Behind_Pct": "0"
+      "area": "MPR",
+      "dailyQty": 14622,
+      "targetStatus": "0"
     },
     {
-      "Area": "PB1",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 4329,
-      "Status_Behind_Pct": "0"
+      "area": "PB1",
+      "dailyQty": 4329,
+      "targetStatus": "0"
     },
     {
-      "Area": "PB2",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 795,
-      "Status_Behind_Pct": "0"
+      "area": "PB2",
+      "dailyQty": 795,
+      "targetStatus": "0"
     },
     {
-      "Area": "PB3",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 772,
-      "Status_Behind_Pct": "0.253968253968254"
+      "area": "PB3",
+      "dailyQty": 772,
+      "targetStatus": "0.253968253968254"
     },
     {
-      "Area": "PB4",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 164,
-      "Status_Behind_Pct": "0.253968253968254"
+      "area": "PB4",
+      "dailyQty": 164,
+      "targetStatus": "0.253968253968254"
     },
     {
-      "Area": "PBSRES",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 5197,
-      "Status_Behind_Pct": "0"
+      "area": "PBSRES",
+      "dailyQty": 5197,
+      "targetStatus": "0"
     },
     {
-      "Area": "MP",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 25612,
-      "Status_Behind_Pct": "0"
+      "area": "MP",
+      "dailyQty": 25612,
+      "targetStatus": "0"
     },
     {
-      "Area": "MIX",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 33087,
-      "Status_Behind_Pct": "0"
+      "area": "MIX",
+      "dailyQty": 33087,
+      "targetStatus": "0"
     },
     {
-      "Area": "MS",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 21512,
-      "Status_Behind_Pct": "0"
+      "area": "MS",
+      "dailyQty": 21512,
+      "targetStatus": "0"
     },
     {
-      "Area": "MSX",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 28798,
-      "Status_Behind_Pct": "0"
+      "area": "MSX",
+      "dailyQty": 28798,
+      "targetStatus": "0"
     },
     {
-      "Area": "FM",
-      "Daily_Qty_Today": 0,
-      "Total_Cycle_Counted": 2308,
-      "Status_Behind_Pct": "0"
+      "area": "FM",
+      "dailyQty": 2308,
+      "targetStatus": "0"
     }
   ],
-  "Daily_Tasks": [
+  "dailyTasks": [
     {
-      "Description": "ADJUSTMENTS (Returns)",
-      "Current_Status": "Not started"
+      "task": "ADJUSTMENTS (Returns)",
+      "status": "Not started"
     },
     {
-      "Description": "ADJUSTMENTS (Standard)",
-      "Current_Status": "Not started"
+      "task": "ADJUSTMENTS (Standard)",
+      "status": "Not started"
     },
     {
-      "Description": "Aged stock report 7AM",
-      "Current_Status": "Completed"
+      "task": "Aged stock report 7AM",
+      "status": "Completed"
     },
     {
-      "Description": "Aged stock report 3PM",
-      "Current_Status": "Not started"
+      "task": "Aged stock report 3PM",
+      "status": "Not started"
     },
     {
-      "Description": "Blackwells",
-      "Current_Status": "Not started"
+      "task": "Blackwells",
+      "status": "Not started"
     },
     {
-      "Description": "AGED STOCK REPORT 6 AM",
-      "Current_Status": "Not started"
+      "task": "AGED STOCK REPORT 6 AM",
+      "status": "Not started"
     },
     {
-      "Description": "Available inventory status in Prob-Res pots 3PM",
-      "Current_Status": "Not started"
+      "task": "Available inventory status in Prob-Res pots 3PM",
+      "status": "Not started"
     },
     {
-      "Description": "Available inventory status in Prob-Res pots 6AM",
-      "Current_Status": "Not started"
+      "task": "Available inventory status in Prob-Res pots 6AM",
+      "status": "Not started"
     },
     {
-      "Description": "EMPTY BIN CHECKS",
-      "Current_Status": "Not started"
+      "task": "EMPTY BIN CHECKS",
+      "status": "Not started"
     },
     {
-      "Description": "Internet returns",
-      "Current_Status": "Not started"
+      "task": "Internet returns",
+      "status": "Not started"
     },
     {
-      "Description": "Inventory Status (DATA STUDIO)",
-      "Current_Status": "Not started"
+      "task": "Inventory Status (DATA STUDIO)",
+      "status": "Not started"
     },
     {
-      "Description": "LOCATIONS IN ERROR",
-      "Current_Status": "Not started"
+      "task": "LOCATIONS IN ERROR",
+      "status": "Not started"
     },
     {
-      "Description": "Manual Despatch Adjustment",
-      "Current_Status": "Not started"
+      "task": "Manual Despatch Adjustment",
+      "status": "Not started"
     },
     {
-      "Description": "Manual location checks",
-      "Current_Status": "Not started"
+      "task": "Manual location checks",
+      "status": "Not started"
     },
     {
-      "Description": "Mixing violations (multiple ISBN)",
-      "Current_Status": "Not started"
+      "task": "Mixing violations (multiple ISBN)",
+      "status": "Not started"
     },
     {
-      "Description": "MLC Tracker update",
-      "Current_Status": "Not started"
+      "task": "MLC Tracker update",
+      "status": "Not started"
     },
     {
-      "Description": "Supplier Overs Report",
-      "Current_Status": "Not started"
+      "task": "Supplier Overs Report",
+      "status": "Not started"
     },
     {
-      "Description": "SIS afternoon report",
-      "Current_Status": "Not started"
+      "task": "SIS afternoon report",
+      "status": "Not started"
     },
     {
-      "Description": "PI 1st count",
-      "Current_Status": "Not started"
+      "task": "PI 1st count",
+      "status": "Not started"
     },
     {
-      "Description": "PI 2nd count",
-      "Current_Status": "Not started"
+      "task": "PI 2nd count",
+      "status": "Not started"
     },
     {
-      "Description": "PI assign",
-      "Current_Status": "Not started"
+      "task": "PI assign",
+      "status": "Not started"
     },
     {
-      "Description": "PI Investigation",
-      "Current_Status": "Not started"
+      "task": "PI Investigation",
+      "status": "Not started"
     },
     {
-      "Description": "PI Master file update (Cycle)",
-      "Current_Status": "Not started"
+      "task": "PI Master file update (Cycle)",
+      "status": "Not started"
     },
     {
-      "Description": "POD",
-      "Current_Status": "Not started"
-    },
-    {
-      "Description": "PI set up",
-      "Current_Status": "Not started"
-    },
-    {
-      "Description": "SHRINKAGE RECONCILATION DAILY",
-      "Current_Status": "Not started"
-    },
-    {
-      "Description": "SLA update",
-      "Current_Status": "Not started"
-    },
-    {
-      "Description": "Stock left on RDTs check",
-      "Current_Status": "Not started"
+      "task": "POD",
+      "status": "Not started"
     }
   ],
-  "Weekly_Tasks": [
+  "weeklyTasks": [
     {
-      "Description": "(Weekly) SLA",
-      "Current_Status": "Not started"
+      "task": "(Weekly) SLA",
+      "status": "Not started"
     },
     {
-      "Description": "(Weekly) SIS report",
-      "Current_Status": "Not started"
+      "task": "(Weekly) SIS report",
+      "status": "Not started"
     },
     {
-      "Description": "(Weekly) Shrinkage",
-      "Current_Status": "Not started"
+      "task": "(Weekly) Shrinkage",
+      "status": "Not started"
     },
     {
-      "Description": "(Weekly) ORM",
-      "Current_Status": "Not started"
+      "task": "(Weekly) ORM",
+      "status": "Not started"
     },
     {
-      "Description": "(Tuesday) RP split pack",
-      "Current_Status": "Not started"
+      "task": "(Tuesday) RP split pack",
+      "status": "Not started"
     },
     {
-      "Description": "(Thursday) RP split pack",
-      "Current_Status": "Not started"
+      "task": "(Thursday) RP split pack",
+      "status": "Not started"
     },
     {
-      "Description": "(Weekly) Price checker update",
-      "Current_Status": "Not started"
+      "task": "(Weekly) Price checker update",
+      "status": "Not started"
     },
     {
-      "Description": "(Weekly) AGED STOCK REPORT 12 PM Friday",
-      "Current_Status": "Not started"
+      "task": "(Weekly) AGED STOCK REPORT 12 PM Friday",
+      "status": "Not started"
     },
     {
-      "Description": "(once a month) Shrinkage for Period",
-      "Current_Status": "Completed"
+      "task": "(once a month) Shrinkage for Period",
+      "status": "Completed"
     },
     {
-      "Description": "(Once a month) MLC on FM",
-      "Current_Status": "Not started"
+      "task": "(Once a month) MLC on FM",
+      "status": "Not started"
     },
     {
-      "Description": "(Weekly) Shrinkage to Database",
-      "Current_Status": "Not started"
+      "task": "(Weekly) Shrinkage to Database",
+      "status": "Not started"
     },
     {
-      "Description": "(Weekly) Returns locations checks",
-      "Current_Status": "Not started"
+      "task": "(Weekly) Returns locations checks",
+      "status": "Not started"
     }
   ],
-  "Trend_History": [
+  "history": [
     {
-      "Week_No": 46014,
-      "Volume": null
+      "week": "W46014",
+      "qty": 0
     },
     {
-      "Week_No": 46014,
-      "Volume": null
+      "week": "W46014",
+      "qty": 0
     },
     {
-      "Week_No": 46014,
-      "Volume": null
+      "week": "W46014",
+      "qty": 0
     },
     {
-      "Week_No": 46014,
-      "Volume": null
+      "week": "W46014",
+      "qty": 0
     },
     {
-      "Week_No": 46014,
-      "Volume": null
+      "week": "W46014",
+      "qty": 0
     },
     {
-      "Week_No": 46014,
-      "Volume": null
+      "week": "W46014",
+      "qty": 0
     },
     {
-      "Week_No": 46014,
-      "Volume": null
+      "week": "W46014",
+      "qty": 0
     },
     {
-      "Week_No": 46014,
-      "Volume": null
+      "week": "W46014",
+      "qty": 0
     },
     {
-      "Week_No": 46014,
-      "Volume": null
+      "week": "W46014",
+      "qty": 0
     }
   ]
 }
+================================
