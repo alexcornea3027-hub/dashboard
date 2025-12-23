@@ -148,7 +148,7 @@ setInterval(()=>{
   const h=(v/max)*7+.3;
   const mat=new THREE.MeshStandardMaterial({color:0x4fd1c5,metalness:.5,roughness:.25});
   const bar=new THREE.Mesh(new THREE.BoxGeometry(1,h,1),mat);
-  bar.position.set((i-2)*2,10,0); // start above
+  bar.position.set((i-2)*2,10,0);
   scene.add(bar); bars.push({bar,h});
  });
 
