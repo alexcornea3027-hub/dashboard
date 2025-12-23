@@ -2,28 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>STOCK TEAM VCB | IMMERSIVE 3D</title>
-
-<!-- THREE.JS -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+<title>STOCK TEAM VCB | 3D COMMAND</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 
 <style>
 :root{
- --bg:#05060a;
- --panel:rgba(255,255,255,.06);
+ --bg:#05070d;
+ --panel:rgba(255,255,255,.07);
  --border:rgba(255,255,255,.15);
  --text:#fff;
 
  --cyan:#4fd1c5;
  --amber:#ffb703;
- --red:#ff5d5d;
+ --rose:#ff6b6b;
 }
 
 [data-theme="light"]{
- --bg:#f4f6fb;
+ --bg:#f2f4f9;
  --panel:#ffffff;
  --border:#d0d6e0;
  --text:#111;
@@ -41,26 +37,48 @@ body{
 .app{
  height:100vh;
  display:grid;
- grid-template-rows:70px 1fr;
+ grid-template-rows:70px 90px 1fr;
 }
 
 /* TOP BAR */
 .top{
  display:flex;
- align-items:center;
  justify-content:space-between;
+ align-items:center;
  padding:0 30px;
- background:linear-gradient(180deg,rgba(0,0,0,.3),transparent);
 }
-.logo{font-weight:800;font-size:1.4rem}
+.logo{font-size:1.4rem;font-weight:800}
 .logo span{color:var(--amber)}
-.controls button{
+
+.btn{
  padding:10px 22px;
- border:none;
  border-radius:50px;
+ border:none;
  cursor:pointer;
  font-weight:700;
  background:linear-gradient(135deg,var(--amber),#ff8c42);
+}
+
+/* CLOCK */
+.clock{
+ display:flex;
+ justify-content:center;
+ align-items:center;
+}
+.clock-card{
+ padding:14px 50px;
+ border-radius:60px;
+ background:var(--panel);
+ border:1px solid var(--border);
+ box-shadow:0 20px 40px rgba(0,0,0,.5);
+ animation:float 6s ease-in-out infinite;
+}
+#time{font-size:2.8rem;font-weight:800;letter-spacing:3px}
+#date{font-size:.8rem;color:var(--amber);text-align:center}
+
+@keyframes float{
+ 0%,100%{transform:translateY(0)}
+ 50%{transform:translateY(-12px)}
 }
 
 /* MAIN */
@@ -76,29 +94,34 @@ body{
 .card{
  background:var(--panel);
  border:1px solid var(--border);
- border-radius:40px;
+ border-radius:36px;
  padding:20px;
  position:relative;
  overflow:hidden;
 }
 
-/* CURVED SECTIONS */
-.card.curve::before{
- content:'';
- position:absolute;
- inset:-30%;
- background:radial-gradient(circle at 30% 30%,rgba(79,209,197,.25),transparent 55%);
+.card h3{
+ font-size:.75rem;
+ letter-spacing:2px;
+ color:#888;
+ margin-bottom:10px;
 }
 
-/* 3D CANVAS */
+/* 3D */
 .canvas3d{width:100%;height:100%}
 
 /* TASKS */
 .tasks{
  height:100%;
  overflow-y:auto;
- padding-right:10px;
+ padding-right:8px;
 }
+.tasks::-webkit-scrollbar{width:4px}
+.tasks::-webkit-scrollbar-thumb{
+ background:var(--border);
+ border-radius:10px;
+}
+
 .task{
  padding:14px 18px;
  margin-bottom:10px;
@@ -106,16 +129,17 @@ body{
  background:rgba(255,255,255,.05);
  display:flex;
  justify-content:space-between;
+ align-items:center;
 }
 .task.done{border-left:4px solid var(--cyan)}
 .badge{
  font-size:.65rem;
+ font-weight:800;
  padding:6px 14px;
  border-radius:50px;
- font-weight:800;
 }
 .ok{background:var(--cyan);color:#000}
-.wait{background:#999;color:#000}
+.wait{background:#aaa;color:#000}
 </style>
 </head>
 
@@ -126,34 +150,50 @@ body{
 <!-- TOP -->
 <div class="top">
  <div class="logo">STOCK TEAM <span>| VCB</span></div>
- <div class="controls">
-  <button onclick="toggleTheme()">DARK / LIGHT</button>
+ <div>
+  <button class="btn" onclick="toggleTheme()">DARK / LIGHT</button>
+  <button class="btn" onclick="toggleFS()">FULLSCREEN</button>
+ </div>
+</div>
+
+<!-- CLOCK -->
+<div class="clock">
+ <div class="clock-card">
+  <div id="time">00:00:00</div>
+  <div id="date">LOADING…</div>
  </div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<!-- LEFT BIG 3D -->
-<div class="card curve" style="grid-row:span 2">
+<!-- 3D BARS -->
+<div class="card" style="grid-row:span 2">
+ <h3>PRODUCTIVITY MAP · 3D</h3>
  <div id="bars3d" class="canvas3d"></div>
 </div>
 
-<!-- TOP RIGHT -->
-<div class="card curve">
+<!-- DONUT -->
+<div class="card">
+ <h3>COUNTING PROGRESS</h3>
  <div id="donut3d" class="canvas3d"></div>
 </div>
 
-<!-- BOTTOM RIGHT -->
+<!-- TASKS -->
 <div class="card">
+ <h3>DAILY OPERATIONS</h3>
  <div class="tasks" id="tasks"></div>
 </div>
 
 </div>
 </div>
 
-<script>
-/* ================= DATA ================= */
+<!-- ================= THREE.JS ES MODULE ================= -->
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/controls/OrbitControls.js';
+
+/* DATA */
 const store={
  counting:[
  {area:"MPR",qty:146},{area:"PB1",qty:43},{area:"PB2",qty:79},
@@ -171,71 +211,84 @@ const store={
  ]
 };
 
-/* ================= THEME ================= */
-function toggleTheme(){
- document.body.dataset.theme =
- document.body.dataset.theme==="dark"?"light":"dark";
-}
+/* CLOCK */
+setInterval(()=>{
+ const d=new Date();
+ time.innerText=d.toLocaleTimeString('en-GB',{hour12:false});
+ date.innerText=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+},1000);
 
-/* ================= TASKS ================= */
-const taskBox=document.getElementById("tasks");
+/* TASKS */
+const box=document.getElementById("tasks");
 store.daily.forEach(t=>{
  const d=t.s==="Completed";
- taskBox.innerHTML+=`
+ box.innerHTML+=`
  <div class="task ${d?"done":""}">
   <span>${t.t}</span>
   <span class="badge ${d?"ok":"wait"}">${d?"READY":"PENDING"}</span>
  </div>`;
 });
 
-/* ================= 3D BAR CHART ================= */
+/* FULLSCREEN */
+window.toggleFS=()=>{
+ if(!document.fullscreenElement)document.documentElement.requestFullscreen();
+ else document.exitFullscreen();
+}
+
+/* THEME */
+window.toggleTheme=()=>{
+ document.body.dataset.theme=
+ document.body.dataset.theme==="dark"?"light":"dark";
+}
+
+/* 3D BARS */
 function bars3D(){
  const el=document.getElementById("bars3d");
  const scene=new THREE.Scene();
  const cam=new THREE.PerspectiveCamera(50,el.clientWidth/el.clientHeight,.1,100);
- cam.position.set(0,8,16);
+ cam.position.set(0,8,18);
 
- const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
- renderer.setSize(el.clientWidth,el.clientHeight);
- el.appendChild(renderer.domElement);
+ const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+ r.setSize(el.clientWidth,el.clientHeight);
+ el.appendChild(r.domElement);
 
  scene.add(new THREE.AmbientLight(0xffffff,.4));
- const light=new THREE.DirectionalLight(0x4fd1c5,1.2);
- light.position.set(5,10,5);
- scene.add(light);
+ const l=new THREE.DirectionalLight(0x4fd1c5,1.2);
+ l.position.set(5,10,5);
+ scene.add(l);
 
  const max=Math.max(...store.counting.map(x=>x.qty));
  store.counting.forEach((d,i)=>{
-  const h=(d.qty/max)*8+.2;
+  const h=(d.qty/max)*8+.3;
   const bar=new THREE.Mesh(
-   new THREE.BoxGeometry(.8,h,.8),
-   new THREE.MeshStandardMaterial({color:0x4fd1c5,metalness:.4,roughness:.3})
+   new THREE.BoxGeometry(.9,h,.9),
+   new THREE.MeshStandardMaterial({color:0x4fd1c5,metalness:.5,roughness:.25})
   );
-  bar.position.set((i-6)*1.2,h/2,0);
+  bar.position.set((i-6)*1.3,h/2,0);
   scene.add(bar);
  });
 
- const controls=new THREE.OrbitControls(cam,renderer.domElement);
- controls.enableZoom=false;
- controls.enableDamping=true;
+ const c=new OrbitControls(cam,r.domElement);
+ c.enableDamping=true;
+ c.enableZoom=false;
 
- (function animate(){
-  requestAnimationFrame(animate);
-  controls.update();
-  renderer.render(scene,cam);
+ (function anim(){
+  requestAnimationFrame(anim);
+  c.update();
+  r.render(scene,cam);
  })();
 }
 
-/* ================= 3D DONUT ================= */
+/* 3D DONUT */
 function donut3D(){
  const el=document.getElementById("donut3d");
  const scene=new THREE.Scene();
  const cam=new THREE.PerspectiveCamera(50,el.clientWidth/el.clientHeight,.1,100);
  cam.position.z=8;
 
- const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
- renderer.setSize(el.clientWidth,el.clientHeight);
- el.appendChild(renderer.domElement);
+ const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+ r.setSize(el.clientWidth,el.clientHeight);
+ el.appendChild(r.domElement);
 
  scene.add(new THREE.AmbientLight(0xffffff,.5));
  const l=new THREE.PointLight(0xffb703,1.5);
@@ -243,15 +296,15 @@ function donut3D(){
  scene.add(l);
 
  const total=store.counting.reduce((a,b)=>a+b.qty,0);
- const geo=new THREE.TorusGeometry(2.6,.6,32,120,(total/1193)*Math.PI*2);
+ const geo=new THREE.TorusGeometry(2.8,.6,32,160,(total/1193)*Math.PI*2);
  const mat=new THREE.MeshStandardMaterial({color:0xffb703,metalness:.6,roughness:.25});
  const tor=new THREE.Mesh(geo,mat);
  scene.add(tor);
 
- (function anim(){
-  requestAnimationFrame(anim);
+ (function a(){
+  requestAnimationFrame(a);
   tor.rotation.y+=.01;
-  renderer.render(scene,cam);
+  r.render(scene,cam);
  })();
 }
 
