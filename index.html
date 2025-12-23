@@ -37,7 +37,7 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888}
 .tasks{height:100%;overflow-y:auto;padding-right:6px}
 .tasks::-webkit-scrollbar{width:4px}
 .tasks::-webkit-scrollbar-thumb{background:var(--border)}
-.task{padding:14px 18px;margin-bottom:10px;border-radius:18px;background:rgba(255,255,255,.05);display:flex;justify-content:space-between}
+.task{padding:14px 18px;margin-bottom:10px;border-radius:18px;background:rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center}
 .done{border-left:4px solid var(--cyan)}
 .badge{font-size:.65rem;padding:6px 14px;border-radius:50px;font-weight:800}
 .ok{background:var(--cyan);color:#000}
@@ -68,7 +68,7 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888}
 
 <div class="main">
 <div class="card" style="grid-row:span 2">
- <h3>WEEKLY VOLUME · 3D WATERFALL + PARTICLES</h3>
+ <h3>WEEKLY VOLUME · 3D WATERFALL + PARTICLES + HEATMAP</h3>
  <div id="weekly3d" class="canvas3d"></div>
 </div>
 
@@ -113,7 +113,6 @@ tasks.forEach(x=>{
 const timeEl=document.getElementById("time");
 const dateEl=document.getElementById("date");
 const hgEl=document.getElementById("hourglass");
-
 let lastMin=null;
 setInterval(()=>{
  const d=new Date();
@@ -121,12 +120,12 @@ setInterval(()=>{
  dateEl.innerText=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
  if(d.getMinutes()!==lastMin){
   lastMin=d.getMinutes();
-  // Animate clepsidra rotation
-  hgEl.rotation.y += Math.PI; 
+  hgMesh.rotation.y += Math.PI;
  }
 },1000);
 
-// CLEPSIDRA 3D
+// CLEPSIDRA 3D cu nisip
+let hgMesh;
 (function(){
  const scene=new THREE.Scene();
  const cam=new THREE.PerspectiveCamera(50, hgEl.clientWidth/hgEl.clientHeight, .1, 20);
@@ -139,23 +138,40 @@ setInterval(()=>{
  const geomTop=new THREE.ConeGeometry(.4,1,32);
  const geomBot=new THREE.ConeGeometry(.4,1,32);
  geomBot.rotateX(Math.PI);
-
+ hgMesh=new THREE.Group();
  const top=new THREE.Mesh(geomTop,material);
  const bot=new THREE.Mesh(geomBot,material);
  top.position.y=0.5; bot.position.y=-0.5;
- scene.add(top,bot);
+ hgMesh.add(top,bot);
+
+ // Nisip ca particule
+ const sandGeo=new THREE.BufferGeometry();
+ const sandCount=100;
+ const sandPos=new Float32Array(sandCount*3);
+ for(let i=0;i<sandCount;i++){
+  sandPos[i*3]=(Math.random()-0.5)*0.2;
+  sandPos[i*3+1]=Math.random()*0.8-0.4;
+  sandPos[i*3+2]=(Math.random()-0.5)*0.2;
+ }
+ sandGeo.setAttribute('position',new THREE.BufferAttribute(sandPos,3));
+ const sandMat=new THREE.PointsMaterial({color:0xffb703,size:0.05});
+ const sandPoints=new THREE.Points(sandGeo,sandMat);
+ hgMesh.add(sandPoints);
+
+ scene.add(hgMesh);
 
  scene.add(new THREE.AmbientLight(0xffffff,.5));
  const l=new THREE.PointLight(0xffb703,1.5); l.position.set(5,5,5); scene.add(l);
 
  function anim(){
   requestAnimationFrame(anim);
+  sandPoints.rotation.y +=0.01;
   renderer.render(scene,cam);
  }
  anim();
 })();
 
-// WEEKLY 3D WATERFALL + PARTICLES
+// WEEKLY 3D WATERFALL + PARTICULE + HEATMAP + TOOLTIP
 (function(){
  const el=document.getElementById("weekly3d");
  const scene=new THREE.Scene();
@@ -169,16 +185,26 @@ setInterval(()=>{
 
  const max=Math.max(...weekly);
  const bars=[];
+ const tooltip=document.createElement('div');
+ tooltip.style.position='absolute';
+ tooltip.style.padding='6px 12px';
+ tooltip.style.background='rgba(0,0,0,0.7)';
+ tooltip.style.color='#fff';
+ tooltip.style.borderRadius='6px';
+ tooltip.style.display='none';
+ tooltip.style.pointerEvents='none';
+ document.body.appendChild(tooltip);
+
  weekly.forEach((v,i)=>{
   const h=(v/max)*7+.3;
   const mat=new THREE.MeshStandardMaterial({color:0x4fd1c5,metalness:.5,roughness:.25});
   const bar=new THREE.Mesh(new THREE.BoxGeometry(1,h,1),mat);
   bar.position.set((i-2)*2,h/2,0);
   scene.add(bar);
-  bars.push({bar,h});
+  bars.push({bar,h,value:v});
  });
 
- // PARTICLES
+ // PARTICULES
  const pgeo=new THREE.BufferGeometry();
  const count=500;
  const positions=new Float32Array(count*3);
@@ -196,6 +222,14 @@ setInterval(()=>{
  controls.enableDamping=true;
  controls.enableZoom=false;
 
+ const raycaster=new THREE.Raycaster();
+ const mouse=new THREE.Vector2();
+
+ window.addEventListener('mousemove',(e)=>{
+  mouse.x=(e.clientX/el.clientWidth)*2-1;
+  mouse.y=-(e.clientY/el.clientHeight)*2+1;
+ });
+
  let t=0;
  function animate(){
   requestAnimationFrame(animate);
@@ -206,6 +240,18 @@ setInterval(()=>{
   cam.position.x=12*Math.sin(t/5);
   cam.position.z=12*Math.cos(t/5);
   cam.lookAt(0,3,0);
+
+  // Tooltip
+  raycaster.setFromCamera(mouse,cam);
+  const intersects=raycaster.intersectObjects(bars.map(b=>b.bar));
+  if(intersects.length>0){
+    const obj=bars.find(b=>b.bar===intersects[0].object);
+    tooltip.style.display='block';
+    tooltip.style.left=(event.clientX+15)+'px';
+    tooltip.style.top=(event.clientY+15)+'px';
+    tooltip.innerText=`Value: ${obj.value}`;
+  }else tooltip.style.display='none';
+
   renderer.render(scene,cam);
  }
  animate();
