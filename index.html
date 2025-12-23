@@ -2,339 +2,270 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockTeam VCB | Premium Dashboard</title>
+    <title>StockTeam VCB | Executive Control</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #06080f;
-            --card-bg: rgba(16, 20, 31, 0.8);
-            --border: rgba(255, 255, 255, 0.06);
-            /* Culori mai calde */
-            --gold: #ffb347;
-            --emerald: #00fa9a;
-            --soft-red: #ff5e62;
-            --sky-blue: #00d2ff;
-            --text-main: #e0e6ed;
-            --text-muted: #94a3b8;
+            --bg: #05070a;
+            --card-bg: #0d1117;
+            --accent-gold: #ffb100;
+            --accent-green: #00e676;
+            --accent-blue: #00b0ff;
+            --text-main: #ffffff;
+            --text-dim: #8b949e;
+            --border: rgba(255, 255, 255, 0.08);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-deep);
-            background-image: radial-gradient(circle at top right, #1a1f35, transparent);
+            background: var(--bg);
             color: var(--text-main);
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            padding: 1.5vh;
+            padding: 2vh;
         }
 
-        /* HEADER ALIGNMENT */
+        /* HEADER & CLOCK */
         header {
             height: 10vh;
             display: grid;
             grid-template-columns: 1fr auto 1fr;
             align-items: center;
-            padding: 0 10px;
+            border-bottom: 1px solid var(--border);
             margin-bottom: 2vh;
         }
 
-        .brand h1 { font-size: 1.6rem; font-weight: 800; color: var(--gold); letter-spacing: -1px; }
-        .brand span { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
-
-        /* CENTRAL CLOCK WIDGET */
         .clock-widget {
             background: var(--card-bg);
-            border: 1px solid var(--gold);
+            border: 1px solid var(--accent-gold);
             padding: 10px 40px;
-            border-radius: 20px;
+            border-radius: 16px;
             text-align: center;
-            box-shadow: 0 0 25px rgba(255, 179, 71, 0.15);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255, 177, 0, 0.1);
         }
-        #time { font-size: 2.2rem; font-weight: 800; color: #fff; line-height: 1; }
-        #date { font-size: 0.8rem; color: var(--gold); font-weight: 700; text-transform: uppercase; margin-top: 5px; }
+        #time { font-size: 2rem; font-weight: 800; color: #fff; line-height: 1; }
+        #date { font-size: 0.8rem; color: var(--accent-gold); text-transform: uppercase; font-weight: 600; margin-top: 4px; }
 
-        .header-right { justify-self: end; }
-        .fs-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 8px 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: 0.3s;
-        }
-        .fs-btn:hover { background: var(--gold); color: #000; }
-
-        /* GRID DEFINITION - NO OVERLAPPING */
+        /* GRID SYSTEM */
         main {
             flex: 1;
             display: grid;
-            grid-template-rows: 22vh 30vh 1fr; /* Rigid sectors */
+            grid-template-rows: 20vh 35vh 1fr;
             gap: 2vh;
             min-height: 0;
         }
 
-        .top-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .mid-row { display: grid; grid-template-columns: 1.6fr 1.1fr; gap: 20px; }
-        .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; min-height: 0; }
+        .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; }
+        .chart-grid { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 2vh; }
 
-        /* CARDS */
+        /* CARD STYLE */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 20px;
-            position: relative;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
         }
 
-        /* FLOATING ANIMATION ONLY FOR TOP CARDS */
-        .top-row .card { animation: float 5s ease-in-out infinite; }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        .kpi-data h3 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
-        .kpi-data .val { font-size: 2.2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-        .kpi-data .sub { font-size: 0.7rem; color: var(--text-muted); }
-
-        .chart-box { width: 90px; height: 90px; position: relative; }
-        .chart-box .perc { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            font-weight: 800; font-size: 0.85rem; 
-        }
+        .card-label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .card-value { font-size: 2.8rem; font-weight: 800; line-height: 1; }
+        
+        .donut-mini { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 85px; height: 85px; }
+        .perc-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.8rem; font-weight: 700; }
 
         /* LISTS */
-        .list-card { display: flex; flex-direction: column; overflow: hidden; }
-        .list-header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 10px;
-        }
-        .scroll-area { flex: 1; overflow-y: auto; padding-right: 5px; }
-        .scroll-area::-webkit-scrollbar { width: 4px; }
-        .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
-        .task-item {
-            background: rgba(255,255,255,0.02);
+        .list-container { flex: 1; overflow-y: auto; margin-top: 15px; }
+        .task-row {
+            background: rgba(255,255,255,0.03);
+            margin-bottom: 6px;
             padding: 12px 15px;
-            margin-bottom: 8px;
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-left: 4px solid transparent;
         }
-        .status-pill { font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; }
-        .done { background: rgba(0, 250, 154, 0.1); color: var(--emerald); }
-        .wait { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }
+        .status-pill { font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; }
+        .done { color: var(--accent-green); background: rgba(0, 230, 118, 0.1); border: 1px solid var(--accent-green); }
+        .wait { color: var(--text-dim); background: rgba(255, 255, 255, 0.05); }
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="brand">
-            <h1>StockTeam VCB</h1>
-            <span>Executive Inventory Dashboard</span>
+        <div>
+            <h1 style="font-size: 1.5rem; letter-spacing: -1px;">StockTeam <span style="color: var(--accent-gold);">VCB</span></h1>
+            <p style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase;">Inventory Management Terminal</p>
         </div>
         
         <div class="clock-widget">
             <div id="time">00:00:00</div>
-            <div id="date">Tuesday, 23 December</div>
+            <div id="date">Tuesday, 23 Dec 2025</div>
         </div>
 
-        <div class="header-right">
-            <button class="fs-btn" onclick="toggleFS()">FULLSCREEN</button>
+        <div style="text-align: right;">
+            <button onclick="document.documentElement.requestFullscreen()" style="background:none; border: 1px solid var(--border); color: var(--text-dim); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.7rem;">FULLSCREEN</button>
         </div>
     </header>
 
     <main>
-        <div class="top-row">
+        <div class="row">
             <div class="card">
-                <div class="kpi-data">
-                    <h3>Daily Locations</h3>
-                    <div class="val" id="daily-sum" style="color: var(--emerald);">0</div>
-                    <div class="sub" id="target-remain">Target: 1,193</div>
-                </div>
-                <div class="chart-box">
-                    <canvas id="c1"></canvas>
-                    <div class="perc" id="p1">0%</div>
+                <span class="card-label">Daily Count Today</span>
+                <div class="card-value" id="val-daily" style="color: var(--accent-green);">0</div>
+                <span style="font-size: 0.7rem; color: var(--text-dim);">Target: 1,193 Locations</span>
+                <div class="donut-mini">
+                    <canvas id="chart-daily"></canvas>
+                    <div class="perc-label" id="perc-daily">0%</div>
                 </div>
             </div>
-
-            <div class="card" style="animation-delay: 1s;">
-                <div class="kpi-data">
-                    <h3>Daily Tasks</h3>
-                    <div class="val" id="d-task-ratio" style="color: var(--soft-red);">0/0</div>
-                    <div class="sub">Operational Progress</div>
-                </div>
-                <div class="chart-box">
-                    <canvas id="c2"></canvas>
-                    <div class="perc" id="p2">0%</div>
+            <div class="card">
+                <span class="card-label">Daily Tasks</span>
+                <div class="card-value" id="val-d-tasks">0/0</div>
+                <span style="font-size: 0.7rem; color: var(--text-dim);">Operational Readiness</span>
+                <div class="donut-mini">
+                    <canvas id="chart-d-tasks"></canvas>
+                    <div class="perc-label" id="perc-d-tasks">0%</div>
                 </div>
             </div>
-
-            <div class="card" style="animation-delay: 2s;">
-                <div class="kpi-data">
-                    <h3>Weekly Tasks</h3>
-                    <div class="val" id="w-task-ratio" style="color: var(--sky-blue);">0/0</div>
-                    <div class="sub">Strategic Progress</div>
-                </div>
-                <div class="chart-box">
-                    <canvas id="c3"></canvas>
-                    <div class="perc" id="p3">0%</div>
+            <div class="card">
+                <span class="card-label">Weekly Compliance</span>
+                <div class="card-value" id="val-w-tasks" style="color: var(--accent-blue);">0/0</div>
+                <span style="font-size: 0.7rem; color: var(--text-dim);">Strategic Tasks</span>
+                <div class="donut-mini">
+                    <canvas id="chart-w-tasks"></canvas>
+                    <div class="perc-label" id="perc-w-tasks">0%</div>
                 </div>
             </div>
         </div>
 
-        <div class="mid-row">
-            <div class="card" style="flex-direction: column; align-items: stretch;">
-                <h3 style="font-size: 0.8rem; color: var(--emerald); margin-bottom: 15px;">▮ DAILY PRODUCTIVITY BY AREA</h3>
-                <div style="flex:1;"><canvas id="barChart"></canvas></div>
+        <div class="chart-grid">
+            <div class="card">
+                <span class="card-label" style="color: var(--accent-green);">Daily Productivity by Area (Locations)</span>
+                <div style="flex:1; margin-top:10px;"><canvas id="bar-productivity"></canvas></div>
             </div>
-            <div class="card" style="flex-direction: column; align-items: stretch;">
-                <h3 style="font-size: 0.8rem; color: var(--sky-blue); margin-bottom: 15px;">📈 WEEKLY VOLUME HISTORY</h3>
-                <div style="flex:1;"><canvas id="lineChart"></canvas></div>
+            <div class="card">
+                <span class="card-label" style="color: var(--accent-blue);">Performance History (Weekly)</span>
+                <div style="flex:1; margin-top:10px;"><canvas id="line-history"></canvas></div>
             </div>
         </div>
 
-        <div class="bottom-row">
-            <div class="card list-card">
-                <div class="list-header">
-                    <span style="font-weight: 800;">📝 DAILY CHECKLIST</span>
-                    <span style="color: var(--soft-red); font-size: 0.7rem;">PRIORITY</span>
-                </div>
-                <div class="scroll-area" id="daily-list"></div>
+        <div class="row" style="grid-template-columns: 1.5fr 1fr;">
+            <div class="card">
+                <span class="card-label">Daily Operational Checklist</span>
+                <div class="list-container" id="list-daily"></div>
             </div>
-            <div class="card list-card">
-                <div class="list-header">
-                    <span style="font-weight: 800;">📅 WEEKLY CHECKLIST</span>
-                    <span style="color: var(--sky-blue); font-size: 0.7rem;">SCHEDULE</span>
-                </div>
-                <div class="scroll-area" id="weekly-list"></div>
+            <div class="card">
+                <span class="card-label">Weekly Strategic Checklist</span>
+                <div class="list-container" id="list-weekly"></div>
             </div>
         </div>
     </main>
 
     <script>
-        const TARGET = 1193;
-
-        const db = {
-            piData: [
-                {"Area": "MPR", "Daily Qty": 120}, {"Area": "PB1", "Daily Qty": 85}, {"Area": "PB2", "Daily Qty": 40},
-                {"Area": "PB3", "Daily Qty": 0}, {"Area": "PB4", "Daily Qty": 0}, {"Area": "PBSRES", "Daily Qty": 110},
-                {"Area": "MP", "Daily Qty": 250}, {"Area": "MIX", "Daily Qty": 136}, {"Area": "MS", "Daily Qty": 180},
-                {"Area": "MSX", "Daily Qty": 200}, {"Area": "FM", "Daily Qty": 45}, {"Area": "HP", "Daily Qty": 20}
+        // DATELE EXTRASE DIN OFFICE SCRIPT (SIMULARE CONFORM TABELELOR TALE)
+        const data = {
+            metadata: { target: 1193 },
+            dailyStats: [
+                {area: "MPR", dailyQty: 146}, {area: "PB1", dailyQty: 43}, {area: "PB2", dailyQty: 79},
+                {area: "PB3", dailyQty: 77}, {area: "PB4", dailyQty: 16}, {area: "PBSRES", dailyQty: 51},
+                {area: "MP", dailyQty: 256}, {area: "MIX", dailyQty: 330}, {area: "MS", dailyQty: 215},
+                {area: "MSX", dailyQty: 287}, {area: "FM", dailyQty: 23}, {area: "HP", dailyQty: 5}
             ],
-            dailyTask: [
-                {t: "Aged stock report 7AM", s: "Completed"},
-                {t: "Aged stock report 3PM", s: "Not started"},
-                {t: "ADJUSTMENTS (Returns)", s: "Not started"},
-                {t: "PI 1st count", s: "Not started"},
-                {t: "SLA update", s: "Not started"}
+            dailyTasks: [
+                {task: "Aged stock report 7AM", status: "Completed"},
+                {task: "Aged stock report 3PM", status: "Not started"},
+                {task: "ADJUSTMENTS (Returns)", status: "Not started"},
+                {task: "PI 1st count", status: "Not started"}
             ],
-            weeklyTask: [
-                {t: "(once a month) Shrinkage", s: "Completed"},
-                {t: "SIS report", s: "Not started"},
-                {t: "Weekly ORM", s: "Not started"}
+            weeklyTasks: [
+                {task: "(once a month) Shrinkage", status: "Completed"},
+                {task: "SIS report", status: "Not started"}
             ],
-            weeklyHistory: [
-                {w: 30, q: 6901}, {w: 31, q: 5447}, {w: 32, q: 4524}, {w: 33, q: 2068}, {w: 34, q: 0}
+            history: [
+                {week: "W30", qty: 6901}, {week: "W31", qty: 5447}, {week: "W32", qty: 4524}, {week: "W33", qty: 2068}, {week: "W34", qty: 0}
             ]
         };
 
-        function toggleFS() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-            else document.exitFullscreen();
-        }
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('time').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
-            document.getElementById('date').innerText = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-        }
-        setInterval(updateClock, 1000); updateClock();
-
-        // CHARTS LOGIC
-        window.onload = () => {
-            const dailySum = db.piData.reduce((a, b) => a + b["Daily Qty"], 0);
-            document.getElementById('daily-sum').innerText = dailySum.toLocaleString();
-            document.getElementById('target-remain').innerText = `Target: 1,193 (${Math.max(0, TARGET - dailySum)} left)`;
-
-            const dDone = db.dailyTask.filter(x => x.s === "Completed").length;
-            document.getElementById('d-task-ratio').innerText = `${dDone}/${db.dailyTask.length}`;
+        function updateUI() {
+            // 1. KPI Calculations
+            const dailySum = data.dailyStats.reduce((acc, curr) => acc + curr.dailyQty, 0);
+            document.getElementById('val-daily').innerText = dailySum.toLocaleString();
             
-            const wDone = db.weeklyTask.filter(x => x.s === "Completed").length;
-            document.getElementById('w-task-ratio').innerText = `${wDone}/${db.weeklyTask.length}`;
+            const dDone = data.dailyTasks.filter(t => t.status === "Completed").length;
+            document.getElementById('val-d-tasks').innerText = `${dDone}/${data.dailyTasks.length}`;
 
-            const drawDoughnut = (id, pId, val, total, col) => {
-                const perc = Math.min(100, Math.round((val / total) * 100));
-                document.getElementById(pId).innerText = perc + "%";
+            const wDone = data.weeklyTasks.filter(t => t.status === "Completed").length;
+            document.getElementById('val-w-tasks').innerText = `${wDone}/${data.weeklyTasks.length}`;
+
+            // 2. Donut Charts
+            const createDonut = (id, val, target, color, labelId) => {
+                const perc = Math.min(100, Math.round((val/target)*100));
+                document.getElementById(labelId).innerText = perc + "%";
                 new Chart(document.getElementById(id), {
                     type: 'doughnut',
-                    data: { datasets: [{ data: [val, Math.max(0, total - val)], backgroundColor: [col, 'rgba(255,255,255,0.05)'], borderWidth: 0 }] },
-                    options: { cutout: '82%', plugins: { tooltip: false }, maintainAspectRatio: false }
+                    data: { datasets: [{ data: [val, Math.max(0, target-val)], backgroundColor: [color, '#1a1f26'], borderWidth: 0 }] },
+                    options: { cutout: '80%', plugins: { tooltip: false }, maintainAspectRatio: false }
                 });
             };
 
-            drawDoughnut('c1', 'p1', dailySum, TARGET, '#00fa9a');
-            drawDoughnut('c2', 'p2', dDone, db.dailyTask.length, '#ff5e62');
-            drawDoughnut('c3', 'p3', wDone, db.weeklyTask.length, '#00d2ff');
+            createDonut('chart-daily', dailySum, data.metadata.target, '#00e676', 'perc-daily');
+            createDonut('chart-d-tasks', dDone, data.dailyTasks.length, '#ffb100', 'perc-d-tasks');
+            createDonut('chart-w-tasks', wDone, data.weeklyTasks.length, '#00b0ff', 'perc-w-tasks');
 
-            // BAR CHART
-            new Chart(document.getElementById('barChart'), {
+            // 3. Bar Chart
+            new Chart(document.getElementById('bar-productivity'), {
                 type: 'bar',
                 data: {
-                    labels: db.piData.map(x => x.Area),
-                    datasets: [{ data: db.piData.map(x => x["Daily Qty"]), backgroundColor: '#00fa9a', borderRadius: 6 }]
+                    labels: data.dailyStats.map(s => s.area),
+                    datasets: [{ data: data.dailyStats.map(s => s.dailyQty), backgroundColor: '#00e676', borderRadius: 4 }]
                 },
-                options: {
-                    maintainAspectRatio: false,
-                    plugins: { legend: false },
-                    scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } } }
-                }
+                options: { maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#8b949e', font: { size: 10 } } } } }
             });
 
-            // LINE CHART
-            new Chart(document.getElementById('lineChart'), {
+            // 4. Line Chart
+            new Chart(document.getElementById('line-history'), {
                 type: 'line',
                 data: {
-                    labels: db.weeklyHistory.map(x => "W" + x.w),
-                    datasets: [{ data: db.weeklyHistory.map(x => x.q), borderColor: '#00d2ff', tension: 0.4, fill: true, backgroundColor: 'rgba(0, 210, 255, 0.05)', pointRadius: 4 }]
+                    labels: data.history.map(h => h.week),
+                    datasets: [{ data: data.history.map(h => h.qty), borderColor: '#00b0ff', tension: 0.4, fill: true, backgroundColor: 'rgba(0, 176, 255, 0.05)' }]
                 },
-                options: {
-                    maintainAspectRatio: false,
-                    plugins: { legend: false },
-                    scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#94a3b8' } } }
-                }
+                options: { maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#8b949e' } } } }
             });
 
-            // LIST RENDERING
-            const renderList = (data, container, color) => {
-                const el = document.getElementById(container);
-                data.forEach(item => {
-                    const isDone = item.s === "Completed";
+            // 5. Lists
+            const renderList = (id, list, color) => {
+                const el = document.getElementById(id);
+                list.forEach(t => {
+                    const isDone = t.status === "Completed";
                     el.innerHTML += `
-                        <div class="task-item" style="border-left-color: ${color}">
-                            <span style="font-size: 0.85rem;">${item.t}</span>
-                            <span class="status-pill ${isDone ? 'done' : 'wait'}">${isDone ? 'DONE' : 'WAIT'}</span>
+                        <div class="task-row" style="border-left-color: ${isDone ? color : 'transparent'}">
+                            <span style="font-size: 0.85rem;">${t.task}</span>
+                            <span class="status-pill ${isDone ? 'done' : 'wait'}">${isDone ? 'Done' : 'Wait'}</span>
                         </div>
                     `;
                 });
             };
-            renderList(db.dailyTask, 'daily-list', '#ff5e62');
-            renderList(db.weeklyTask, 'weekly-list', '#00d2ff');
-        };
+            renderList('list-daily', data.dailyTasks, '#ffb100');
+            renderList('list-weekly', data.weeklyTasks, '#00b0ff');
+        }
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('time').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+            document.getElementById('date').innerText = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        setInterval(updateTime, 1000);
+        window.onload = () => { updateTime(); updateUI(); };
     </script>
 </body>
 </html>
