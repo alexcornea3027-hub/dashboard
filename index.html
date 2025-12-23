@@ -1,8 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>STOCK TEAM VCB | 3D MISSION CONTROL</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Stock Team | 3D Mission Control</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -12,7 +13,6 @@
  --text:#fff;
  --cyan:#4fd1c5;
  --amber:#ffb703;
- --rose:#ff6b6b;
 }
 [data-theme="light"]{
  --bg:#f3f5fa;
@@ -21,268 +21,390 @@
  --text:#111;
 }
 *{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
 .app{height:100vh;display:grid;grid-template-rows:70px 110px 1fr}
 .top{display:flex;justify-content:space-between;align-items:center;padding:0 30px}
 .logo{font-size:1.4rem;font-weight:800}
 .logo span{color:var(--amber)}
-button{padding:10px 22px;border:none;border-radius:50px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--amber),#ff8c42)}
+button{padding:10px 18px;border:none;border-radius:50px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--amber),#ff8c42);margin-left:8px}
 .clock{display:flex;justify-content:center;align-items:center}
-.clock-card{display:flex;align-items:center;gap:25px;padding:20px 50px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 20px 40px rgba(0,0,0,.5)}
-#time{font-size:2.6rem;font-weight:800;letter-spacing:3px}
+.clock-card{display:flex;align-items:center;gap:18px;padding:18px 36px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 20px 40px rgba(0,0,0,.5)}
+#time{font-size:2.2rem;font-weight:800;letter-spacing:3px}
 #date{font-size:.8rem;color:var(--amber)}
 .main{padding:20px;display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 1fr;gap:20px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:36px;padding:20px;overflow:hidden}
-h3{font-size:.75rem;letter-spacing:2px;color:#888}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:18px;overflow:hidden;position:relative}
+h3{font-size:.75rem;letter-spacing:2px;color:#888;margin-bottom:12px}
 .tasks{height:100%;overflow-y:auto;padding-right:6px}
-.tasks::-webkit-scrollbar{width:4px}
+.tasks::-webkit-scrollbar{width:6px}
 .tasks::-webkit-scrollbar-thumb{background:var(--border)}
-.task{padding:14px 18px;margin-bottom:10px;border-radius:18px;background:rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center}
+.task{padding:12px 14px;margin-bottom:10px;border-radius:14px;background:rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center}
 .done{border-left:4px solid var(--cyan)}
-.badge{font-size:.65rem;padding:6px 14px;border-radius:50px;font-weight:800}
+.badge{font-size:.65rem;padding:6px 12px;border-radius:24px;font-weight:800}
 .ok{background:var(--cyan);color:#000}
 .wait{background:#aaa;color:#000}
-.canvas3d{width:100%;height:100%}
+.canvas3d{width:100%;height:100%;min-height:160px}
+#weekly3d{height:100%;min-height:340px}
+.tooltip {
+ position:fixed;
+ padding:8px 12px;
+ background:rgba(0,0,0,0.8);
+ color:#fff;
+ border-radius:6px;
+ font-size:.85rem;
+ pointer-events:none;
+ transform:translate(-50%,-120%);
+ white-space:nowrap;
+ z-index:9999;
+ display:none;
+}
+@media (max-width:900px){
+ .main{grid-template-columns:1fr;grid-template-rows:auto auto auto}
+ .clock-card{padding:12px 18px}
+}
 </style>
 </head>
 <body data-theme="dark">
-
 <div class="app">
-<div class="top">
- <div class="logo">STOCK TEAM <span>| VCB</span></div>
- <div>
-  <button onclick="toggleTheme()">DARK / LIGHT</button>
-  <button onclick="toggleFS()">FULLSCREEN</button>
- </div>
-</div>
-
-<div class="clock">
- <div class="clock-card">
-  <div id="hourglass" class="canvas3d"></div>
-  <div>
-   <div id="time">00:00:00</div>
-   <div id="date">LOADING…</div>
+  <div class="top">
+    <div class="logo">STOCK TEAM <span>| VCB</span></div>
+    <div>
+      <button id="themeBtn">DARK / LIGHT</button>
+      <button id="fsBtn">FULLSCREEN</button>
+    </div>
   </div>
- </div>
+
+  <div class="clock">
+    <div class="clock-card">
+      <div id="hourglass" class="canvas3d" style="width:120px;height:80px;"></div>
+      <div>
+        <div id="time">00:00:00</div>
+        <div id="date">LOADING…</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="card" style="grid-row:span 2">
+      <h3>WEEKLY VOLUME · 3D WATERFALL + PARTICLES + HEATMAP</h3>
+      <div id="weekly3d" class="canvas3d"></div>
+    </div>
+
+    <div class="card">
+      <h3>COUNTING PROGRESS · 3D DONUT</h3>
+      <div id="donut3d" class="canvas3d"></div>
+    </div>
+
+    <div class="card">
+      <h3>DAILY TASKS</h3>
+      <div class="tasks" id="tasks"></div>
+    </div>
+  </div>
 </div>
 
-<div class="main">
-<div class="card" style="grid-row:span 2">
- <h3>WEEKLY VOLUME · 3D WATERFALL + PARTICLES + HEATMAP</h3>
- <div id="weekly3d" class="canvas3d"></div>
-</div>
-
-<div class="card">
- <h3>COUNTING PROGRESS · DONUT 3D</h3>
- <div id="donut3d" class="canvas3d"></div>
-</div>
-
-<div class="card">
- <h3>DAILY TASKS</h3>
- <div class="tasks" id="tasks"></div>
-</div>
-</div>
-</div>
+<!-- Tooltip element -->
+<div id="tooltip" class="tooltip" aria-hidden="true"></div>
 
 <script type="module">
+/*
+  Clean, robust single-file implementation.
+  - Uses ES module imports of Three.js and OrbitControls from jsDelivr
+  - Responsive canvas resizing
+  - Fixed tooltip & raycasting math
+  - English UI strings
+  - Safe checks to avoid runtime errors
+*/
+
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/controls/OrbitControls.js";
 
-// BUTTONS
-window.toggleTheme = () => document.body.dataset.theme = document.body.dataset.theme==="dark"?"light":"dark";
-window.toggleFS = () => { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };
+/* -------------------------
+   UI Interactions
+   ------------------------- */
+const themeBtn = document.getElementById('themeBtn');
+const fsBtn = document.getElementById('fsBtn');
 
-// DATA
-const weekly=[6901,5447,4524,2068,1100];
-const tasks=[
- {t:"Aged stock report 7AM",s:"Completed"},
- {t:"Aged stock report 3PM",s:"Not started"},
- {t:"Returns Adjustments",s:"Not started"},
- {t:"PI First Count",s:"Not started"},
- {t:"SLA Master Sync",s:"Not started"},
- {t:"High Value Audit",s:"Not started"}
-];
-
-// TASKS
-const tb=document.getElementById("tasks");
-tasks.forEach(x=>{
- tb.innerHTML+=`<div class="task ${x.s==="Completed"?"done":""}"><span>${x.t}</span><span class="badge ${x.s==="Completed"?"ok":"wait"}">${x.s==="Completed"?"READY":"PENDING"}</span></div>`;
+themeBtn.addEventListener('click', () => {
+  document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+});
+fsBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen().catch(()=>{});
 });
 
-// CLOCK + CLEPSIDRA 3D
-const timeEl=document.getElementById("time");
-const dateEl=document.getElementById("date");
-const hgEl=document.getElementById("hourglass");
-let lastMin=null;
+/* -------------------------
+   Data (example)
+   ------------------------- */
+const weekly = [6901, 5447, 4524, 2068, 1100];
+const tasks = [
+  { t: "Aged stock report 07:00", s: "Completed" },
+  { t: "Aged stock report 15:00", s: "Pending" },
+  { t: "Returns adjustments", s: "Pending" },
+  { t: "Physical inventory: first count", s: "Pending" },
+  { t: "SLA master sync", s: "Pending" },
+  { t: "High value audit", s: "Pending" }
+];
+
+/* Populate tasks (English labels) */
+const tb = document.getElementById("tasks");
+tb.innerHTML = "";
+tasks.forEach(x=>{
+  const div = document.createElement('div');
+  div.className = `task ${x.s==="Completed"?"done":""}`;
+  div.innerHTML = `<span>${x.t}</span><span class="badge ${x.s==="Completed"?"ok":"wait"}">${x.s==="Completed"?"READY":"PENDING"}</span>`;
+  tb.appendChild(div);
+});
+
+/* -------------------------
+   Clock + Hourglass 3D
+   ------------------------- */
+const timeEl = document.getElementById("time");
+const dateEl = document.getElementById("date");
+const hgEl = document.getElementById("hourglass");
+
+let lastMin = null;
+let hgMesh = null; // will be set by 3D init
+
 setInterval(()=>{
- const d=new Date();
- timeEl.innerText=d.toLocaleTimeString("en-GB",{hour12:false});
- dateEl.innerText=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
- if(d.getMinutes()!==lastMin){
-  lastMin=d.getMinutes();
-  hgMesh.rotation.y += Math.PI;
- }
+  const d = new Date();
+  timeEl.innerText = d.toLocaleTimeString("en-GB",{hour12:false});
+  dateEl.innerText = d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  if (d.getMinutes() !== lastMin) {
+    lastMin = d.getMinutes();
+    if (hgMesh) {
+      hgMesh.rotation.y += Math.PI; // flip on minute change
+    }
+  }
 },1000);
 
-// CLEPSIDRA 3D cu nisip
-let hgMesh;
-(function(){
- const scene=new THREE.Scene();
- const cam=new THREE.PerspectiveCamera(50, hgEl.clientWidth/hgEl.clientHeight, .1, 20);
- cam.position.set(0,2,4);
- const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
- renderer.setSize(hgEl.clientWidth,hgEl.clientHeight);
- hgEl.appendChild(renderer.domElement);
+// Hourglass scene
+(function initHourglass(){
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(50, hgEl.clientWidth / hgEl.clientHeight, 0.1, 50);
+  cam.position.set(0,1.5,3);
 
- const material=new THREE.MeshStandardMaterial({color:0xffb703,metalness:.7,roughness:.2});
- const geomTop=new THREE.ConeGeometry(.4,1,32);
- const geomBot=new THREE.ConeGeometry(.4,1,32);
- geomBot.rotateX(Math.PI);
- hgMesh=new THREE.Group();
- const top=new THREE.Mesh(geomTop,material);
- const bot=new THREE.Mesh(geomBot,material);
- top.position.y=0.5; bot.position.y=-0.5;
- hgMesh.add(top,bot);
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(hgEl.clientWidth, hgEl.clientHeight);
+  hgEl.appendChild(renderer.domElement);
 
- // Nisip ca particule
- const sandGeo=new THREE.BufferGeometry();
- const sandCount=100;
- const sandPos=new Float32Array(sandCount*3);
- for(let i=0;i<sandCount;i++){
-  sandPos[i*3]=(Math.random()-0.5)*0.2;
-  sandPos[i*3+1]=Math.random()*0.8-0.4;
-  sandPos[i*3+2]=(Math.random()-0.5)*0.2;
- }
- sandGeo.setAttribute('position',new THREE.BufferAttribute(sandPos,3));
- const sandMat=new THREE.PointsMaterial({color:0xffb703,size:0.05});
- const sandPoints=new THREE.Points(sandGeo,sandMat);
- hgMesh.add(sandPoints);
+  // Build the hourglass geometry (two cones) and rotating sand particles.
+  const material = new THREE.MeshStandardMaterial({color:0xffb703, metalness:0.6, roughness:0.25});
+  const geomTop = new THREE.ConeGeometry(0.35, 0.9, 32);
+  const geomBot = new THREE.ConeGeometry(0.35, 0.9, 32);
+  geomBot.rotateX(Math.PI);
 
- scene.add(hgMesh);
+  hgMesh = new THREE.Group();
+  const top = new THREE.Mesh(geomTop, material);
+  const bot = new THREE.Mesh(geomBot, material);
+  top.position.y = 0.45;
+  bot.position.y = -0.45;
+  hgMesh.add(top, bot);
 
- scene.add(new THREE.AmbientLight(0xffffff,.5));
- const l=new THREE.PointLight(0xffb703,1.5); l.position.set(5,5,5); scene.add(l);
+  // sand particles (small points)
+  const sandGeo = new THREE.BufferGeometry();
+  const sandCount = 140;
+  const sandPos = new Float32Array(sandCount * 3);
+  for (let i = 0; i < sandCount; i++) {
+    sandPos[i*3] = (Math.random()-0.5)*0.18;
+    sandPos[i*3+1] = Math.random()*0.7-0.35;
+    sandPos[i*3+2] = (Math.random()-0.5)*0.18;
+  }
+  sandGeo.setAttribute('position', new THREE.BufferAttribute(sandPos, 3));
+  const sandMat = new THREE.PointsMaterial({color:0xffb703, size:0.04, sizeAttenuation:true});
+  const sandPoints = new THREE.Points(sandGeo, sandMat);
+  hgMesh.add(sandPoints);
 
- function anim(){
-  requestAnimationFrame(anim);
-  sandPoints.rotation.y +=0.01;
-  renderer.render(scene,cam);
- }
- anim();
+  scene.add(hgMesh);
+  scene.add(new THREE.AmbientLight(0xffffff, .6));
+  const l = new THREE.PointLight(0xffb703, 1.2);
+  l.position.set(4,4,4);
+  scene.add(l);
+
+  function onResize(){
+    const w = hgEl.clientWidth;
+    const h = hgEl.clientHeight;
+    renderer.setSize(w, h);
+    cam.aspect = w/h;
+    cam.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', onResize);
+
+  function anim(){
+    requestAnimationFrame(anim);
+    sandPoints.rotation.y += 0.008;
+    renderer.render(scene, cam);
+  }
+  anim();
 })();
 
-// WEEKLY 3D WATERFALL + PARTICULE + HEATMAP + TOOLTIP
-(function(){
- const el=document.getElementById("weekly3d");
- const scene=new THREE.Scene();
- const cam=new THREE.PerspectiveCamera(50,el.clientWidth/el.clientHeight,.1,100);
- cam.position.set(0,12,20);
- const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
- renderer.setSize(el.clientWidth,el.clientHeight); el.appendChild(renderer.domElement);
+/* -------------------------
+   WEEKLY 3D: bars + particles + tooltip
+   ------------------------- */
+(function initWeekly3D(){
+  const container = document.getElementById('weekly3d');
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 200);
+  cam.position.set(0,12,20);
 
- scene.add(new THREE.AmbientLight(0xffffff,.4));
- const light=new THREE.DirectionalLight(0x4fd1c5,1.2); light.position.set(5,12,10); scene.add(light);
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  container.appendChild(renderer.domElement);
 
- const max=Math.max(...weekly);
- const bars=[];
- const tooltip=document.createElement('div');
- tooltip.style.position='absolute';
- tooltip.style.padding='6px 12px';
- tooltip.style.background='rgba(0,0,0,0.7)';
- tooltip.style.color='#fff';
- tooltip.style.borderRadius='6px';
- tooltip.style.display='none';
- tooltip.style.pointerEvents='none';
- document.body.appendChild(tooltip);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+  const dirLight = new THREE.DirectionalLight(0x4fd1c5, 1.2);
+  dirLight.position.set(5, 12, 10);
+  scene.add(dirLight);
 
- weekly.forEach((v,i)=>{
-  const h=(v/max)*7+.3;
-  const mat=new THREE.MeshStandardMaterial({color:0x4fd1c5,metalness:.5,roughness:.25});
-  const bar=new THREE.Mesh(new THREE.BoxGeometry(1,h,1),mat);
-  bar.position.set((i-2)*2,h/2,0);
-  scene.add(bar);
-  bars.push({bar,h,value:v});
- });
+  // Bars (waterfall)
+  const max = Math.max(...weekly);
+  const bars = [];
+  weekly.forEach((v, i) => {
+    const h = (v / max) * 7 + 0.3;
+    const mat = new THREE.MeshStandardMaterial({color:0x4fd1c5, metalness:0.5, roughness:0.25});
+    const box = new THREE.Mesh(new THREE.BoxGeometry(1.2, h, 1.2), mat);
+    box.position.set((i - (weekly.length-1)/2) * 2.2, h/2, 0);
+    scene.add(box);
+    bars.push({mesh: box, height: h, value: v});
+  });
 
- // PARTICULES
- const pgeo=new THREE.BufferGeometry();
- const count=500;
- const positions=new Float32Array(count*3);
- for(let i=0;i<count;i++){
-   positions[i*3]=(Math.random()-0.5)*10;
-   positions[i*3+1]=Math.random()*10+5;
-   positions[i*3+2]=(Math.random()-0.5)*5;
- }
- pgeo.setAttribute('position',new THREE.BufferAttribute(positions,3));
- const pmaterial=new THREE.PointsMaterial({color:0xffb703,size:0.15});
- const particles=new THREE.Points(pgeo,pmaterial);
- scene.add(particles);
+  // Particles
+  const pgeo = new THREE.BufferGeometry();
+  const pcount = 600;
+  const positions = new Float32Array(pcount * 3);
+  for (let i = 0; i < pcount; i++){
+    positions[i*3] = (Math.random()-0.5) * 12;
+    positions[i*3+1] = Math.random() * 10 + 3;
+    positions[i*3+2] = (Math.random()-0.5) * 6;
+  }
+  pgeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const pmaterial = new THREE.PointsMaterial({color:0xffb703, size:0.12, sizeAttenuation:true});
+  const particles = new THREE.Points(pgeo, pmaterial);
+  scene.add(particles);
 
- const controls=new OrbitControls(cam,renderer.domElement);
- controls.enableDamping=true;
- controls.enableZoom=false;
+  // Controls
+  const controls = new OrbitControls(cam, renderer.domElement);
+  controls.enableDamping = true;
+  controls.enableZoom = true;
 
- const raycaster=new THREE.Raycaster();
- const mouse=new THREE.Vector2();
+  // Raycasting setup for tooltip
+  const raycaster = new THREE.Raycaster();
+  const mouseN = new THREE.Vector2(); // normalized coords
+  let lastPointer = {x:0, y:0, clientX:0, clientY:0};
 
- window.addEventListener('mousemove',(e)=>{
-  mouse.x=(e.clientX/el.clientWidth)*2-1;
-  mouse.y=-(e.clientY/el.clientHeight)*2+1;
- });
+  // Listen to pointer move on container to get correct coordinates
+  container.addEventListener('pointermove', (ev) => {
+    const rect = container.getBoundingClientRect();
+    const x = ev.clientX - rect.left;
+    const y = ev.clientY - rect.top;
+    mouseN.x = ( x / rect.width ) * 2 - 1;
+    mouseN.y = - ( y / rect.height ) * 2 + 1;
+    lastPointer.clientX = ev.clientX;
+    lastPointer.clientY = ev.clientY;
+  });
 
- let t=0;
- function animate(){
-  requestAnimationFrame(animate);
-  controls.update();
-  t+=0.02;
-  particles.rotation.y=t/5;
-  bars.forEach(b=>{b.bar.position.y += (b.h/2-b.bar.position.y)*0.05;});
-  cam.position.x=12*Math.sin(t/5);
-  cam.position.z=12*Math.cos(t/5);
-  cam.lookAt(0,3,0);
+  // Tooltip element
+  const tooltip = document.getElementById('tooltip');
 
-  // Tooltip
-  raycaster.setFromCamera(mouse,cam);
-  const intersects=raycaster.intersectObjects(bars.map(b=>b.bar));
-  if(intersects.length>0){
-    const obj=bars.find(b=>b.bar===intersects[0].object);
-    tooltip.style.display='block';
-    tooltip.style.left=(event.clientX+15)+'px';
-    tooltip.style.top=(event.clientY+15)+'px';
-    tooltip.innerText=`Value: ${obj.value}`;
-  }else tooltip.style.display='none';
+  // Resize handling
+  function onResize(){
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    renderer.setSize(w, h);
+    cam.aspect = w / h;
+    cam.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', onResize);
 
-  renderer.render(scene,cam);
- }
- animate();
+  let t = 0;
+  function animate(){
+    requestAnimationFrame(animate);
+    controls.update();
+    t += 0.02;
+
+    // subtle bar easing so they sit nicely
+    bars.forEach(b => {
+      b.mesh.position.y += (b.height/2 - b.mesh.position.y) * 0.06;
+    });
+
+    particles.rotation.y = t/5;
+
+    // move camera orbiting around center
+    cam.position.x = 12 * Math.sin(t/5);
+    cam.position.z = 12 * Math.cos(t/5);
+    cam.lookAt(0, 3, 0);
+
+    // raycast against bar meshes
+    raycaster.setFromCamera(mouseN, cam);
+    const intersects = raycaster.intersectObjects(bars.map(b => b.mesh));
+    if (intersects.length > 0) {
+      const hit = bars.find(b => b.mesh === intersects[0].object);
+      if (hit) {
+        tooltip.style.display = 'block';
+        tooltip.style.left = (lastPointer.clientX) + 'px';
+        tooltip.style.top = (lastPointer.clientY - 10) + 'px';
+        tooltip.innerText = `Value: ${hit.value}`;
+      } else {
+        tooltip.style.display = 'none';
+      }
+    } else {
+      tooltip.style.display = 'none';
+    }
+
+    renderer.render(scene, cam);
+  }
+  animate();
 })();
 
-// DONUT 3D
-(function(){
- const el=document.getElementById("donut3d");
- const scene=new THREE.Scene();
- const cam=new THREE.PerspectiveCamera(50,el.clientWidth/el.clientHeight,.1,100);
- cam.position.z=8;
- const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
- renderer.setSize(el.clientWidth,el.clientHeight); el.appendChild(renderer.domElement);
+/* -------------------------
+   DONUT (3D TORUS) - shows counting progress
+   ------------------------- */
+(function initDonut3D(){
+  const el = document.getElementById('donut3d');
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(50, el.clientWidth / el.clientHeight, 0.1, 100);
+  cam.position.set(0, 0, 8);
 
- scene.add(new THREE.AmbientLight(0xffffff,.5));
- const l=new THREE.PointLight(0xffb703,1.5); l.position.set(5,5,5); scene.add(l);
+  const renderer = new THREE.WebGLRenderer({alpha:true, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(el.clientWidth, el.clientHeight);
+  el.appendChild(renderer.domElement);
 
- const total=weekly.reduce((a,b)=>a+b,0);
- const tor=new THREE.Mesh(
-  new THREE.TorusGeometry(2.6,.6,32,160,(total/30000)*Math.PI*2),
-  new THREE.MeshStandardMaterial({color:0xffb703,metalness:.6,roughness:.25})
- );
- scene.add(tor);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  const l = new THREE.PointLight(0xffb703, 1.2);
+  l.position.set(4, 4, 4);
+  scene.add(l);
 
- function anim(){
-  requestAnimationFrame(anim);
-  tor.rotation.y+=0.01;
-  renderer.render(scene,cam);
- }
- anim();
+  const total = weekly.reduce((a,b)=>a+b, 0);
+  // Map total to a visible arc (clamped).
+  const maxTotal = 30000;
+  const fraction = Math.min(total / maxTotal, 1);
+  const arc = fraction * Math.PI * 2;
+
+  const tor = new THREE.Mesh(
+    new THREE.TorusGeometry(2.6, 0.55, 32, 160, arc),
+    new THREE.MeshStandardMaterial({color:0xffb703, metalness:0.6, roughness:0.25})
+  );
+  scene.add(tor);
+
+  function onResize(){
+    const w = el.clientWidth;
+    const h = el.clientHeight;
+    renderer.setSize(w,h);
+    cam.aspect = w/h;
+    cam.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', onResize);
+
+  function anim(){
+    requestAnimationFrame(anim);
+    tor.rotation.y += 0.01;
+    renderer.render(scene, cam);
+  }
+  anim();
 })();
+
 </script>
 </body>
 </html>
