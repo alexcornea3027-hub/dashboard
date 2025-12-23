@@ -2,184 +2,133 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STOCK TEAM | VCB Mission Control</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    
+    <title>STOCK TEAM | VCB VORTEX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
-      }
-    }
+    { "imports": { "three": "https://unpkg.com/three@0.158.0/build/three.module.js" } }
     </script>
-
     <style>
         :root {
-            --bg: #fdfaf6; --card: #ffffff; --text: #1a1a1a;
-            --accent: #ff9a8b; --secondary: #abecd6; --gold: #f6d365;
-            --border: rgba(0,0,0,0.05); --glass: rgba(255,255,255,0.8);
+            --bg: #0a0c10; --card: rgba(20, 24, 33, 0.7);
+            --gold: #f6d365; --rose: #fda085; --mint: #84fab0;
+            --text: #eef2f3; --border: rgba(255,255,255,0.08);
         }
-        [data-theme="dark"] {
-            --bg: #080a0f; --card: #11151c; --text: #e0e6ed;
-            --accent: #ff7e5f; --secondary: #4facfe; --gold: #feb47b;
-            --border: rgba(255,255,255,0.05); --glass: rgba(17,21,28,0.8);
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Outfit', sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            height: 100vh; 
-            overflow: hidden;
-            transition: background 0.5s ease;
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-rows: 70px 1fr;
-            height: 100vh;
-            padding: 15px;
-            gap: 15px;
-        }
-
-        /* Top Navigation */
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            background: var(--card);
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-        }
-        .brand { font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px; }
-        .brand span { color: var(--accent); }
-
-        .btn-group { display: flex; gap: 10px; }
-        .btn {
-            padding: 8px 16px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .btn:hover { transform: translateY(-2px); border-color: var(--accent); }
-
-        /* Main Content Grid */
-        .content {
-            display: grid;
-            grid-template-columns: 1fr 1fr 380px;
-            gap: 15px;
-        }
-
-        .panel {
-            background: var(--card);
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .panel-title { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; color: #888; }
-
-        /* 3D Container */
-        .canvas-container { flex: 1; width: 100%; min-height: 200px; border-radius: 15px; overflow: hidden; }
-
-        /* Clock Widget */
-        .clock-box { text-align: right; }
-        #time { font-size: 2.2rem; font-weight: 800; line-height: 1; }
-        #date { font-size: 0.85rem; color: #777; font-weight: 500; }
-
-        /* Tasks Styling */
-        .task-list { overflow-y: auto; flex: 1; padding-right: 8px; }
-        .task-list::-webkit-scrollbar { width: 4px; }
-        .task-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
-        .task-item {
-            background: var(--bg);
-            padding: 12px 15px;
-            border-radius: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--border);
-            transition: 0.3s;
-        }
-        .task-item.done { border-left: 5px solid var(--secondary); background: rgba(171, 236, 214, 0.1); }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         
-        .badge {
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 8px;
-        }
-        .badge.ready { background: var(--secondary); color: #1a4a3a; }
-        .badge.pending { background: var(--border); color: #777; }
+        #particle-bg { position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%; }
 
-        .kpi-big { font-size: 3.5rem; font-weight: 800; color: var(--accent); }
+        .app { display: grid; grid-template-rows: 80px 1fr; gap: 15px; padding: 15px; height: 100vh; }
+
+        /* HEADER & HOURGLASS */
+        .top-nav {
+            display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center;
+            background: var(--card); border-radius: 25px; border: 1px solid var(--border); padding: 0 30px;
+        }
+        .brand { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; }
+        .clock-center { display: flex; align-items: center; justify-content: center; gap: 20px; }
+        #hourglass-container { width: 60px; height: 60px; }
+        #time { font-size: 2.2rem; font-weight: 800; letter-spacing: 2px; }
+
+        /* MAIN CONTENT */
+        .main-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 15px; min-height: 0; }
+        .left-col { display: grid; grid-template-rows: 1fr 1.2fr; gap: 15px; }
+        .right-col { display: grid; grid-template-rows: 1fr; gap: 15px; }
+
+        .panel { 
+            background: var(--card); border-radius: 30px; border: 1px solid var(--border);
+            padding: 25px; display: flex; flex-direction: column; backdrop-filter: blur(15px);
+            position: relative; overflow: hidden;
+        }
+
+        .title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-bottom: 15px; }
+
+        /* 3D CHARTS ROW */
+        .donut-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; }
+        .donut-wrap { position: relative; height: 100%; min-height: 180px; }
+
+        /* TASKS FEED - FULL LIST */
+        .feed-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow: hidden; }
+        .task-scroll { overflow-y: auto; padding-right: 10px; }
+        .task-scroll::-webkit-scrollbar { width: 4px; }
+        .task-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .task-box {
+            background: rgba(255,255,255,0.03); padding: 14px 18px; border-radius: 18px;
+            margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid transparent; transition: 0.3s;
+        }
+        .task-box.done { border-left: 4px solid var(--mint); background: rgba(132, 250, 176, 0.05); }
+        .badge { font-size: 0.6rem; font-weight: 800; padding: 5px 12px; border-radius: 50px; }
+        .ready { background: var(--mint); color: #000; }
+        .wait { background: var(--border); color: #666; }
+
+        .btn-fs { position: absolute; top: 20px; right: 20px; cursor: pointer; opacity: 0.5; transition: 0.3s; }
+        .btn-fs:hover { opacity: 1; }
     </style>
 </head>
-<body data-theme="light">
+<body>
 
-<div class="dashboard">
-    <nav class="nav">
-        <div class="brand">STOCK TEAM <span>| VCB</span></div>
-        <div class="clock-box">
-            <div id="time">00:00:00</div>
-            <div id="date">Tuesday, 23 Dec</div>
+<canvas id="particle-bg"></canvas>
+
+<div class="app">
+    <nav class="top-nav">
+        <div class="brand">STOCK TEAM <span style="color:var(--rose)">| VCB</span></div>
+        <div class="clock-center">
+            <div id="hourglass-container"></div>
+            <div>
+                <div id="time">00:00:00</div>
+                <div id="date" style="font-size: 0.8rem; opacity: 0.6;">Tuesday, 23 December</div>
+            </div>
         </div>
-        <div class="btn-group">
-            <button class="btn" onclick="toggleTheme()">Theme</button>
-            <button class="btn" onclick="toggleFS()">Fullscreen</button>
+        <div style="text-align: right;">
+            <button onclick="document.documentElement.requestFullscreen()" class="badge wait" style="cursor:pointer">FULLSCREEN</button>
         </div>
     </nav>
 
-    <div class="content">
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-title">Target Monitoring</div>
+    <div class="main-grid">
+        <div class="left-col">
+            <div class="panel">
+                <div class="title">Mission Progress · 3D Monitoring</div>
+                <div class="donut-row">
+                    <div class="donut-wrap">
+                        <div id="dailyDonut" style="height:100%"></div>
+                        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center">
+                            <div style="font-size:0.7rem; color:var(--rose)">DAILY</div>
+                            <div id="d-perc" style="font-size:1.5rem; font-weight:800">0%</div>
+                        </div>
+                    </div>
+                    <div class="donut-wrap">
+                        <div id="weeklyDonut" style="height:100%"></div>
+                        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center">
+                            <div style="font-size:0.7rem; color:var(--gold)">WEEKLY</div>
+                            <div id="w-perc" style="font-size:1.5rem; font-weight:800">0%</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                <span class="panel-title">Daily Count</span>
-                <div class="kpi-big" id="count-val">0</div>
-                <div id="donut3d" class="canvas-container"></div>
+
+            <div class="panel">
+                <div class="title">Productivity Flow · 3D Waterfall</div>
+                <div id="trend3d" style="flex:1"></div>
             </div>
         </div>
 
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-title">Weekly Performance Trend</div>
+        <div class="right-col">
+            <div class="panel">
+                <div class="title">Comprehensive Operation Feed</div>
+                <div class="feed-container">
+                    <div>
+                        <h4 style="margin-bottom:15px; color:var(--rose)">Daily Routine</h4>
+                        <div class="task-scroll" id="dailyList"></div>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:15px; color:var(--gold)">Weekly Strategic</h4>
+                        <div class="task-scroll" id="weeklyList"></div>
+                    </div>
+                </div>
             </div>
-            <div id="weekly3d" class="canvas-container"></div>
-        </div>
-
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-title">Operation Feed</div>
-            </div>
-            <h4 style="margin: 10px 0; font-size: 0.8rem;">Daily Checklist</h4>
-            <div class="task-list" id="dailyTasks"></div>
-            
-            <h4 style="margin: 20px 0 10px 0; font-size: 0.8rem;">Weekly Strategic</h4>
-            <div class="task-list" id="weeklyTasks"></div>
         </div>
     </div>
 </div>
@@ -187,139 +136,139 @@
 <script type="module">
     import * as THREE from 'three';
 
-    // -- STATE & DATA --
+    // -- DATA MOCK --
     const state = {
-        target: 1193,
-        counting: 754, // Exemplu de progres
-        history: [
-            {w: 'W31', q: 4500}, {w: 'W32', q: 5200}, 
-            {w: 'W33', q: 4800}, {w: 'W34', q: 6100}
-        ],
         daily: [
-            {n: 'Aged stock report 7AM', s: 'Completed'},
-            {n: 'Returns Adjustments', s: 'Pending'},
-            {n: 'PI First Count', s: 'Pending'}
+            {t: "Aged stock report 7AM", s: "Completed"}, {t: "Aged stock report 3PM", s: "Pending"},
+            {t: "Returns Audit", s: "Pending"}, {t: "PI Count 1", s: "Completed"},
+            {t: "SLA Sync", s: "Pending"}, {t: "Empty Bin Check", s: "Pending"}
         ],
         weekly: [
-            {n: 'Monthly Shrinkage', s: 'Completed'},
-            {n: 'Strategic ORM', s: 'Pending'}
+            {t: "Monthly Shrinkage", s: "Completed"}, {t: "Strategic ORM", s: "Pending"},
+            {t: "Safety Audit", s: "Pending"}, {t: "Team Review", s: "Pending"}
         ]
     };
+
+    // -- HOURGLASS 3D --
+    function initHourglass() {
+        const container = document.getElementById('hourglass-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(60, 60);
+        container.appendChild(renderer.domElement);
+
+        const geo = new THREE.CylinderGeometry(2, 0.2, 4, 16);
+        const mat = new THREE.MeshPhongMaterial({ color: 0xf6d365, wireframe: true });
+        const mesh = new THREE.Mesh(geo, mat);
+        scene.add(mesh);
+        scene.add(new THREE.AmbientLight(0xffffff, 1));
+        camera.position.z = 10;
+
+        function anim() { 
+            requestAnimationFrame(anim); 
+            mesh.rotation.y += 0.05; 
+            mesh.rotation.z = Math.sin(Date.now()*0.002)*0.5;
+            renderer.render(scene, camera); 
+        }
+        anim();
+    }
+
+    // -- 3D DONUTS (Reusable) --
+    function createDonut(elementId, color) {
+        const container = document.getElementById(elementId);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        const torus = new THREE.Mesh(
+            new THREE.TorusGeometry(8, 2.5, 16, 100),
+            new THREE.MeshPhongMaterial({ color: color, shininess: 80 })
+        );
+        scene.add(torus);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const pL = new THREE.PointLight(0xffffff, 1); pL.position.set(10,10,10); scene.add(pL);
+        camera.position.z = 25;
+
+        function anim() { 
+            requestAnimationFrame(anim); 
+            torus.rotation.y += 0.01; 
+            renderer.render(scene, camera); 
+        }
+        anim();
+    }
+
+    // -- PARTICLE BACKGROUND --
+    function initParticles() {
+        const canvas = document.getElementById('particle-bg');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+            }
+            update() {
+                this.x += this.speedX; this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(253, 160, 133, 0.3)';
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
+            }
+        }
+        for(let i=0; i<100; i++) particles.push(new Particle());
+        function anim() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(anim);
+        }
+        anim();
+    }
 
     // -- CLOCK --
     setInterval(() => {
         const d = new Date();
         document.getElementById('time').innerText = d.toLocaleTimeString('en-GB', {hour12:false});
-        document.getElementById('date').innerText = d.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'});
     }, 1000);
 
-    // -- UI RENDER --
-    function renderTasks() {
-        const dEl = document.getElementById('dailyTasks');
-        const wEl = document.getElementById('weeklyTasks');
-        document.getElementById('count-val').innerText = state.counting.toLocaleString();
-
-        const createItem = t => `
-            <div class="task-item ${t.s === 'Completed' ? 'done' : ''}">
-                <span style="font-size:0.85rem; font-weight:600;">${t.n}</span>
-                <span class="badge ${t.s === 'Completed' ? 'ready' : 'pending'}">${t.s === 'Completed' ? 'READY' : 'WAIT'}</span>
+    // -- RENDER LISTS --
+    function renderLists() {
+        const dList = document.getElementById('dailyList');
+        const wList = document.getElementById('weeklyList');
+        const map = t => `
+            <div class="task-box ${t.s === 'Completed' ? 'done' : ''}">
+                <span style="font-size:0.8rem">${t.t}</span>
+                <span class="badge ${t.s === 'Completed' ? 'ready' : 'wait'}">${t.s === 'Completed' ? 'READY' : 'PENDING'}</span>
             </div>
         `;
-        dEl.innerHTML = state.daily.map(createItem).join('');
-        wEl.innerHTML = state.weekly.map(createItem).join('');
+        dList.innerHTML = state.daily.map(map).join('');
+        wList.innerHTML = state.weekly.map(map).join('');
+
+        // Calc Percentages
+        const dp = Math.round((state.daily.filter(x=>x.s==='Completed').length / state.daily.length)*100);
+        const wp = Math.round((state.weekly.filter(x=>x.s==='Completed').length / state.weekly.length)*100);
+        document.getElementById('d-perc').innerText = dp + "%";
+        document.getElementById('w-perc').innerText = wp + "%";
     }
 
-    // -- THREE.JS DONUT (3D PROGRESS) --
-    function initDonut3D() {
-        const container = document.getElementById('donut3d');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(renderer.domElement);
-
-        const group = new THREE.Group();
-        scene.add(group);
-
-        const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
-        const material = new THREE.MeshPhongMaterial({ 
-            color: 0xff9a8b, 
-            shininess: 100,
-            transparent: true,
-            opacity: 0.8
-        });
-        const torus = new THREE.Mesh(geometry, material);
-        group.add(torus);
-
-        const light = new THREE.PointLight(0xffffff, 1, 100);
-        light.position.set(10, 10, 10);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
-        camera.position.z = 30;
-
-        function animate() {
-            requestAnimationFrame(animate);
-            group.rotation.y += 0.01;
-            group.rotation.x += 0.005;
-            renderer.render(scene, camera);
-        }
-        animate();
-    }
-
-    // -- THREE.JS BARS (WEEKLY TREND) --
-    function initBars3D() {
-        const container = document.getElementById('weekly3d');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(renderer.domElement);
-
-        const maxVal = Math.max(...state.history.map(h => h.q));
-        
-        state.history.forEach((data, i) => {
-            const h = (data.q / maxVal) * 15;
-            const geo = new THREE.BoxGeometry(3, h, 3);
-            const mat = new THREE.MeshPhongMaterial({ color: 0x4facfe });
-            const bar = new THREE.Mesh(geo, mat);
-            bar.position.x = (i - 1.5) * 6;
-            bar.position.y = h / 2 - 5;
-            scene.add(bar);
-        });
-
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(5, 10, 7.5);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-
-        camera.position.set(0, 5, 25);
-        camera.lookAt(0, 0, 0);
-
-        function animate() {
-            requestAnimationFrame(animate);
-            scene.rotation.y += 0.002;
-            renderer.render(scene, camera);
-        }
-        animate();
-    }
-
-    window.toggleTheme = () => {
-        const b = document.body;
-        b.dataset.theme = b.dataset.theme === 'dark' ? 'light' : 'dark';
+    // -- INIT ALL --
+    window.onload = () => {
+        initParticles();
+        initHourglass();
+        createDonut('dailyDonut', 0xfda085);
+        createDonut('weeklyDonut', 0xf6d365);
+        renderLists();
     };
-
-    window.toggleFS = () => {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-        else document.exitFullscreen();
-    };
-
-    renderTasks();
-    initDonut3D();
-    initBars3D();
 </script>
-
 </body>
 </html>
