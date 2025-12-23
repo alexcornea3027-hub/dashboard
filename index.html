@@ -1,319 +1,361 @@
-import React, { useEffect, useState, useRef } from "react";
-import {
-  PieChart, Pie, Cell,
-  BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer,
-  LineChart, Line, Legend, ComposedChart
-} from 'recharts';
-
-// Default warm palette
-const COLORS = ["#ff8a65", "#ff7043", "#ff5722", "#ffab91", "#ffccbc", "#ffd54f", "#ffb74d", "#ffa726", "#ff8f00", "#ff6f00"];
-
-export default function VCBStockTeam() {
-  const [data, setData] = useState(null);
-  const [theme, setTheme] = useState('light');
-  const [now, setNow] = useState(new Date());
-  const hourglassRef = useRef(null);
-  const particlesRef = useRef(null);
-
-  useEffect(() => {
-    fetch('/data/dashboard.json')
-      .then(r => r.json())
-      .then(j => setData(j))
-      .catch(e => console.error('Could not load /data/dashboard.json', e));
-  }, []);
-
-  // Clock + minute tick
-  useEffect(() => {
-    const tick = () => setNow(new Date());
-    const msToNextMinute = (60 - new Date().getSeconds()) * 1000 - new Date().getMilliseconds();
-    const timeout = setTimeout(() => {
-      tick();
-      // rotate hourglass once each minute (brief animation toggle)
-      if (hourglassRef.current) {
-        hourglassRef.current.classList.remove('hg-rotate');
-        // force reflow
-        // eslint-disable-next-line
-        hourglassRef.current.offsetWidth;
-        hourglassRef.current.classList.add('hg-rotate');
-      }
-      const interval = setInterval(tick, 60 * 1000);
-      // store so we can clear on unmount
-      (V._intervals || (V._intervals = [])).push(interval);
-    }, msToNextMinute);
-
-    const V = window; // hold intervals
-    (V._timeouts || (V._timeouts = [])).push(timeout);
-
-    return () => {
-      (V._timeouts || []).forEach(t => clearTimeout(t));
-      (V._intervals || []).forEach(i => clearInterval(i));
-    };
-  }, []);
-
-  // Particles background simple canvas
-  useEffect(() => {
-    const canvas = particlesRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let w = canvas.width = canvas.offsetWidth;
-    let h = canvas.height = canvas.offsetHeight;
-    let particles = [];
-    const create = n => {
-      particles = Array.from({ length: n }).map(() => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: 1 + Math.random() * 2,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        alpha: 0.1 + Math.random() * 0.7
-      }));
-    };
-    create(80);
-    let raf;
-    const draw = () => {
-      ctx.clearRect(0, 0, w, h);
-      particles.forEach(p => {
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
-        if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
-        ctx.beginPath();
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle = '#fff';
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-    const onResize = () => { w = canvas.width = canvas.offsetWidth; h = canvas.height = canvas.offsetHeight; create(80); };
-    window.addEventListener('resize', onResize);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); };
-  }, []);
-
-  // Helpers
-  const toTitle = s => s && s[0] ? s[0].toUpperCase() + s.slice(1) : s;
-
-  const completedCount = (list) => list ? list.filter(t => t.status && t.status.toLowerCase().includes('completed')).length : 0;
-  const pendingCount = (list) => list ? list.length - completedCount(list) : 0;
-
-  const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
-    document.documentElement.classList.toggle('dark', next === 'dark');
-  };
-
-  const goFull = () => {
-    const el = document.documentElement;
-    if (!document.fullscreenElement) el.requestFullscreen?.(); else document.exitFullscreen?.();
-  };
-
-  // Render loaders
-  if (!data) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-slate-800 dark:to-slate-900">
-      <div className="text-center p-6 rounded-2xl shadow-2xl bg-white/80 dark:bg-slate-900/70">
-        <h2 className="text-2xl font-bold">VCB StockTeam — Loading data...</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Fetching <code>/data/dashboard.json</code></p>
-      </div>
-    </div>
-  );
-
-  // Prepare chart data
-  const counting = data.counting || [];
-  const pieData = counting.filter(c => c.area && c.area !== 'Total:' && c.qty >= 0).map((c, i) => ({ name: c.area, value: c.qty, color: COLORS[i % COLORS.length] }));
-
-  const dailyTasks = data.dailyTasks || [];
-  const weeklyTasks = data.weeklyTasks || [];
-  const history = data.history || [];
-
-  // Simple weekly/daily completion bars
-  const dailyCompletion = [{ name: 'Completed', value: completedCount(dailyTasks) }, { name: 'Pending', value: pendingCount(dailyTasks) }];
-  const weeklyCompletion = [{ name: 'Completed', value: completedCount(weeklyTasks) }, { name: 'Pending', value: pendingCount(weeklyTasks) }];
-
-  // Build history chart format
-  const historyChart = history.map((h, i) => ({ week: h.week || `W${i}`, total: Number(h.total || 0) }));
-
-  // Waterfall: show area deltas as a cumulative bar (visual waterfall)
-  let cumulative = 0;
-  const waterfall = pieData.map(p => {
-    const start = cumulative; cumulative += p.value; return { name: p.name, value: p.value, start };
-  });
-
-  return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-100">
-      <canvas ref={particlesRef} className="pointer-events-none fixed inset-0 opacity-20 mix-blend-screen"></canvas>
-
-      <header className="flex items-center justify-between mb-6">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VCB StockTeam — Dashboard</title>
+  <!-- Chart.js CDN (user will need internet to load this) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg1: #fff7ed;
+      --bg2: #ffe7d6;
+      --card: rgba(255,255,255,0.85);
+      --muted: #6b7280;
+      --accent: #ff7043;
+      --accent-dark: #ff5722;
+      --success: #16a34a;
+      --danger: #ef4444;
+      --glass: rgba(255,255,255,0.6);
+    }
+    .dark{
+      --bg1:#0b1220;
+      --bg2:#12202a;
+      --card: rgba(10,14,20,0.6);
+      --muted: #cbd5e1;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    body{
+      background: linear-gradient(120deg,var(--bg1) 0%, var(--bg2) 60%);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:18px;
+      box-sizing:border-box;
+    }
+    .app{max-width:1300px;margin:0 auto;display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .title{font-size:20px;font-weight:800;}
+    .meta{font-size:12px;color:var(--muted);}
+    .controls{display:flex;gap:8px;align-items:center;}
+    button{background:var(--card);border:0;padding:8px 12px;border-radius:10px;cursor:pointer;box-shadow:0 6px 18px rgba(15,15,15,0.06);}
+    .main{background:transparent;border-radius:12px;padding:0;}
+    .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 8px 30px rgba(15,15,15,0.06);}
+    .top-row{display:flex;gap:12px;align-items:center;}
+    .clock{flex:1;text-align:center;padding:18px;border-radius:10px;}
+    .big-time{font-size:56px;font-weight:800;line-height:1;}
+    .big-date{font-size:14px;color:var(--muted);margin-top:6px;}
+    .hourglass{width:76px;height:76px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:36px;background:linear-gradient(180deg,rgba(255,255,255,0.9),rgba(255,255,255,0.75));}
+    .hg-rot { transform: rotate(360deg); transition: transform 700ms ease-in-out; }
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+    .charts-grid .card{height:260px;padding:10px;display:flex;flex-direction:column;}
+    .waterfall{height:110px;padding:10px;}
+    .right-col{display:flex;flex-direction:column;gap:12px;}
+    .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+    .counts{margin-top:12px;max-height:220px;overflow:auto;padding-right:6px;}
+    .list{margin-top:10px;max-height:300px;overflow:auto;}
+    ul.tasks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;}
+    .task{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;}
+    .badge{padding:6px 8px;border-radius:999px;font-size:12px;font-weight:700;}
+    .pending{background:rgba(255,152,72,0.12);color:#bf360c;}
+    .done{background:rgba(34,197,94,0.12);color:var(--success);}
+    .footer{margin-top:18px;text-align:center;color:var(--muted);font-size:12px;}
+    canvas.particles{position:fixed;left:0;top:0;pointer-events:none;z-index:0;opacity:0.18;}
+    .card-stack{display:flex;flex-direction:column;gap:12px;}
+    /* responsive */
+    @media (max-width:1000px){
+      .app{grid-template-columns:1fr; padding:12px;}
+      .right-col{order:3;}
+      .charts-grid{grid-template-columns:1fr;}
+      .hourglass{display:none;}
+    }
+  </style>
+</head>
+<body>
+  <canvas class="particles" id="particles"></canvas>
+  <div class="app">
+    <div class="main">
+      <header>
         <div>
-          <h1 className="text-2xl font-extrabold">VCB StockTeam — Dashboard</h1>
-          <div className="text-sm text-slate-600 dark:text-slate-300">Data source: <code>/data/dashboard.json</code></div>
+          <div class="title">VCB StockTeam — Dashboard</div>
+          <div class="meta">Source: <code>/data/dashboard.json</code></div>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={toggleTheme} className="px-3 py-2 rounded-lg bg-white/70 dark:bg-slate-700/60 shadow">Theme: {theme}</button>
-          <button onClick={goFull} className="px-3 py-2 rounded-lg bg-white/70 dark:bg-slate-700/60 shadow">Fullscreen</button>
+        <div class="controls">
+          <button id="themeBtn" title="Toggle theme">Toggle Theme</button>
+          <button id="fullBtn" title="Fullscreen">Fullscreen</button>
         </div>
       </header>
 
-      <main className="grid grid-cols-12 gap-6">
-        {/* Left - big stats + charts */}
-        <section className="col-span-8 rounded-2xl p-6 shadow-lg bg-white/80 dark:bg-slate-900/60">
-          <div className="flex gap-6 items-center">
-            <div className="flex-1 text-center py-6 px-4">
-              <div className="text-6xl font-extrabold leading-tight">{now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-              <div className="text-sm mt-1">{now.toLocaleDateString()}</div>
-            </div>
+      <div class="card top-row">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div class="clock" style="flex:1;">
+            <div id="time" class="big-time">--:--</div>
+            <div id="date" class="big-date">Loading date...</div>
+          </div>
+          <div class="hourglass card" style="width:110px;flex-shrink:0;">
+            <div id="hg" style="font-size:48px;">⏳</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;">minute tick</div>
+          </div>
+        </div>
 
-            <div className="w-28 h-28 flex flex-col items-center justify-center rounded-xl bg-orange-50 dark:bg-slate-800/40">
-              <div ref={hourglassRef} className="text-4xl transition-transform duration-800 transform hg-rotate-once" style={{ animationDuration: '1s' }}>⏳</div>
-              <div className="text-xs mt-2">minute tick</div>
-            </div>
+        <div class="charts-grid" style="margin-top:16px;">
+          <div class="card">
+            <strong>Daily Tasks — Completed vs Pending</strong>
+            <canvas id="dailyChart" style="flex:1;margin-top:10px;"></canvas>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-lg bg-white/60 dark:bg-slate-800/50 shadow-sm">
-              <h3 className="font-semibold">Daily Tasks — Completed vs Pending</h3>
-              <div style={{ height: 180 }} className="mt-3">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={dailyCompletion}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#ff7043" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-lg bg-white/60 dark:bg-slate-800/50 shadow-sm">
-              <h3 className="font-semibold">Weekly Tasks — Completed vs Pending</h3>
-              <div style={{ height: 180 }} className="mt-3">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={weeklyCompletion}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#ffa726" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+          <div class="card">
+            <strong>Weekly Tasks — Completed vs Pending</strong>
+            <canvas id="weeklyChart" style="flex:1;margin-top:10px;"></canvas>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-lg bg-white/60 dark:bg-slate-800/50 shadow-sm">
-              <h3 className="font-semibold">Inventory Distribution (areas)</h3>
-              <div style={{ height: 260 }} className="mt-3">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={80} fill="#8884d8">
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-lg bg-white/60 dark:bg-slate-800/50 shadow-sm">
-              <h3 className="font-semibold">Weekly History (Totals)</h3>
-              <div style={{ height: 260 }} className="mt-3">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={historyChart}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="week" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="total" stroke="#ff8a65" strokeWidth={3} dot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+          <div class="card">
+            <strong>Inventory Distribution (areas)</strong>
+            <canvas id="pieChart" style="flex:1;margin-top:10px;"></canvas>
           </div>
 
-          <div className="mt-6 p-4 rounded-lg bg-white/60 dark:bg-slate-800/50 shadow-sm">
-            <h3 className="font-semibold">Waterfall view (cumulative by area)</h3>
-            <div style={{ height: 110 }} className="mt-3">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={waterfall}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" stackId="a" fill="#ff6f00" />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
+          <div class="card">
+            <strong>Weekly History (Totals)</strong>
+            <canvas id="historyChart" style="flex:1;margin-top:10px;"></canvas>
           </div>
-        </section>
+        </div>
 
-        {/* Right - tasks and meta */}
-        <aside className="col-span-4 space-y-6">
-          <div className="rounded-2xl p-4 shadow-lg bg-white/80 dark:bg-slate-900/60">
-            <h2 className="text-lg font-bold">Summary</h2>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <div className="p-3 rounded-lg bg-orange-50 dark:bg-slate-800/40">
-                <div className="text-sm">Target</div>
-                <div className="text-2xl font-extrabold">{data.metadata?.target ?? '-'}</div>
-              </div>
-              <div className="p-3 rounded-lg bg-orange-50 dark:bg-slate-800/40">
-                <div className="text-sm">Timestamp</div>
-                <div className="text-2xl font-extrabold">{data.metadata?.timestamp ?? '-'}</div>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <h3 className="font-semibold">Counts</h3>
-              <ul className="mt-2 max-h-48 overflow-auto">
-                {counting.map((c, i) => (
-                  <li key={i} className="flex justify-between py-1 border-b border-transparent last:border-0">
-                    <span>{c.area}</span>
-                    <span className="font-medium">{c.qty}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="rounded-2xl p-4 shadow-lg bg-white/80 dark:bg-slate-900/60">
-            <h2 className="text-lg font-bold">Daily Tasks</h2>
-            <ul className="mt-3 space-y-2 max-h-64 overflow-auto">
-              {dailyTasks.map((t, i) => (
-                <li key={i} className="flex items-center justify-between p-2 rounded-md" style={{ background: t.status && t.status.toLowerCase().includes('completed') ? 'rgba(76,175,80,0.08)' : 'rgba(255,87,34,0.04)' }}>
-                  <div>
-                    <div className="font-medium">{t.name}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-300">{t.status}</div>
-                  </div>
-                  <div className={`text-xs px-2 py-1 rounded-full ${t.status && t.status.toLowerCase().includes('completed') ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}`}>{t.status && t.status.toLowerCase().includes('completed') ? 'Completed' : 'Pending'}</div>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-2xl p-4 shadow-lg bg-white/80 dark:bg-slate-900/60">
-            <h2 className="text-lg font-bold">Weekly Tasks</h2>
-            <ul className="mt-3 space-y-2 max-h-64 overflow-auto">
-              {weeklyTasks.map((t, i) => (
-                <li key={i} className="flex items-center justify-between p-2 rounded-md" style={{ background: t.status && t.status.toLowerCase().includes('completed') ? 'rgba(76,175,80,0.08)' : 'rgba(255,87,34,0.04)' }}>
-                  <div>
-                    <div className="font-medium">{t.name}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-300">{t.status}</div>
-                  </div>
-                  <div className={`text-xs px-2 py-1 rounded-full ${t.status && t.status.toLowerCase().includes('completed') ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}`}>{t.status && t.status.toLowerCase().includes('completed') ? 'Completed' : 'Pending'}</div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </aside>
-      </main>
-
-      <style jsx>{`
-        .hg-rotate { transform: rotate(360deg); transition: transform 700ms ease-in-out; }
-        /* ensure dark theme support */
-        :root { --bg: #fff; }
-        .dark :root { --bg: #0b1220; }
-      `}</style>
+        <div class="card waterfall" style="margin-top:12px;">
+          <strong>Waterfall (cumulative by area)</strong>
+          <canvas id="waterfallChart" style="height:90px;margin-top:8px;"></canvas>
+        </div>
+      </div>
     </div>
-  );
-}
+
+    <aside class="right-col">
+      <div class="card">
+        <strong>Summary</strong>
+        <div class="summary-grid">
+          <div class="card" style="padding:10px;text-align:center;">
+            <div style="font-size:12px;color:var(--muted)">Target</div>
+            <div id="target" style="font-size:20px;font-weight:800">-</div>
+          </div>
+          <div class="card" style="padding:10px;text-align:center;">
+            <div style="font-size:12px;color:var(--muted)">Timestamp</div>
+            <div id="timestamp" style="font-size:20px;font-weight:800">-</div>
+          </div>
+        </div>
+        <div class="counts card" id="countsList" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="card card-stack">
+        <div>
+          <strong>Daily Tasks</strong>
+          <div class="list">
+            <ul id="dailyList" class="tasks"></ul>
+          </div>
+        </div>
+
+        <div>
+          <strong>Weekly Tasks</strong>
+          <div class="list">
+            <ul id="weeklyList" class="tasks"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <strong>Notes</strong>
+        <div style="margin-top:8px;font-size:13px;color:var(--muted)">
+          - Warm professional palette, full-screen support and light/dark theme.<br>
+          - Hourglass rotates every minute. Particle background for subtle motion.<br>
+          - Place <code>dashboard.json</code> in <code>/data/dashboard.json</code> relative to this file.
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="footer card" style="max-width:1300px;margin:14px auto;">VCB StockTeam — Generated static dashboard • works with modern browsers</div>
+
+  <script>
+    // helpers
+    const el = id => document.getElementById(id);
+    const isCompleted = s => s && s.toLowerCase().includes('completed');
+
+    // Load data
+    async function loadData() {
+      try {
+        const res = await fetch('/data/dashboard.json', { cache: "no-store" });
+        if (!res.ok) throw new Error('Network response not ok');
+        const data = await res.json();
+        return data;
+      } catch (e) {
+        console.warn('Could not load /data/dashboard.json — falling back to sample data', e);
+        return null;
+      }
+    }
+
+    // Build UI from data (or sample)
+    (async function init(){
+      const raw = await loadData();
+      const sample = {
+        metadata:{ target:1193, timestamp: '13:13:04' },
+        counting:[
+          {"area":"MPR","qty":14622},{"area":"PB1","qty":4329},{"area":"PB2","qty":795},{"area":"PB3","qty":772},
+          {"area":"PB4","qty":164},{"area":"PBSRES","qty":5197},{"area":"MP","qty":25612},{"area":"MIX","qty":33087},
+          {"area":"MS","qty":21512},{"area":"MSX","qty":28798},{"area":"FM","qty":2308},{"area":"HP","qty":561},{"area":"Total:","qty":137369}
+        ],
+        dailyTasks:[
+          {"name":"Aged stock report 7AM","status":"Completed"},{"name":"ADJUSTMENTS (Returns)","status":"Not started"}
+        ],
+        weeklyTasks:[{"name":"(Weekly) SLA","status":"Not started"},{"name":"(once a month) Shrinkage for Period","status":"Completed"}],
+        history:[{"week":"W23","total":100},{"week":"W24","total":120},{"week":"W25","total":90}]
+      };
+      const data = raw || sample;
+
+      // header info
+      el('target').textContent = data.metadata?.target ?? '-';
+      el('timestamp').textContent = data.metadata?.timestamp ?? '-';
+      // counts
+      const countsList = el('countsList');
+      countsList.innerHTML = '';
+      (data.counting || []).forEach(c=>{
+        const row = document.createElement('div');
+        row.style.display='flex'; row.style.justifyContent='space-between'; row.style.padding='6px 0'; row.style.borderBottom='1px dashed rgba(0,0,0,0.04)';
+        row.innerHTML = '<div style="font-weight:600;">'+(c.area||'')+'</div><div style="font-weight:700;">'+(c.qty||0)+'</div>';
+        countsList.appendChild(row);
+      });
+
+      // tasks lists
+      const dailyList = el('dailyList');
+      const weeklyList = el('weeklyList');
+      (data.dailyTasks || []).forEach(t=>{
+        const li = document.createElement('li'); li.className='task';
+        li.style.background = isCompleted(t.status) ? 'rgba(34,197,94,0.06)' : 'rgba(255,152,72,0.04)';
+        li.innerHTML = '<div><div style="font-weight:700;">'+t.name+'</div><div style="font-size:12px;color:var(--muted)">'+(t.status||'')+'</div></div>' +
+                       '<div class=\"badge '+(isCompleted(t.status)?'done':'pending')+'\">'+(isCompleted(t.status)?'Completed':'Pending')+'</div>';
+        dailyList.appendChild(li);
+      });
+      (data.weeklyTasks || []).forEach(t=>{
+        const li = document.createElement('li'); li.className='task';
+        li.style.background = isCompleted(t.status) ? 'rgba(34,197,94,0.06)' : 'rgba(255,152,72,0.04)';
+        li.innerHTML = '<div><div style="font-weight:700;">'+t.name+'</div><div style="font-size:12px;color:var(--muted)">'+(t.status||'')+'</div></div>' +
+                       '<div class=\"badge '+(isCompleted(t.status)?'done':'pending')+'\">'+(isCompleted(t.status)?'Completed':'Pending')+'</div>';
+        weeklyList.appendChild(li);
+      });
+
+      // charts
+      const colors = ['#ff8a65','#ff7043','#ff5722','#ffab91','#ffccbc','#ffd54f','#ffb74d','#ffa726','#ff8f00','#ff6f00'];
+      // pie data (exclude Total:)
+      const pieAreas = (data.counting||[]).filter(c=>c.area && c.area!=='Total:').map(c=>c.area);
+      const pieValues = (data.counting||[]).filter(c=>c.area && c.area!=='Total:').map(c=>c.qty);
+
+      // daily/weekly completed vs pending
+      const dailyCompleted = (data.dailyTasks||[]).filter(t=>isCompleted(t.status)).length;
+      const dailyPending = (data.dailyTasks||[]).length - dailyCompleted;
+      const weeklyCompleted = (data.weeklyTasks||[]).filter(t=>isCompleted(t.status)).length;
+      const weeklyPending = (data.weeklyTasks||[]).length - weeklyCompleted;
+
+      // history
+      const historyLabels = (data.history||[]).map(h=>h.week||'');
+      const historyValues = (data.history||[]).map(h=>Number(h.total||0));
+
+      // Create Chart.js charts (destroy if exist)
+      function createOrUpdateChart(id, config){
+        const c = document.getElementById(id);
+        if (!c) return null;
+        if (c._chart) c._chart.destroy();
+        c._chart = new Chart(c.getContext('2d'), config);
+        return c._chart;
+      }
+
+      createOrUpdateChart('pieChart', {
+        type: 'pie',
+        data: { labels: pieAreas, datasets:[{data: pieValues, backgroundColor: colors, borderColor:'#fff', borderWidth:1}] },
+        options: { plugins:{legend:{position:'bottom'}} }
+      });
+
+      createOrUpdateChart('dailyChart', {
+        type: 'bar',
+        data: { labels:['Completed','Pending'], datasets:[{label:'Tasks',data:[dailyCompleted,dailyPending],backgroundColor:[colors[1],colors[2]]}] },
+        options:{scales:{y:{beginAtZero:true,precision:0}}}
+      });
+
+      createOrUpdateChart('weeklyChart', {
+        type: 'bar',
+        data: { labels:['Completed','Pending'], datasets:[{label:'Tasks',data:[weeklyCompleted,weeklyPending],backgroundColor:[colors[5],colors[6]]}] },
+        options:{scales:{y:{beginAtZero:true,precision:0}}}
+      });
+
+      createOrUpdateChart('historyChart', {
+        type: 'line',
+        data: { labels: historyLabels, datasets:[{label:'Weekly total',data:historyValues,fill:false,borderColor:colors[0],tension:0.3,pointRadius:4,pointBackgroundColor:colors[0]}] },
+        options:{scales:{y:{beginAtZero:true}}}
+      });
+
+      // waterfall: show stacked bars to emulate cumulative (one dataset with each area as its own stack)
+      // We'll use a stacked bar where each bar is a single stack segment. That visually resembles a waterfall cumulatively.
+      const waterfallLabels = pieAreas;
+      const waterfallDataset = pieValues.map((v,i)=>({label:pieAreas[i],data:[v],backgroundColor:colors[i%colors.length]}));
+      // Use horizontal stacked bar to show incremental; Chart.js supports stacking across datasets if labels align; we transpose by using single label 'Inventory' on x-axis
+      const wfConfig = {
+        type:'bar',
+        data:{ labels:['Inventory'], datasets: waterfallDataset },
+        options:{ indexAxis:'y', scales:{ x:{ stacked:true }, y:{ stacked:true } }, plugins:{legend:{position:'right'}} }
+      };
+      createOrUpdateChart('waterfallChart', wfConfig);
+
+    })();
+
+    // Clock + hourglass rotation every minute
+    function updateTime(){
+      const now = new Date();
+      const hhmm = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      document.getElementById('time').textContent = hhmm;
+      document.getElementById('date').textContent = now.toLocaleDateString();
+    }
+    updateTime();
+    // set timeout until next minute then interval each minute
+    const msToNextMinute = (60 - new Date().getSeconds())*1000 - new Date().getMilliseconds();
+    setTimeout(()=>{
+      updateTime();
+      rotateHG();
+      setInterval(()=>{ updateTime(); rotateHG(); }, 60*1000);
+    }, msToNextMinute);
+
+    function rotateHG(){
+      const elHg = document.getElementById('hg');
+      if(!elHg) return;
+      elHg.classList.remove('hg-rot');
+      // force reflow
+      void elHg.offsetWidth;
+      elHg.classList.add('hg-rot');
+    }
+
+    // Theme toggle
+    const themeBtn = el('themeBtn');
+    themeBtn.addEventListener('click', ()=>{
+      document.documentElement.classList.toggle('dark');
+    });
+
+    // Fullscreen
+    el('fullBtn').addEventListener('click', async ()=>{
+      try{
+        if(!document.fullscreenElement) await document.documentElement.requestFullscreen();
+        else await document.exitFullscreen();
+      }catch(e){console.warn('Fullscreen error',e);}
+    });
+
+    // Particles background
+    (function particles(){
+      const canvas = document.getElementById('particles');
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w,h,particles=[];
+      function resize(){ w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight; particles=[]; for(let i=0;i<90;i++){ particles.push({x:Math.random()*w,y:Math.random()*h,r:1+Math.random()*2,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,alpha:0.08+Math.random()*0.6}); }};
+      function draw(){ ctx.clearRect(0,0,w,h); particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; if(p.x<0)p.x=w; if(p.x>w)p.x=0; if(p.y<0)p.y=h; if(p.y>h)p.y=0; ctx.beginPath(); ctx.globalAlpha=p.alpha; ctx.fillStyle='#ffffff'; ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }); requestAnimationFrame(draw); }
+      window.addEventListener('resize', resize);
+      resize(); draw();
+    })();
+
+    // Expose simple globals to avoid ReferenceErrors in case file used with inline onclick
+    window.toggleTheme = () => document.documentElement.classList.toggle('dark');
+    window.goFull = async () => { if(!document.fullscreenElement) await document.documentElement.requestFullscreen(); else await document.exitFullscreen(); };
+  </script>
+</body>
+</html>
