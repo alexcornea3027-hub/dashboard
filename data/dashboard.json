@@ -1,255 +1,265 @@
-{
+
   "metadata": {
     "target": 1193,
-    "lastUpdate": "13:05:14"
+    "timestamp": "13:13:04"
   },
-  "dailyStats": [
+  "counting": [
     {
       "area": "Area",
-      "dailyQty": 0,
-      "targetStatus": "Behind the target %"
+      "qty": 0
     },
     {
       "area": "MPR",
-      "dailyQty": 14622,
-      "targetStatus": "0"
+      "qty": 14622
     },
     {
       "area": "PB1",
-      "dailyQty": 4329,
-      "targetStatus": "0"
+      "qty": 4329
     },
     {
       "area": "PB2",
-      "dailyQty": 795,
-      "targetStatus": "0"
+      "qty": 795
     },
     {
       "area": "PB3",
-      "dailyQty": 772,
-      "targetStatus": "0.253968253968254"
+      "qty": 772
     },
     {
       "area": "PB4",
-      "dailyQty": 164,
-      "targetStatus": "0.253968253968254"
+      "qty": 164
     },
     {
       "area": "PBSRES",
-      "dailyQty": 5197,
-      "targetStatus": "0"
+      "qty": 5197
     },
     {
       "area": "MP",
-      "dailyQty": 25612,
-      "targetStatus": "0"
+      "qty": 25612
     },
     {
       "area": "MIX",
-      "dailyQty": 33087,
-      "targetStatus": "0"
+      "qty": 33087
     },
     {
       "area": "MS",
-      "dailyQty": 21512,
-      "targetStatus": "0"
+      "qty": 21512
     },
     {
       "area": "MSX",
-      "dailyQty": 28798,
-      "targetStatus": "0"
+      "qty": 28798
     },
     {
       "area": "FM",
-      "dailyQty": 2308,
-      "targetStatus": "0"
+      "qty": 2308
+    },
+    {
+      "area": "HP",
+      "qty": 561
+    },
+    {
+      "area": "Total:",
+      "qty": 137369
     }
   ],
   "dailyTasks": [
     {
-      "task": "ADJUSTMENTS (Returns)",
+      "name": "ADJUSTMENTS (Returns)",
       "status": "Not started"
     },
     {
-      "task": "ADJUSTMENTS (Standard)",
+      "name": "ADJUSTMENTS (Standard)",
       "status": "Not started"
     },
     {
-      "task": "Aged stock report 7AM",
+      "name": "Aged stock report 7AM",
       "status": "Completed"
     },
     {
-      "task": "Aged stock report 3PM",
+      "name": "Aged stock report 3PM",
       "status": "Not started"
     },
     {
-      "task": "Blackwells",
+      "name": "Blackwells",
       "status": "Not started"
     },
     {
-      "task": "AGED STOCK REPORT 6 AM",
+      "name": "AGED STOCK REPORT 6 AM",
       "status": "Not started"
     },
     {
-      "task": "Available inventory status in Prob-Res pots 3PM",
+      "name": "Available inventory status in Prob-Res pots 3PM",
       "status": "Not started"
     },
     {
-      "task": "Available inventory status in Prob-Res pots 6AM",
+      "name": "Available inventory status in Prob-Res pots 6AM",
       "status": "Not started"
     },
     {
-      "task": "EMPTY BIN CHECKS",
+      "name": "EMPTY BIN CHECKS",
       "status": "Not started"
     },
     {
-      "task": "Internet returns",
+      "name": "Internet returns",
       "status": "Not started"
     },
     {
-      "task": "Inventory Status (DATA STUDIO)",
+      "name": "Inventory Status (DATA STUDIO)",
       "status": "Not started"
     },
     {
-      "task": "LOCATIONS IN ERROR",
+      "name": "LOCATIONS IN ERROR",
       "status": "Not started"
     },
     {
-      "task": "Manual Despatch Adjustment",
+      "name": "Manual Despatch Adjustment",
       "status": "Not started"
     },
     {
-      "task": "Manual location checks",
+      "name": "Manual location checks",
       "status": "Not started"
     },
     {
-      "task": "Mixing violations (multiple ISBN)",
+      "name": "Mixing violations (multiple ISBN)",
       "status": "Not started"
     },
     {
-      "task": "MLC Tracker update",
+      "name": "MLC Tracker update",
       "status": "Not started"
     },
     {
-      "task": "Supplier Overs Report",
+      "name": "Supplier Overs Report",
       "status": "Not started"
     },
     {
-      "task": "SIS afternoon report",
+      "name": "SIS afternoon report",
       "status": "Not started"
     },
     {
-      "task": "PI 1st count",
+      "name": "PI 1st count",
       "status": "Not started"
     },
     {
-      "task": "PI 2nd count",
+      "name": "PI 2nd count",
       "status": "Not started"
     },
     {
-      "task": "PI assign",
+      "name": "PI assign",
       "status": "Not started"
     },
     {
-      "task": "PI Investigation",
+      "name": "PI Investigation",
       "status": "Not started"
     },
     {
-      "task": "PI Master file update (Cycle)",
+      "name": "PI Master file update (Cycle)",
       "status": "Not started"
     },
     {
-      "task": "POD",
+      "name": "POD",
+      "status": "Not started"
+    },
+    {
+      "name": "PI set up",
+      "status": "Not started"
+    },
+    {
+      "name": "SHRINKAGE RECONCILATION DAILY",
+      "status": "Not started"
+    },
+    {
+      "name": "SLA update",
+      "status": "Not started"
+    },
+    {
+      "name": "Stock left on RDTs check",
       "status": "Not started"
     }
   ],
   "weeklyTasks": [
     {
-      "task": "(Weekly) SLA",
+      "name": "(Weekly) SLA",
       "status": "Not started"
     },
     {
-      "task": "(Weekly) SIS report",
+      "name": "(Weekly) SIS report",
       "status": "Not started"
     },
     {
-      "task": "(Weekly) Shrinkage",
+      "name": "(Weekly) Shrinkage",
       "status": "Not started"
     },
     {
-      "task": "(Weekly) ORM",
+      "name": "(Weekly) ORM",
       "status": "Not started"
     },
     {
-      "task": "(Tuesday) RP split pack",
+      "name": "(Tuesday) RP split pack",
       "status": "Not started"
     },
     {
-      "task": "(Thursday) RP split pack",
+      "name": "(Thursday) RP split pack",
       "status": "Not started"
     },
     {
-      "task": "(Weekly) Price checker update",
+      "name": "(Weekly) Price checker update",
       "status": "Not started"
     },
     {
-      "task": "(Weekly) AGED STOCK REPORT 12 PM Friday",
+      "name": "(Weekly) AGED STOCK REPORT 12 PM Friday",
       "status": "Not started"
     },
     {
-      "task": "(once a month) Shrinkage for Period",
+      "name": "(once a month) Shrinkage for Period",
       "status": "Completed"
     },
     {
-      "task": "(Once a month) MLC on FM",
+      "name": "(Once a month) MLC on FM",
       "status": "Not started"
     },
     {
-      "task": "(Weekly) Shrinkage to Database",
+      "name": "(Weekly) Shrinkage to Database",
       "status": "Not started"
     },
     {
-      "task": "(Weekly) Returns locations checks",
+      "name": "(Weekly) Returns locations checks",
       "status": "Not started"
     }
   ],
   "history": [
     {
       "week": "W46014",
-      "qty": 0
+      "total": 0
     },
     {
       "week": "W46014",
-      "qty": 0
+      "total": 0
     },
     {
       "week": "W46014",
-      "qty": 0
+      "total": 0
     },
     {
       "week": "W46014",
-      "qty": 0
+      "total": 0
     },
     {
       "week": "W46014",
-      "qty": 0
+      "total": 0
     },
     {
       "week": "W46014",
-      "qty": 0
+      "total": 0
     },
     {
       "week": "W46014",
-      "qty": 0
+      "total": 0
     },
     {
       "week": "W46014",
-      "qty": 0
+      "total": 0
     },
     {
       "week": "W46014",
-      "qty": 0
+      "total": 0
     }
   ]
-}
-================================
