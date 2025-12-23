@@ -3,11 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Stock Team | 3D Mission Control — Fixed</title>
+<title>Stock Team | 3D Mission Control — PRO</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 
-<!-- Import map: maps bare "three" specifiers to CDN ESM build -->
-<script type="importmap">
+<!-- POLYFILL for import maps on older browsers (recommended for GitHub Pages) -->
+<script async src="https://ga.jspm.io/npm:es-module-shims@1.8.1/dist/es-module-shims.js"></script>
+
+<!-- importmap-shim for es-module-shims (fallback-friendly). Maps bare "three" to CDN ESM build -->
+<script type="importmap-shim">
 {
   "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
@@ -16,47 +19,82 @@
 }
 </script>
 
-<!-- Chart.js (global UMD) -->
+<!-- Chart.js UMD -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <style>
-:root{--bg:#0f1216;--panel:rgba(255,255,255,.05);--border:rgba(255,255,255,.09);--text:#fff;--warm1:#ffb703;--warm2:#ff8c42;--accent:#ff6b6b;--cyan:#4fd1c5}
-[data-theme="light"]{--bg:#f7f8fb;--panel:#fff;--border:#d6dce8;--text:#111}
-*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
-.app{display:grid;grid-template-rows:68px 110px 1fr;gap:12px;padding:12px;height:100vh}
-.top{display:flex;align-items:center;justify-content:space-between;padding:0 18px}
-.logo{font-weight:800;font-size:1.2rem}.logo span{color:var(--warm1)}
-.controls{display:flex;gap:8px;align-items:center}.btn{padding:8px 14px;border-radius:999px;border:none;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--warm1),var(--warm2));color:#111}.small{padding:8px 10px;border-radius:10px;background:transparent;border:1px solid var(--border);color:var(--text);cursor:pointer}
-.clock{display:flex;align-items:center;justify-content:center}.clock-card{display:flex;align-items:center;gap:14px;padding:12px 18px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.4)}
-#time{font-size:1.6rem;font-weight:800;letter-spacing:2px}#date{font-size:.8rem;color:var(--warm1)}
-.main{display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 1fr;gap:14px;padding:6px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:14px;position:relative;overflow:hidden}
-h3{font-size:.78rem;color:#bdbdbd;letter-spacing:1.6px;margin-bottom:8px}
-.canvas3d{width:100%;height:100%;min-height:140px}#weekly3d{min-height:360px}
-.tasks{height:100%;overflow:auto;padding-right:6px}.task{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);margin-bottom:10px}
-.done{border-left:4px solid var(--cyan)}.badge{padding:6px 12px;border-radius:999px;font-weight:800;font-size:.75rem}.ok{background:var(--cyan);color:#000}.wait{background:#aaa;color:#000}
-.tooltip{position:fixed;pointer-events:none;padding:8px 12px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;z-index:9999;display:none;transform:translate(-50%,-120%)}
-.mini-charts{display:flex;gap:12px;align-items:stretch}.mini-charts canvas{flex:1;min-height:120px}
+:root{
+  --bg:#0f1216;
+  --panel:rgba(255,255,255,.04);
+  --border:rgba(255,255,255,.07);
+  --text:#fff;
+  --warm1:#ffb703;
+  --warm2:#ff8c42;
+  --accent:#ff6b6b;
+  --cyan:#4fd1c5;
+  --glass: rgba(255,255,255,0.03);
+}
+[data-theme="light"]{
+  --bg:#f7f8fb;
+  --panel:#fff;
+  --border:#d6dce8;
+  --text:#111;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+.container{display:grid;grid-template-rows:72px 110px 1fr;gap:12px;padding:12px;height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+.brand{font-weight:800;font-size:1.2rem}
+.brand span{color:var(--warm1)}
+.controls{display:flex;gap:8px;align-items:center}
+.btn{padding:8px 14px;border-radius:999px;border:none;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--warm1),var(--warm2));color:#111}
+.small{padding:8px 10px;border-radius:10px;background:transparent;border:1px solid var(--border);color:var(--text);cursor:pointer}
+.clock{display:flex;align-items:center;justify-content:center}
+.clock-card{display:flex;align-items:center;gap:14px;padding:12px 18px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.4)}
+#time{font-size:1.6rem;font-weight:800;letter-spacing:2px}
+#date{font-size:.8rem;color:var(--warm1)}
+.main{display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:1fr 1fr;gap:14px;padding:6px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px;position:relative;overflow:hidden}
+.title{font-size:.78rem;color:#bdbdbd;letter-spacing:1.6px;margin-bottom:8px}
+.canvas{width:100%;height:100%;min-height:140px}
+#weekly3d{min-height:380px}
+.tasks{height:100%;overflow:auto;padding-right:8px}
+.task{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);margin-bottom:10px}
+.done{border-left:4px solid var(--cyan)}
+.badge{padding:6px 12px;border-radius:999px;font-weight:800;font-size:.75rem}
+.ok{background:var(--cyan);color:#000}
+.wait{background:#aaa;color:#000}
+.tooltip{position:fixed;pointer-events:none;padding:8px 12px;border-radius:8px;background:rgba(0,0,0,0.82);color:#fff;z-index:9999;display:none;transform:translate(-50%,-120%);font-weight:600}
+.mini-charts{display:flex;gap:12px;align-items:stretch}
+.mini-charts canvas{flex:1;min-height:120px}
 .footer-controls{position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
-@media (max-width:920px){.main{grid-template-columns:1fr;grid-template-rows:auto auto auto}#weekly3d{min-height:260px}}
+.headerline{display:flex;align-items:center;gap:12px}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+.legend-warm{background:var(--warm2)}
+.legend-amber{background:var(--warm1)}
+@media (max-width:960px){
+  .main{grid-template-columns:1fr;grid-template-rows:auto auto auto}
+  #weekly3d{min-height:260px}
+}
 </style>
 </head>
 <body data-theme="dark">
-<div class="app">
-  <div class="top">
-    <div class="logo">STOCK TEAM <span>| VCB</span></div>
+<div class="container">
+  <div class="header">
+    <div class="brand">STOCK TEAM <span>| VCB</span></div>
     <div class="controls">
       <button id="themeBtn" class="small">DARK / LIGHT</button>
       <button id="fsBtn" class="small">FULLSCREEN</button>
-      <button id="reloadBtn" class="small">RELOAD DATA</button>
       <button id="playBtn" class="small">PAUSE</button>
+      <button id="reloadBtn" class="small">RELOAD DATA</button>
       <button id="snapshotBtn" class="small">EXPORT WEEKLY PNG</button>
     </div>
   </div>
 
   <div class="clock">
     <div class="clock-card">
-      <div id="hourglass" style="width:120px;height:88px" class="canvas3d"></div>
+      <div id="hourglass" style="width:120px;height:88px" class="canvas" aria-hidden="true"></div>
       <div>
         <div id="time">00:00:00</div>
         <div id="date">LOADING…</div>
@@ -66,8 +104,14 @@ h3{font-size:.78rem;color:#bdbdbd;letter-spacing:1.6px;margin-bottom:8px}
 
   <div class="main">
     <div class="card" style="grid-row:span 2">
-      <h3>WEEKLY VOLUME · 3D WATERFALL + PARTICLES + TOOLTIP</h3>
-      <div id="weekly3d" class="canvas3d"></div>
+      <div class="headerline">
+        <div class="title">WEEKLY VOLUME · 3D WATERFALL + PARTICLES</div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <div class="legend-dot legend-warm"></div><small>Volume bars</small>
+          <div class="legend-dot legend-amber" style="margin-left:8px"></div><small>Particles</small>
+        </div>
+      </div>
+      <div id="weekly3d" class="canvas"></div>
       <div class="footer-controls">
         <button id="fpsSlow" class="small">SLOW</button>
         <button id="fpsNormal" class="small">NORMAL</button>
@@ -76,9 +120,9 @@ h3{font-size:.78rem;color:#bdbdbd;letter-spacing:1.6px;margin-bottom:8px}
     </div>
 
     <div class="card">
-      <h3>COUNTING PROGRESS · 3D DONUT</h3>
-      <div id="donut3d" class="canvas3d"></div>
-      <div style="margin-top:8px">
+      <div class="title">COUNTING PROGRESS · 3D DONUT</div>
+      <div id="donut3d" class="canvas"></div>
+      <div style="margin-top:10px">
         <div class="mini-charts">
           <canvas id="miniLine"></canvas>
           <canvas id="miniDoughnut"></canvas>
@@ -87,224 +131,401 @@ h3{font-size:.78rem;color:#bdbdbd;letter-spacing:1.6px;margin-bottom:8px}
     </div>
 
     <div class="card">
-      <h3>DAILY TASKS</h3>
-      <div class="tasks" id="tasks"></div>
+      <div class="title">DAILY & WEEKLY TASKS</div>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1">
+          <h4 style="font-size:.85rem;margin-bottom:8px;color:#ddd">Daily</h4>
+          <div class="tasks" id="dailyTasks"></div>
+        </div>
+        <div style="flex:1">
+          <h4 style="font-size:.85rem;margin-bottom:8px;color:#ddd">Weekly</h4>
+          <div class="tasks" id="weeklyTasks"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <div id="tooltip" class="tooltip" aria-hidden="true"></div>
 
-<!-- Main module: uses import map; OrbitControls resolves to three via import map -->
-<script type="module">
+<!-- Main module: uses importmap-shim (es-module-shims) for wide compatibility -->
+<script type="module-shim">
+/* 3D Dashboard — robust and fixed:
+ - Uses import maps (mapped by importmap-shim) so "three" resolves
+ - Loads data from ./data/dashboard.json (falls back gracefully)
+ - Fixes DirectionalLight position bug (use light.position.set(...))
+ - Warm palette, animations, controls
+*/
+
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-/* minimal utilities + behaviour: same as explained earlier
-   This file is intentionally compact but complete — everything uses the "three" import that
-   the importmap maps to the CDN ESM build, so the browser resolves correctly. 
-   The rest of the code (scenes, loaders, charts) is the same functional approach used previously.
-*/
-
+/* UI refs */
 const themeBtn = document.getElementById('themeBtn');
 const fsBtn = document.getElementById('fsBtn');
-const reloadBtn = document.getElementById('reloadBtn');
 const playBtn = document.getElementById('playBtn');
+const reloadBtn = document.getElementById('reloadBtn');
 const snapshotBtn = document.getElementById('snapshotBtn');
 const tooltip = document.getElementById('tooltip');
-const tasksContainer = document.getElementById('tasks');
 const timeEl = document.getElementById('time');
 const dateEl = document.getElementById('date');
 const weeklyEl = document.getElementById('weekly3d');
 const donutEl = document.getElementById('donut3d');
 const hourglassEl = document.getElementById('hourglass');
+const dailyTasksEl = document.getElementById('dailyTasks');
+const weeklyTasksEl = document.getElementById('weeklyTasks');
 const miniLineCtx = document.getElementById('miniLine').getContext('2d');
 const miniDoughCtx = document.getElementById('miniDoughnut').getContext('2d');
 
 let animationRunning = true;
 let speedFactor = 1;
 
+/* Controls */
 themeBtn.addEventListener('click', ()=> document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark');
 fsBtn.addEventListener('click', ()=> { if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen().catch(()=>{}); });
 playBtn.addEventListener('click', ()=> { animationRunning = !animationRunning; playBtn.innerText = animationRunning ? 'PAUSE' : 'PLAY'; });
-reloadBtn.addEventListener('click', ()=> loadDataAndBuild());
-document.getElementById('fpsSlow').addEventListener('click', ()=> speedFactor = 0.6);
+reloadBtn.addEventListener('click', ()=> loadAndBuild());
+document.getElementById('fpsSlow').addEventListener('click', ()=> speedFactor = 0.55);
 document.getElementById('fpsNormal').addEventListener('click', ()=> speedFactor = 1);
 document.getElementById('fpsFast').addEventListener('click', ()=> speedFactor = 1.8);
 
-/* data fallback */
+/* Snapshot */
+snapshotBtn.addEventListener('click', ()=> {
+  try {
+    if (weeklyRenderer && weeklyRenderer.domElement) {
+      const dataUrl = weeklyRenderer.domElement.toDataURL('image/png');
+      const a = document.createElement('a'); a.href = dataUrl; a.download = 'weekly_snapshot.png'; document.body.appendChild(a); a.click(); a.remove();
+    }
+  } catch (e) { console.error(e); alert('Snapshot failed — see console'); }
+});
+
+/* Safe device pixel ratio */
+const DPR = ()=> Math.min(window.devicePixelRatio || 1, 2);
+
+/* DATA: try to fetch data/dashboard.json — fallback to defaults */
+const dataPath = './data/dashboard.json';
+
 const defaultData = {
-  weekly:[6901,5447,4524,2068,1100],
-  tasks:[
-    {t:"Aged stock report 07:00", s:"Completed"},
-    {t:"Aged stock report 15:00", s:"Pending"},
-    {t:"Returns adjustments", s:"Pending"},
-    {t:"PI First Count", s:"Pending"},
-    {t:"SLA Master Sync", s:"Pending"},
-    {t:"High Value Audit", s:"Pending"}
+  metadata: { target: 1193, timestamp: new Date().toLocaleTimeString('en-GB') },
+  counting: [
+    {area:"MPR", qty:14622},{area:"PB1",qty:4329},{area:"PB2",qty:795},{area:"PB3",qty:772},
+    {area:"PB4",qty:164},{area:"PBSRES",qty:5197},{area:"MP",qty:25612},{area:"MIX",qty:33087},
+    {area:"MS",qty:21512},{area:"MSX",qty:28798},{area:"FM",qty:2308},{area:"HP",qty:561},
+    {area:"Total:",qty:137369}
+  ],
+  dailyTasks: [
+    {name:"Aged stock report 7AM", status:"Completed"},
+    {name:"Aged stock report 3PM", status:"Not started"},
+    {name:"Returns Adjustments", status:"Not started"},
+    {name:"PI First Count", status:"Not started"}
+  ],
+  weeklyTasks: [
+    {name:"(Weekly) SLA", status:"Not started"},
+    {name:"(Weekly) SIS report", status:"Not started"},
+    {name:"(once a month) Shrinkage for Period", status:"Completed"}
+  ],
+  history: [
+    {week:"W1", total:6901},{week:"W2",total:5447},{week:"W3",total:4524},{week:"W4",total:2068},
+    {week:"W5",total:1100},{week:"W6",total:3200},{week:"W7",total:4800},{week:"W8",total:6000},{week:"W9",total:7300}
   ]
 };
 
-async function loadDataFromJSON(){
-  try{
-    const r = await fetch('./data.json', {cache:'no-cache'});
-    if(!r.ok) throw new Error('no data.json');
-    const j = await r.json();
-    if(!j.weekly || !j.tasks) throw new Error('invalid data');
+async function fetchDashboard(){
+  try {
+    const res = await fetch(dataPath, {cache:'no-cache'});
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const j = await res.json();
+    // minimal validation
+    if (!j.history || !Array.isArray(j.history)) throw new Error('Invalid JSON schema');
     return j;
-  }catch(e){
+  } catch (e) {
+    console.warn('dashboard.json load failed — using defaultData', e);
     return defaultData;
   }
 }
 
-function renderTasks(tasks){
-  tasksContainer.innerHTML = '';
-  tasks.forEach(x=>{
-    const d = document.createElement('div');
-    d.className = `task ${x.s==='Completed'?'done':''}`;
-    const statusText = x.s === 'Completed' ? 'READY' : (x.s||'Pending').toUpperCase();
-    d.innerHTML = `<span>${x.t}</span><span class="badge ${x.s==='Completed'?'ok':'wait'}">${statusText}</span>`;
-    tasksContainer.appendChild(d);
+/* Render tasks */
+function renderTasks(daily, weekly){
+  dailyTasksEl.innerHTML = '';
+  weeklyTasksEl.innerHTML = '';
+  daily.forEach(t=>{
+    const div = document.createElement('div'); div.className = `task ${t.status==='Completed'?'done':''}`;
+    div.innerHTML = `<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${t.status==='Completed'?'READY':'PENDING'}</span>`;
+    dailyTasksEl.appendChild(div);
+  });
+  weekly.forEach(t=>{
+    const div = document.createElement('div'); div.className = `task ${t.status==='Completed'?'done':''}`;
+    div.innerHTML = `<span>${t.name}</span><span class="badge ${t.status==='Completed'?'ok':'wait'}">${t.status==='Completed'?'READY':'PENDING'}</span>`;
+    weeklyTasksEl.appendChild(div);
   });
 }
 
-/* clock */
-let lastMinute = null;
-setInterval(()=>{
+/* Clock + hourglass flip each minute */
+let lastMin = null;
+setInterval(()=> {
   const d = new Date();
   timeEl.innerText = d.toLocaleTimeString('en-GB',{hour12:false});
-  dateEl.innerText = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-  if(d.getMinutes() !== lastMinute){
-    lastMinute = d.getMinutes();
-    if(hourglassGroup) hourglassGroup.rotation.y += Math.PI;
+  dateEl.innerText = d.toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long'});
+  if (d.getMinutes() !== lastMin) {
+    lastMin = d.getMinutes();
+    if (hourglassGroup) hourglassGroup.rotation.y += Math.PI;
   }
-},1000);
+}, 1000);
 
-/* safe pixel ratio */
-const DPR = ()=>Math.min(window.devicePixelRatio||1,2);
+/* ---------- HOURGLASS (mini) ---------- */
+let hourglassGroup = null;
+(function initHourglass(){
+  try {
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(45, hourglassEl.clientWidth / hourglassEl.clientHeight, 0.1, 50);
+    cam.position.set(0,1.5,3);
 
-/* hourglass */
-let hourglassGroup=null;
-(function(){
-  const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(50, hourglassEl.clientWidth/hourglassEl.clientHeight, 0.1, 50);
-  cam.position.set(0,1.5,3);
-  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  renderer.setPixelRatio(DPR());
-  renderer.setSize(hourglassEl.clientWidth, hourglassEl.clientHeight);
-  hourglassEl.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+    renderer.setPixelRatio(DPR());
+    renderer.setSize(hourglassEl.clientWidth, hourglassEl.clientHeight);
+    hourglassEl.appendChild(renderer.domElement);
 
-  const gTop = new THREE.ConeGeometry(0.35,0.9,32);
-  const gBot = new THREE.ConeGeometry(0.35,0.9,32); gBot.rotateX(Math.PI);
-  const mat = new THREE.MeshStandardMaterial({color:0xffb703, metalness:0.4, roughness:0.25});
-  hourglassGroup = new THREE.Group();
-  const top = new THREE.Mesh(gTop,mat); top.position.y=0.44;
-  const bot = new THREE.Mesh(gBot,mat); bot.position.y=-0.44;
-  hourglassGroup.add(top,bot);
+    const mat = new THREE.MeshStandardMaterial({color:0xffb703, metalness:0.4, roughness:0.25});
+    const gTop = new THREE.ConeGeometry(0.32, 0.8, 32);
+    const gBot = new THREE.ConeGeometry(0.32, 0.8, 32); gBot.rotateX(Math.PI);
 
-  const sandGeo = new THREE.BufferGeometry();
-  const N = 120; const pos = new Float32Array(N*3);
-  for(let i=0;i<N;i++){ pos[i*3]=(Math.random()-0.5)*0.18; pos[i*3+1]=Math.random()*0.7-0.35; pos[i*3+2]=(Math.random()-0.5)*0.18; }
-  sandGeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
-  const sand = new THREE.Points(sandGeo, new THREE.PointsMaterial({size:0.035, color:0xffb703, sizeAttenuation:true}));
-  hourglassGroup.add(sand);
+    hourglassGroup = new THREE.Group();
+    const top = new THREE.Mesh(gTop, mat); top.position.y = 0.38;
+    const bot = new THREE.Mesh(gBot, mat); bot.position.y = -0.38;
+    hourglassGroup.add(top, bot);
 
-  scene.add(hourglassGroup);
-  scene.add(new THREE.AmbientLight(0xffffff,0.6));
-  const pl = new THREE.PointLight(0xffb703,1); pl.position.set(3,3,3); scene.add(pl);
+    // sand particles
+    const sandGeo = new THREE.BufferGeometry();
+    const N = 110;
+    const positions = new Float32Array(N*3);
+    for (let i=0;i<N;i++){
+      positions[i*3] = (Math.random()-0.5)*0.16;
+      positions[i*3+1] = Math.random()*0.6 - 0.3;
+      positions[i*3+2] = (Math.random()-0.5)*0.16;
+    }
+    sandGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const sandPts = new THREE.Points(sandGeo, new THREE.PointsMaterial({size:0.035, color:0xffb703, sizeAttenuation:true}));
+    hourglassGroup.add(sandPts);
 
-  function onResize(){ renderer.setSize(hourglassEl.clientWidth,hourglassEl.clientHeight); cam.aspect = hourglassEl.clientWidth/hourglassEl.clientHeight; cam.updateProjectionMatrix(); }
-  window.addEventListener('resize', onResize);
+    scene.add(hourglassGroup);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const pl = new THREE.PointLight(0xffb703, 1.0); pl.position.set(3,3,3); scene.add(pl);
 
-  function loop(){ requestAnimationFrame(loop); sand.rotation.y += 0.009 * speedFactor; renderer.render(scene,cam); }
-  loop();
+    function onResize(){
+      renderer.setSize(hourglassEl.clientWidth, hourglassEl.clientHeight);
+      cam.aspect = hourglassEl.clientWidth / hourglassEl.clientHeight; cam.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', onResize);
+
+    function loop(){
+      requestAnimationFrame(loop);
+      sandPts.rotation.y += 0.009 * speedFactor;
+      renderer.render(scene, cam);
+    }
+    loop();
+  } catch (e) {
+    console.error('Hourglass init error', e);
+  }
 })();
 
-/* weekly & donut scenes - compact but reliable */
-let weeklyRenderer, weeklyScene, weeklyCamera, weeklyControls, weeklyBars = [], weeklyParticles;
-function createWeeklyScene(arr){
-  if(weeklyRenderer && weeklyRenderer.domElement && weeklyRenderer.domElement.parentElement===weeklyEl) weeklyEl.removeChild(weeklyRenderer.domElement);
+/* ---------- WEEKLY 3D (waterfall + particles + tooltip) ---------- */
+let weeklyRenderer, weeklyScene, weeklyCamera, weeklyControls;
+let weeklyBars = [], weeklyParticles;
+function createWeeklyScene(historyArr){
+  // remove previous canvas if exists
+  if (weeklyRenderer && weeklyRenderer.domElement && weeklyRenderer.domElement.parentElement === weeklyEl) {
+    weeklyEl.removeChild(weeklyRenderer.domElement);
+  }
+
   weeklyScene = new THREE.Scene();
-  weeklyCamera = new THREE.PerspectiveCamera(50, weeklyEl.clientWidth/weeklyEl.clientHeight, 0.1, 200);
-  weeklyCamera.position.set(0,12,20);
+  weeklyCamera = new THREE.PerspectiveCamera(50, weeklyEl.clientWidth / weeklyEl.clientHeight, 0.1, 200);
+  weeklyCamera.position.set(0, 12, 20);
+
   weeklyRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  weeklyRenderer.setPixelRatio(DPR()); weeklyRenderer.setSize(weeklyEl.clientWidth, weeklyEl.clientHeight); weeklyEl.appendChild(weeklyRenderer.domElement);
+  weeklyRenderer.setPixelRatio(DPR());
+  weeklyRenderer.setSize(weeklyEl.clientWidth, weeklyEl.clientHeight);
+  weeklyEl.appendChild(weeklyRenderer.domElement);
 
-  weeklyScene.add(new THREE.AmbientLight(0xffffff,0.4));
-  weeklyScene.add(new THREE.DirectionalLight(0xffb703,1.05).set(5,12,10));
+  weeklyScene.add(new THREE.AmbientLight(0xffffff, 0.45));
+  const dirLight = new THREE.DirectionalLight(0xff8c42, 0.9);
+  dirLight.position.set(5,12,10); // CORRECT: set light position via position.set(...)
+  weeklyScene.add(dirLight);
 
-  const max = Math.max(...arr);
+  // build bars from history totals
+  const values = historyArr.map(h=>Number(h.total || 0));
+  const labels = historyArr.map(h=>h.week || '');
+  const max = Math.max(...values, 1);
   weeklyBars = [];
-  arr.forEach((v,i)=>{
+  values.forEach((v,i)=>{
     const h = (v/max)*7 + 0.3;
-    const mat = new THREE.MeshStandardMaterial({color:0xff8c42, metalness:0.45, roughness:0.28});
-    const box = new THREE.Mesh(new THREE.BoxGeometry(1.2,h,1.2), mat);
-    box.position.set((i - (arr.length-1)/2)*2.2, h/2, 0);
-    weeklyScene.add(box); weeklyBars.push({mesh:box,height:h,value:v});
+    const mat = new THREE.MeshStandardMaterial({color:0xff8c42, metalness:0.35, roughness:0.28});
+    const boxGeom = new THREE.BoxGeometry(1.4, h, 1.2);
+    const box = new THREE.Mesh(boxGeom, mat);
+    box.position.set((i - (values.length-1)/2) * 2.2, h/2, 0);
+    weeklyScene.add(box);
+    weeklyBars.push({mesh: box, height: h, value: v, label: labels[i]});
   });
 
-  const pgeo = new THREE.BufferGeometry(); const pcount = 700; const positions = new Float32Array(pcount*3);
-  for(let i=0;i<pcount;i++){ positions[i*3] = (Math.random()-0.5)*14; positions[i*3+1] = Math.random()*10+3; positions[i*3+2] = (Math.random()-0.5)*6; }
-  pgeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  // particles
+  const pgeo = new THREE.BufferGeometry();
+  const pcount = 900;
+  const ppositions = new Float32Array(pcount * 3);
+  for (let i=0;i<pcount;i++){
+    ppositions[i*3] = (Math.random()-0.5) * 16;
+    ppositions[i*3+1] = Math.random() * 10 + 3;
+    ppositions[i*3+2] = (Math.random()-0.5) * 6;
+  }
+  pgeo.setAttribute('position', new THREE.BufferAttribute(ppositions, 3));
   weeklyParticles = new THREE.Points(pgeo, new THREE.PointsMaterial({size:0.12, color:0xffb703, sizeAttenuation:true}));
   weeklyScene.add(weeklyParticles);
 
   weeklyControls = new OrbitControls(weeklyCamera, weeklyRenderer.domElement);
-  weeklyControls.enableDamping = true; weeklyControls.enableZoom = true;
+  weeklyControls.enableDamping = true;
+  weeklyControls.enableZoom = true;
 
-  const ray = new THREE.Raycaster(); const mouse = new THREE.Vector2();
-  weeklyEl.addEventListener('pointermove', (ev)=>{ const r = weeklyEl.getBoundingClientRect(); const x = ev.clientX - r.left; const y = ev.clientY - r.top; mouse.x = (x/r.width)*2-1; mouse.y = -(y/r.height)*2+1; weeklyEl._lastPointer = {clientX:ev.clientX, clientY:ev.clientY}; });
+  // raycasting + pointer
+  const ray = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  weeklyEl.addEventListener('pointermove', (ev) => {
+    const rect = weeklyEl.getBoundingClientRect();
+    const x = ev.clientX - rect.left;
+    const y = ev.clientY - rect.top;
+    mouse.x = (x / rect.width) * 2 - 1;
+    mouse.y = - (y / rect.height) * 2 + 1;
+    weeklyEl._lastPointer = {clientX: ev.clientX, clientY: ev.clientY};
+  });
 
-  function animate(){ requestAnimationFrame(animate); weeklyParticles.rotation.y += 0.004 * speedFactor; weeklyBars.forEach(b=>{ b.mesh.position.y += (b.height/2 - b.mesh.position.y) * 0.06 * speedFactor; }); weeklyCamera.position.x = 12*Math.sin(perf.now()/6000); weeklyCamera.position.z = 12*Math.cos(perf.now()/6000); weeklyCamera.lookAt(0,3,0); weeklyControls.update();
+  function onResize(){
+    weeklyRenderer.setSize(weeklyEl.clientWidth, weeklyEl.clientHeight);
+    weeklyCamera.aspect = weeklyEl.clientWidth / weeklyEl.clientHeight; weeklyCamera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', onResize);
+
+  let t = 0;
+  function animate(){
+    requestAnimationFrame(animate);
+    t += 0.02 * speedFactor;
+    weeklyParticles.rotation.y = t/5;
+    weeklyBars.forEach(b => {
+      b.mesh.position.y += (b.height/2 - b.mesh.position.y) * 0.06 * speedFactor;
+    });
+    weeklyCamera.position.x = 12 * Math.sin(t/5);
+    weeklyCamera.position.z = 12 * Math.cos(t/5);
+    weeklyCamera.lookAt(0, 3, 0);
+    weeklyControls.update();
+
+    // tooltip via raycast
     ray.setFromCamera(mouse, weeklyCamera);
     const intersects = ray.intersectObjects(weeklyBars.map(b=>b.mesh));
-    if(intersects.length>0 && weeklyEl._lastPointer){ const hit = weeklyBars.find(b=>b.mesh===intersects[0].object); tooltip.style.display='block'; tooltip.style.left=(weeklyEl._lastPointer.clientX+12)+'px'; tooltip.style.top=(weeklyEl._lastPointer.clientY-10)+'px'; tooltip.innerText = `Value: ${hit.value}`; } else tooltip.style.display='none';
-    weeklyRenderer.render(weeklyScene, weeklyCamera);
+    if (intersects.length > 0 && weeklyEl._lastPointer) {
+      const hit = weeklyBars.find(b => b.mesh === intersects[0].object);
+      tooltip.style.display = 'block';
+      tooltip.style.left = (weeklyEl._lastPointer.clientX + 12) + 'px';
+      tooltip.style.top = (weeklyEl._lastPointer.clientY - 10) + 'px';
+      tooltip.innerText = `${hit.label || ''} — ${hit.value}`;
+    } else {
+      tooltip.style.display = 'none';
+    }
+
+    if (animationRunning) weeklyRenderer.render(weeklyScene, weeklyCamera);
+    else weeklyRenderer.render(weeklyScene, weeklyCamera);
   }
   animate();
 }
 
+/* ---------- DONUT 3D + mini charts ---------- */
 let donutRenderer;
-function createDonut(arr){
-  if(donutRenderer && donutRenderer.domElement && donutRenderer.domElement.parentElement===donutEl) donutEl.removeChild(donutRenderer.domElement);
+function createDonutAndMini(countingArr, historyArr){
+  // destroy previous canvas if exists
+  if (donutRenderer && donutRenderer.domElement && donutRenderer.domElement.parentElement === donutEl) donutEl.removeChild(donutRenderer.domElement);
+
   const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(50, donutEl.clientWidth/donutEl.clientHeight, 0.1, 100);
-  cam.position.set(0,0,8);
-  donutRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true}); donutRenderer.setPixelRatio(DPR()); donutRenderer.setSize(donutEl.clientWidth, donutEl.clientHeight); donutEl.appendChild(donutRenderer.domElement);
-  scene.add(new THREE.AmbientLight(0xffffff,0.5)); const l = new THREE.PointLight(0xffb703,1.1); l.position.set(4,4,4); scene.add(l);
-  const total = arr.reduce((a,b)=>a+b,0); const maxTotal = 30000; const fraction = Math.min(total/maxTotal,1); const arc = fraction*Math.PI*2;
-  const tor = new THREE.Mesh(new THREE.TorusGeometry(2.6,0.55,32,160,arc), new THREE.MeshStandardMaterial({color:0xff8c42, metalness:0.6, roughness:0.25})); scene.add(tor);
-  function loop(){ requestAnimationFrame(loop); tor.rotation.y += 0.01*speedFactor; donutRenderer.render(scene,cam); } loop();
+  const cam = new THREE.PerspectiveCamera(50, donutEl.clientWidth / donutEl.clientHeight, 0.1, 100);
+  cam.position.set(0, 0, 8);
 
-  // small Chart.js charts
+  donutRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  donutRenderer.setPixelRatio(DPR());
+  donutRenderer.setSize(donutEl.clientWidth, donutEl.clientHeight);
+  donutEl.appendChild(donutRenderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  const pl = new THREE.PointLight(0xffb703, 1.0); pl.position.set(4,4,4); scene.add(pl);
+
+  // compute totals (exclude "Total:" row if present)
+  const items = countingArr.filter(c => (c.area || '').toLowerCase().indexOf('total') === -1);
+  const total = items.reduce((s, it) => s + (Number(it.qty) || 0), 0);
+  const maxTotal = Math.max(1, total);
+  const fraction = Math.min(total / Math.max(100000, maxTotal), 1); // scale visual arc
+  const arc = Math.max(0.2, Math.min(2 * Math.PI * (total / Math.max(30000, maxTotal)), Math.PI * 2));
+
+  const tor = new THREE.Mesh(
+    new THREE.TorusGeometry(2.6, 0.55, 32, 160, arc),
+    new THREE.MeshStandardMaterial({color:0xff8c42, metalness:0.6, roughness:0.25})
+  );
+  scene.add(tor);
+
+  function onResize(){
+    donutRenderer.setSize(donutEl.clientWidth, donutEl.clientHeight);
+    cam.aspect = donutEl.clientWidth / donutEl.clientHeight; cam.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', onResize);
+
+  function loop(){
+    requestAnimationFrame(loop);
+    tor.rotation.y += 0.01 * speedFactor;
+    donutRenderer.render(scene, cam);
+  }
+  loop();
+
+  // Chart.js mini charts
   try {
-    if(window.miniLineChart) window.miniLineChart.destroy();
-    window.miniLineChart = new Chart(miniLineCtx, {type:'line', data:{labels:arr.map((_,i)=>`W${i+1}`), datasets:[{data:arr, borderColor:'#ff8c42', backgroundColor:'rgba(255,140,66,0.12)', tension:0.35, borderWidth:2, pointRadius:3}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}, y:{grid:{display:false}, ticks:{display:false}}}}});
-    if(window.miniDoughChart) window.miniDoughChart.destroy();
-    const used = Math.min(total,30000); const rem = Math.max(0,30000-total);
-    window.miniDoughChart = new Chart(miniDoughCtx, {type:'doughnut', data:{labels:['Used','Remaining'], datasets:[{data:[used,rem], backgroundColor:['#ffb703','#333333']} ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}});
-  } catch(e){ console.warn('chart error', e); }
+    if (window.miniLineChart) window.miniLineChart.destroy();
+    const histValues = historyArr.map(h => Number(h.total || 0));
+    const labels = historyArr.map(h => h.week || '');
+    window.miniLineChart = new Chart(miniLineCtx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{label:'History', data: histValues, tension:0.35, borderColor:'#ff8c42', backgroundColor:'rgba(255,140,66,0.12)', borderWidth:2, pointRadius:3}]
+      },
+      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}, y:{grid:{display:false},ticks:{display:false}}}}
+    });
+
+    if (window.miniDoughChart) window.miniDoughChart.destroy();
+    window.miniDoughChart = new Chart(miniDoughCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Used','Remaining'],
+        datasets: [{ data: [Math.min(total,30000), Math.max(0,30000-total)], backgroundColor: ['#ffb703','#333333'] }]
+      },
+      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}
+    });
+  } catch (e) {
+    console.warn('Mini charts error', e);
+  }
 }
 
-async function loadDataAndBuild(){
-  const data = await loadDataFromJSON();
-  const weekly = Array.isArray(data.weekly)?data.weekly.slice():defaultData.weekly.slice();
-  const tasks = Array.isArray(data.tasks)?data.tasks.slice():defaultData.tasks.slice();
-  renderTasks(tasks);
-  createWeeklyScene(weekly);
-  createDonut(weekly);
-}
-loadDataAndBuild();
+/* ---------- Orchestrator: load data, render everything ---------- */
+async function loadAndBuild(){
+  const data = await fetchDashboard();
 
-/* snapshot */
-document.getElementById('snapshotBtn').addEventListener('click', ()=> {
-  try {
-    if(weeklyRenderer && weeklyRenderer.domElement) {
-      const url = weeklyRenderer.domElement.toDataURL('image/png');
-      const a = document.createElement('a'); a.href = url; a.download = 'weekly_snapshot.png'; document.body.appendChild(a); a.click(); a.remove();
-    }
-  } catch(e){ console.error('snapshot', e); alert('Snapshot failed — see console.'); }
-});
+  // render tasks (daily & weekly)
+  renderTasks(data.dailyTasks || [], data.weeklyTasks || []);
+
+  // use history for weekly bars; if history empty, fallback to last 9 totals from counting (rare)
+  const history = Array.isArray(data.history) && data.history.length ? data.history.slice(0,9) : (data.counting || []).slice(0,9).map((c,i)=>({week:`${c.area||'A'+i}`, total:Number(c.qty)||0}));
+
+  // build 3D scenes (creates or replaces canvases)
+  createWeeklyScene(history);
+  createDonutAndMini(data.counting || [], history);
+}
+
+/* initial load */
+loadAndBuild();
+
+/* keep animation toggles sensible */
+window.addEventListener('blur', ()=> animationRunning = false);
+window.addEventListener('focus', ()=> animationRunning = true);
 
 </script>
 </body>
