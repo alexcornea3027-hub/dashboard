@@ -1,180 +1,319 @@
-<!DOCTYPE html>
-<html lang="ro">
-<head>
-    <meta charset="UTF-8">
-    <title>VCB | EXECUTIVE DASHBOARD</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
-    <script type="importmap">
-    { "imports": { "three": "https://unpkg.com/three@0.158.0/build/three.module.js" } }
-    </script>
-    <style>
-        :root {
-            --bg: #0b0d11; --card: #161a21;
-            --soft-mint: #98ffcc; --soft-gold: #f3d299; --soft-blue: #a3daff;
-            --text-main: #f8fafc; --text-dim: #94a3b8; --border: rgba(255,255,255,0.06);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); height: 100vh; overflow: hidden; }
+import React, { useEffect, useState, useRef } from "react";
+import {
+  PieChart, Pie, Cell,
+  BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer,
+  LineChart, Line, Legend, ComposedChart
+} from 'recharts';
 
-        .app { display: grid; grid-template-rows: 70px 180px 1fr 280px; gap: 15px; padding: 18px; height: 100vh; }
+// Default warm palette
+const COLORS = ["#ff8a65", "#ff7043", "#ff5722", "#ffab91", "#ffccbc", "#ffd54f", "#ffb74d", "#ffa726", "#ff8f00", "#ff6f00"];
 
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; background: var(--card); border-radius: 14px; padding: 0 30px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .logo { font-weight: 800; font-size: 1.3rem; letter-spacing: 1px; color: var(--soft-gold); }
-        .target-pill { background: rgba(152, 255, 204, 0.08); border: 1px solid rgba(152, 255, 204, 0.2); color: var(--soft-mint); padding: 6px 18px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; }
-        
-        .timer-zone { display: flex; align-items: center; gap: 18px; }
-        #hg-canvas { width: 45px; height: 45px; }
-        #clock { font-size: 1.6rem; font-weight: 700; letter-spacing: 2px; }
+export default function VCBStockTeam() {
+  const [data, setData] = useState(null);
+  const [theme, setTheme] = useState('light');
+  const [now, setNow] = useState(new Date());
+  const hourglassRef = useRef(null);
+  const particlesRef = useRef(null);
 
-        /* KPI ROW */
-        .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .kpi-box { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 22px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; }
-        .kpi-box::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); opacity: 0.6; }
-        .kpi-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1.5px; margin-bottom: 6px; font-weight: 600; }
-        .kpi-value { font-size: 2.6rem; font-weight: 800; line-height: 1; color: #fff; }
-        .chart-container { width: 100px; height: 100px; }
+  useEffect(() => {
+    fetch('/data/dashboard.json')
+      .then(r => r.json())
+      .then(j => setData(j))
+      .catch(e => console.error('Could not load /data/dashboard.json', e));
+  }, []);
 
-        /* GRAPHS */
-        .mid-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 15px; min-height: 0; }
-        .panel { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
-        .panel-title { font-size: 0.8rem; font-weight: 700; color: var(--soft-gold); text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  // Clock + minute tick
+  useEffect(() => {
+    const tick = () => setNow(new Date());
+    const msToNextMinute = (60 - new Date().getSeconds()) * 1000 - new Date().getMilliseconds();
+    const timeout = setTimeout(() => {
+      tick();
+      // rotate hourglass once each minute (brief animation toggle)
+      if (hourglassRef.current) {
+        hourglassRef.current.classList.remove('hg-rotate');
+        // force reflow
+        // eslint-disable-next-line
+        hourglassRef.current.offsetWidth;
+        hourglassRef.current.classList.add('hg-rotate');
+      }
+      const interval = setInterval(tick, 60 * 1000);
+      // store so we can clear on unmount
+      (V._intervals || (V._intervals = [])).push(interval);
+    }, msToNextMinute);
 
-        /* LISTS */
-        .bottom-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 15px; min-height: 0; }
-        .scroll-area { overflow-y: auto; padding-right: 8px; }
-        .scroll-area::-webkit-scrollbar { width: 3px; }
-        .scroll-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+    const V = window; // hold intervals
+    (V._timeouts || (V._timeouts = [])).push(timeout);
 
-        .task-card { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 8px; border: 1px solid transparent; transition: 0.3s; }
-        .task-card.ready { border-left: 4px solid var(--soft-mint); background: rgba(152, 255, 204, 0.04); }
-        .status-badge { font-size: 0.65rem; font-weight: 800; padding: 5px 12px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .bg-done { background: var(--soft-mint); color: #0f172a; }
-        .bg-wait { background: #242933; color: #94a3b8; }
-    </style>
-</head>
-<body>
-
-<div class="app">
-    <header class="header">
-        <div class="logo">STOCKTEAM <span style="font-weight:300">| VCB</span></div>
-        <div class="target-pill">DAILY TARGET: 1,193 LOCATIONS</div>
-        <div class="timer-zone">
-            <div id="hg-canvas"></div>
-            <div id="clock">12:00:00</div>
-        </div>
-    </header>
-
-    <div class="kpi-row">
-        <div class="kpi-box" style="--accent: var(--soft-mint)">
-            <div><div class="kpi-label">LOCAȚII NUMĂRATE</div><div class="kpi-value">1,186</div><p style="color:var(--soft-mint); font-size:0.75rem; margin-top:5px;">99% din target</p></div>
-            <div id="c1" class="chart-container"></div>
-        </div>
-        <div class="kpi-box" style="--accent: var(--soft-gold)">
-            <div><div class="kpi-label">TASK-URI ZILNICE</div><div class="kpi-value">1/5</div><p style="color:var(--soft-gold); font-size:0.75rem; margin-top:5px;">20% Finalizate</p></div>
-            <div id="c2" class="chart-container"></div>
-        </div>
-        <div class="kpi-box" style="--accent: var(--soft-blue)">
-            <div><div class="kpi-label">WEEKLY STRATEGIC</div><div class="kpi-value">1/3</div><p style="color:var(--soft-blue); font-size:0.75rem; margin-top:5px;">33% Progres</p></div>
-            <div id="c3" class="chart-container"></div>
-        </div>
-    </div>
-
-    <div class="mid-grid">
-        <div class="panel"><div class="panel-title">Productivitate per Zonă</div><div id="bars-3d" style="flex:1"></div></div>
-        <div class="panel"><div class="panel-title">Trend Volum (W30-W34)</div><div id="trend-3d" style="flex:1"></div></div>
-    </div>
-
-    <div class="bottom-grid">
-        <div class="panel">
-            <div class="panel-title">Daily Operations Feed</div>
-            <div class="scroll-area" id="list-daily"></div>
-        </div>
-        <div class="panel">
-            <div class="panel-title">Weekly Strategic Feed</div>
-            <div class="scroll-area" id="list-weekly"></div>
-        </div>
-    </div>
-</div>
-
-<script type="module">
-    import * as THREE from 'three';
-
-    const db = {
-        daily: [
-            {t: "Aged stock report 7AM", s: "DONE"}, {t: "Aged stock report 3PM", s: "WAIT"},
-            {n: "ADJUSTMENTS (Returns)", s: "WAIT"}, {n: "PI 1st count", s: "WAIT"}, {n: "SLA update", s: "WAIT"}
-        ],
-        weekly: [{t: "Period Shrinkage", s: "DONE"}, {t: "SIS report", s: "WAIT"}, {t: "Weekly ORM", s: "WAIT"}]
+    return () => {
+      (V._timeouts || []).forEach(t => clearTimeout(t));
+      (V._intervals || []).forEach(i => clearInterval(i));
     };
+  }, []);
 
-    // CHART-URI NORMALE 3D (TORUS CU ANIMATIE FINĂ)
-    function createChart(id, color, pct) {
-        const el = document.getElementById(id);
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(100, 100); el.appendChild(renderer.domElement);
-
-        const group = new THREE.Group();
-        const arc = (pct/100) * Math.PI * 2;
-        const main = new THREE.Mesh(new THREE.TorusGeometry(10, 2.5, 16, 100, arc), new THREE.MeshStandardMaterial({ color: color, roughness: 0.3, metalness: 0.6 }));
-        main.rotation.z = Math.PI / 2;
-        
-        const ghost = new THREE.Mesh(new THREE.TorusGeometry(10, 2.5, 16, 100), new THREE.MeshBasicMaterial({ color: 0x333b45, transparent: true, opacity: 0.15 }));
-        group.add(main, ghost); scene.add(group);
-
-        scene.add(new THREE.AmbientLight(0xffffff, 1));
-        const pl = new THREE.PointLight(0xffffff, 80); pl.position.set(10,10,10); scene.add(pl);
-        camera.position.z = 28;
-
-        function anim() { 
-            requestAnimationFrame(anim); 
-            group.rotation.y += 0.008; 
-            group.position.y = Math.sin(Date.now()*0.002)*0.5; // Efect de plutire
-            renderer.render(scene, camera); 
-        }
-        anim();
-    }
-
-    // CLEPSIDRĂ CU PARTICULE (ANIMATIE FLUIDĂ)
-    function initHG() {
-        const el = document.getElementById('hg-canvas');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(45, 45); el.appendChild(renderer.domElement);
-
-        const geo = new THREE.ConeGeometry(2, 3, 4);
-        const mat = new THREE.MeshStandardMaterial({ color: 0xf3d299, wireframe: true });
-        const top = new THREE.Mesh(geo, mat);
-        const btm = new THREE.Mesh(geo, mat);
-        btm.rotation.x = Math.PI; btm.position.y = -3;
-        const group = new THREE.Group(); group.add(top, btm); scene.add(group);
-
-        camera.position.z = 10;
-        function anim() { requestAnimationFrame(anim); group.rotation.y += 0.03; renderer.render(scene, camera); }
-        anim();
-    }
-
-    function renderTasks() {
-        const dL = document.getElementById('list-daily');
-        const wL = document.getElementById('list-weekly');
-        const draw = (list) => list.map(t => `<div class="task-card ${t.s==='DONE'?'ready':''}"><span>${t.t || t.n}</span><span class="status-badge ${t.s==='DONE'?'bg-done':'bg-wait'}">${t.s}</span></div>`).join('');
-        dL.innerHTML = draw(db.daily);
-        wL.innerHTML = draw(db.weekly);
-    }
-
-    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('ro-RO'); }, 1000);
-
-    window.onload = () => {
-        createChart('c1', 0x98ffcc, 99);
-        createChart('c2', 0xf3d299, 20);
-        createChart('c3', 0xa3daff, 33);
-        initHG();
-        renderTasks();
+  // Particles background simple canvas
+  useEffect(() => {
+    const canvas = particlesRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = canvas.offsetWidth;
+    let h = canvas.height = canvas.offsetHeight;
+    let particles = [];
+    const create = n => {
+      particles = Array.from({ length: n }).map(() => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: 1 + Math.random() * 2,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        alpha: 0.1 + Math.random() * 0.7
+      }));
     };
-</script>
-</body>
-</html>
+    create(80);
+    let raf;
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+        ctx.beginPath();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = '#fff';
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    const onResize = () => { w = canvas.width = canvas.offsetWidth; h = canvas.height = canvas.offsetHeight; create(80); };
+    window.addEventListener('resize', onResize);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); };
+  }, []);
+
+  // Helpers
+  const toTitle = s => s && s[0] ? s[0].toUpperCase() + s.slice(1) : s;
+
+  const completedCount = (list) => list ? list.filter(t => t.status && t.status.toLowerCase().includes('completed')).length : 0;
+  const pendingCount = (list) => list ? list.length - completedCount(list) : 0;
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    document.documentElement.classList.toggle('dark', next === 'dark');
+  };
+
+  const goFull = () => {
+    const el = document.documentElement;
+    if (!document.fullscreenElement) el.requestFullscreen?.(); else document.exitFullscreen?.();
+  };
+
+  // Render loaders
+  if (!data) return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-slate-800 dark:to-slate-900">
+      <div className="text-center p-6 rounded-2xl shadow-2xl bg-white/80 dark:bg-slate-900/70">
+        <h2 className="text-2xl font-bold">VCB StockTeam — Loading data...</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Fetching <code>/data/dashboard.json</code></p>
+      </div>
+    </div>
+  );
+
+  // Prepare chart data
+  const counting = data.counting || [];
+  const pieData = counting.filter(c => c.area && c.area !== 'Total:' && c.qty >= 0).map((c, i) => ({ name: c.area, value: c.qty, color: COLORS[i % COLORS.length] }));
+
+  const dailyTasks = data.dailyTasks || [];
+  const weeklyTasks = data.weeklyTasks || [];
+  const history = data.history || [];
+
+  // Simple weekly/daily completion bars
+  const dailyCompletion = [{ name: 'Completed', value: completedCount(dailyTasks) }, { name: 'Pending', value: pendingCount(dailyTasks) }];
+  const weeklyCompletion = [{ name: 'Completed', value: completedCount(weeklyTasks) }, { name: 'Pending', value: pendingCount(weeklyTasks) }];
+
+  // Build history chart format
+  const historyChart = history.map((h, i) => ({ week: h.week || `W${i}`, total: Number(h.total || 0) }));
+
+  // Waterfall: show area deltas as a cumulative bar (visual waterfall)
+  let cumulative = 0;
+  const waterfall = pieData.map(p => {
+    const start = cumulative; cumulative += p.value; return { name: p.name, value: p.value, start };
+  });
+
+  return (
+    <div className="min-h-screen p-6 bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-100">
+      <canvas ref={particlesRef} className="pointer-events-none fixed inset-0 opacity-20 mix-blend-screen"></canvas>
+
+      <header className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-extrabold">VCB StockTeam — Dashboard</h1>
+          <div className="text-sm text-slate-600 dark:text-slate-300">Data source: <code>/data/dashboard.json</code></div>
+        </div>
+        <div className="flex items-center gap-3">
+          <button onClick={toggleTheme} className="px-3 py-2 rounded-lg bg-white/70 dark:bg-slate-700/60 shadow">Theme: {theme}</button>
+          <button onClick={goFull} className="px-3 py-2 rounded-lg bg-white/70 dark:bg-slate-700/60 shadow">Fullscreen</button>
+        </div>
+      </header>
+
+      <main className="grid grid-cols-12 gap-6">
+        {/* Left - big stats + charts */}
+        <section className="col-span-8 rounded-2xl p-6 shadow-lg bg-white/80 dark:bg-slate-900/60">
+          <div className="flex gap-6 items-center">
+            <div className="flex-1 text-center py-6 px-4">
+              <div className="text-6xl font-extrabold leading-tight">{now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+              <div className="text-sm mt-1">{now.toLocaleDateString()}</div>
+            </div>
+
+            <div className="w-28 h-28 flex flex-col items-center justify-center rounded-xl bg-orange-50 dark:bg-slate-800/40">
+              <div ref={hourglassRef} className="text-4xl transition-transform duration-800 transform hg-rotate-once" style={{ animationDuration: '1s' }}>⏳</div>
+              <div className="text-xs mt-2">minute tick</div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="p-4 rounded-lg bg-white/60 dark:bg-slate-800/50 shadow-sm">
+              <h3 className="font-semibold">Daily Tasks — Completed vs Pending</h3>
+              <div style={{ height: 180 }} className="mt-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={dailyCompletion}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#ff7043" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-lg bg-white/60 dark:bg-slate-800/50 shadow-sm">
+              <h3 className="font-semibold">Weekly Tasks — Completed vs Pending</h3>
+              <div style={{ height: 180 }} className="mt-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={weeklyCompletion}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#ffa726" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="p-4 rounded-lg bg-white/60 dark:bg-slate-800/50 shadow-sm">
+              <h3 className="font-semibold">Inventory Distribution (areas)</h3>
+              <div style={{ height: 260 }} className="mt-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={80} fill="#8884d8">
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-lg bg-white/60 dark:bg-slate-800/50 shadow-sm">
+              <h3 className="font-semibold">Weekly History (Totals)</h3>
+              <div style={{ height: 260 }} className="mt-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={historyChart}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="week" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="total" stroke="#ff8a65" strokeWidth={3} dot={{ r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 p-4 rounded-lg bg-white/60 dark:bg-slate-800/50 shadow-sm">
+            <h3 className="font-semibold">Waterfall view (cumulative by area)</h3>
+            <div style={{ height: 110 }} className="mt-3">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={waterfall}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="value" stackId="a" fill="#ff6f00" />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </section>
+
+        {/* Right - tasks and meta */}
+        <aside className="col-span-4 space-y-6">
+          <div className="rounded-2xl p-4 shadow-lg bg-white/80 dark:bg-slate-900/60">
+            <h2 className="text-lg font-bold">Summary</h2>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="p-3 rounded-lg bg-orange-50 dark:bg-slate-800/40">
+                <div className="text-sm">Target</div>
+                <div className="text-2xl font-extrabold">{data.metadata?.target ?? '-'}</div>
+              </div>
+              <div className="p-3 rounded-lg bg-orange-50 dark:bg-slate-800/40">
+                <div className="text-sm">Timestamp</div>
+                <div className="text-2xl font-extrabold">{data.metadata?.timestamp ?? '-'}</div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <h3 className="font-semibold">Counts</h3>
+              <ul className="mt-2 max-h-48 overflow-auto">
+                {counting.map((c, i) => (
+                  <li key={i} className="flex justify-between py-1 border-b border-transparent last:border-0">
+                    <span>{c.area}</span>
+                    <span className="font-medium">{c.qty}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="rounded-2xl p-4 shadow-lg bg-white/80 dark:bg-slate-900/60">
+            <h2 className="text-lg font-bold">Daily Tasks</h2>
+            <ul className="mt-3 space-y-2 max-h-64 overflow-auto">
+              {dailyTasks.map((t, i) => (
+                <li key={i} className="flex items-center justify-between p-2 rounded-md" style={{ background: t.status && t.status.toLowerCase().includes('completed') ? 'rgba(76,175,80,0.08)' : 'rgba(255,87,34,0.04)' }}>
+                  <div>
+                    <div className="font-medium">{t.name}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">{t.status}</div>
+                  </div>
+                  <div className={`text-xs px-2 py-1 rounded-full ${t.status && t.status.toLowerCase().includes('completed') ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}`}>{t.status && t.status.toLowerCase().includes('completed') ? 'Completed' : 'Pending'}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl p-4 shadow-lg bg-white/80 dark:bg-slate-900/60">
+            <h2 className="text-lg font-bold">Weekly Tasks</h2>
+            <ul className="mt-3 space-y-2 max-h-64 overflow-auto">
+              {weeklyTasks.map((t, i) => (
+                <li key={i} className="flex items-center justify-between p-2 rounded-md" style={{ background: t.status && t.status.toLowerCase().includes('completed') ? 'rgba(76,175,80,0.08)' : 'rgba(255,87,34,0.04)' }}>
+                  <div>
+                    <div className="font-medium">{t.name}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-300">{t.status}</div>
+                  </div>
+                  <div className={`text-xs px-2 py-1 rounded-full ${t.status && t.status.toLowerCase().includes('completed') ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}`}>{t.status && t.status.toLowerCase().includes('completed') ? 'Completed' : 'Pending'}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+      </main>
+
+      <style jsx>{`
+        .hg-rotate { transform: rotate(360deg); transition: transform 700ms ease-in-out; }
+        /* ensure dark theme support */
+        :root { --bg: #fff; }
+        .dark :root { --bg: #0b1220; }
+      `}</style>
+    </div>
+  );
+}
