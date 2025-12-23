@@ -10,29 +10,30 @@
 <style>
 :root{
  --bg:#05060a;
- --panel:rgba(255,255,255,.045);
- --border:rgba(255,255,255,.12);
+ --panel:rgba(255,255,255,.05);
+ --border:rgba(255,255,255,.14);
 
- --amber:#ffb703;
- --copper:#ff7a3d;
  --cyan:#4fd1c5;
+ --amber:#ffb703;
  --red:#ff5d5d;
 
- --glow-cyan:0 0 40px rgba(79,209,197,.45);
- --glow-amber:0 0 40px rgba(255,183,3,.45);
+ --glow-cyan:0 0 35px rgba(79,209,197,.6);
+ --glow-amber:0 0 35px rgba(255,183,3,.6);
+
  --font:'Outfit',sans-serif;
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
+
 body{
  font-family:var(--font);
+ background:
+  radial-gradient(circle at 30% 25%,#1b1e2a 0%,transparent 45%),
+  radial-gradient(circle at 80% 70%,#11131c 0%,transparent 45%),
+  var(--bg);
+ color:#fff;
  height:100vh;
  overflow:hidden;
- color:#fff;
- background:
-  radial-gradient(circle at 30% 25%,#1c1f2b 0%,transparent 45%),
-  radial-gradient(circle at 80% 70%,#131521 0%,transparent 45%),
-  var(--bg);
  padding:2vh;
  display:flex;
  flex-direction:column;
@@ -51,7 +52,7 @@ body{
 }
 .logo span{color:var(--amber)}
 .fs-btn{
- background:linear-gradient(135deg,var(--amber),var(--copper));
+ background:linear-gradient(135deg,var(--amber),#ff8c42);
  border:none;
  padding:12px 32px;
  border-radius:50px;
@@ -60,9 +61,7 @@ body{
  box-shadow:0 20px 50px rgba(255,183,3,.5);
  transition:.4s;
 }
-.fs-btn:hover{
- transform:translateY(-3px) scale(1.06);
-}
+.fs-btn:hover{transform:translateY(-3px) scale(1.05)}
 
 /* CLOCK */
 .hero-clock{
@@ -78,23 +77,16 @@ body{
  padding:18px 80px;
  border-radius:140px;
  text-align:center;
- transform-style:preserve-3d;
+ transform:rotateX(18deg);
  box-shadow:0 40px 120px rgba(0,0,0,.9);
  animation:float 6s infinite ease-in-out;
 }
-#time{
- font-size:3.8rem;
- font-weight:800;
- letter-spacing:5px;
-}
-#date{
- font-size:.85rem;
- color:var(--amber);
- letter-spacing:2px;
-}
+#time{font-size:3.8rem;font-weight:800;letter-spacing:5px}
+#date{font-size:.85rem;color:var(--amber);letter-spacing:2px}
+
 @keyframes float{
- 0%,100%{transform:translateY(0) rotateX(18deg)}
- 50%{transform:translateY(-14px) rotateX(18deg)}
+ 0%,100%{transform:rotateX(18deg) translateY(0)}
+ 50%{transform:rotateX(18deg) translateY(-14px)}
 }
 
 /* GRID */
@@ -114,26 +106,23 @@ main{
  border-radius:36px;
  padding:24px;
  position:relative;
- transform-style:preserve-3d;
  box-shadow:
   inset 0 1px 0 rgba(255,255,255,.12),
   0 40px 100px rgba(0,0,0,.85);
- transition:.25s;
+ transition:.3s;
+ transform-style:preserve-3d;
 }
 .card::after{
  content:'';
  position:absolute;
  inset:0;
  border-radius:inherit;
- background:radial-gradient(circle at var(--x,50%) var(--y,50%),rgba(255,255,255,.15),transparent 45%);
- opacity:.15;
+ background:radial-gradient(circle at var(--x,50%) var(--y,50%),rgba(255,255,255,.18),transparent 45%);
+ opacity:.18;
  pointer-events:none;
 }
-.card:hover{
- transform:translateY(-8px);
-}
+.card:hover{transform:translateY(-8px)}
 
-/* TEXT */
 .card-label{
  font-size:.7rem;
  letter-spacing:1.8px;
@@ -155,6 +144,11 @@ main{
  width:110px;
  height:110px;
  filter:drop-shadow(0 20px 40px rgba(0,0,0,.8));
+ animation:floatDonut 5s ease-in-out infinite;
+}
+@keyframes floatDonut{
+ 0%,100%{transform:translateY(-50%)}
+ 50%{transform:translateY(-60%)}
 }
 
 /* LIST */
@@ -167,7 +161,6 @@ main{
  display:flex;
  justify-content:space-between;
  align-items:center;
- transition:.3s;
 }
 .task-tile.ready{
  background:linear-gradient(90deg,rgba(79,209,197,.2),transparent);
@@ -205,7 +198,6 @@ main{
   <span class="card-label">Counting Progress</span>
   <span class="card-val" style="color:var(--cyan)" id="v1">0</span>
   <div class="donut-box"><canvas id="c1"></canvas></div>
-  <span style="font-size:.7rem;color:#666">Target: 1,193 Locations</span>
  </div>
 
  <div class="card">
@@ -226,6 +218,7 @@ main{
   <span class="card-label" style="color:var(--cyan)">Productivity Area Map</span>
   <div style="flex:1;margin-top:10px"><canvas id="bar-chart"></canvas></div>
  </div>
+
  <div class="card">
   <span class="card-label" style="color:var(--amber)">Global Performance Trend</span>
   <div style="flex:1;margin-top:10px"><canvas id="line-chart"></canvas></div>
@@ -237,6 +230,7 @@ main{
   <span class="card-label">Operation Live Feed</span>
   <div class="list-wrap" id="list-d"></div>
  </div>
+
  <div class="card">
   <span class="card-label">Weekly Checklist</span>
   <div class="list-wrap" id="list-w"></div>
@@ -246,7 +240,7 @@ main{
 </main>
 
 <script>
-/* DATA (unchanged) */
+/* DATA */
 const store={
  counting:[
  {area:"MPR",qty:146},{area:"PB1",qty:43},{area:"PB2",qty:79},
@@ -273,93 +267,94 @@ const store={
  ]
 };
 
-/* FULLSCREEN */
 function toggleFS(){
- !document.fullscreenElement?
- document.documentElement.requestFullscreen():
- document.exitFullscreen();
+ !document.fullscreenElement
+ ?document.documentElement.requestFullscreen()
+ :document.exitFullscreen();
 }
 
-/* INIT */
+/* SHADOW PLUGIN */
+Chart.register({
+ id:'shadow',
+ beforeDraw(chart){
+  const ctx=chart.ctx;
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,.6)';
+  ctx.shadowBlur=30;
+  ctx.shadowOffsetY=14;
+ },
+ afterDraw(chart){chart.ctx.restore();}
+});
+
 function init(){
- setInterval(()=>{
-  const n=new Date();
-  time.innerText=n.toLocaleTimeString("en-GB",{hour12:false});
-  date.innerText=n.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
- },1000);
 
- const sum=store.counting.reduce((a,b)=>a+b.qty,0);
- v1.innerText=sum.toLocaleString();
- const d=store.daily.filter(x=>x.s==="Completed").length;
- v2.innerText=`${d}/${store.daily.length}`;
- const w=store.weekly.filter(x=>x.s==="Completed").length;
- v3.innerText=`${w}/${store.weekly.length}`;
+setInterval(()=>{
+ const n=new Date();
+ time.innerText=n.toLocaleTimeString("en-GB",{hour12:false});
+ date.innerText=n.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+},1000);
 
- const donut=(id,val,total,color)=>{
-  new Chart(document.getElementById(id),{
-   type:"doughnut",
-   data:{datasets:[{
-    data:[val,total-val],
-    backgroundColor:[color,"rgba(255,255,255,.05)"],
-    borderWidth:0
-   }]},
-   options:{
-    cutout:"78%",
-    plugins:{tooltip:false},
-    animation:{duration:2400,easing:"easeOutQuart"}
-   }
-  });
- };
+const total=store.counting.reduce((a,b)=>a+b.qty,0);
+v1.innerText=total.toLocaleString();
+const d=store.daily.filter(x=>x.s==="Completed").length;
+v2.innerText=`${d}/${store.daily.length}`;
+const w=store.weekly.filter(x=>x.s==="Completed").length;
+v3.innerText=`${w}/${store.weekly.length}`;
 
- donut("c1",sum,1193,"#4fd1c5");
- donut("c2",d,store.daily.length,"#ff5d5d");
- donut("c3",w,store.weekly.length,"#ffb703");
-
- new Chart(bar-chart,{
-  type:"bar",
-  data:{labels:store.counting.map(x=>x.area),
-   datasets:[{data:store.counting.map(x=>x.qty),
-   backgroundColor:"#4fd1c5",borderRadius:14}]},
-  options:{maintainAspectRatio:false,plugins:{legend:false},
-   animation:{duration:2200,easing:"easeOutQuart"},
-   scales:{y:{display:false},x:{ticks:{color:"#777"},grid:{display:false}}}}
+const donut=(id,val,max,color)=>{
+ new Chart(document.getElementById(id),{
+  type:"doughnut",
+  data:{datasets:[{data:[val,max-val],backgroundColor:[color,"rgba(255,255,255,.06)"],borderWidth:0}]},
+  options:{cutout:"76%",plugins:{tooltip:false},animation:{duration:2600,easing:"easeOutQuart"}}
  });
+};
 
- new Chart(line-chart,{
-  type:"line",
-  data:{labels:store.history.map(x=>x.w),
-   datasets:[{data:store.history.map(x=>x.q),
-   borderColor:"#ffb703",
-   backgroundColor:"rgba(255,183,3,.18)",
-   fill:true,tension:.45,pointRadius:4}]},
-  options:{maintainAspectRatio:false,plugins:{legend:false},
-   animation:{duration:2400,easing:"easeOutQuart"},
-   scales:{y:{display:false},x:{ticks:{color:"#777"},grid:{display:false}}}}
+donut("c1",total,1193,"#4fd1c5");
+donut("c2",d,store.daily.length,"#ff5d5d");
+donut("c3",w,store.weekly.length,"#ffb703");
+
+new Chart(document.getElementById("bar-chart"),{
+ type:"bar",
+ data:{labels:store.counting.map(x=>x.area),
+ datasets:[{data:store.counting.map(x=>x.qty),backgroundColor:"#4fd1c5",borderRadius:18}]},
+ options:{maintainAspectRatio:false,plugins:{legend:false},
+ animation:{duration:2400,easing:"easeOutQuart"},
+ scales:{y:{display:false},x:{ticks:{color:"#777"},grid:{display:false}}}}
+});
+
+new Chart(document.getElementById("line-chart"),{
+ type:"line",
+ data:{labels:store.history.map(x=>x.w),
+ datasets:[{data:store.history.map(x=>x.q),
+ borderColor:"#ffb703",
+ backgroundColor:"rgba(255,183,3,.25)",
+ fill:true,tension:.45,pointRadius:5}]},
+ options:{maintainAspectRatio:false,plugins:{legend:false},
+ animation:{duration:2600,easing:"easeOutQuart"},
+ scales:{y:{display:false},x:{ticks:{color:"#777"},grid:{display:false}}}}
+});
+
+const render=(id,list)=>{
+ const el=document.getElementById(id);
+ el.innerHTML="";
+ list.forEach(i=>{
+  const done=i.s==="Completed";
+  el.innerHTML+=`
+  <div class="task-tile ${done?"ready":""}">
+   <span>${i.t}</span>
+   <span class="badge ${done?"b-ready":"b-wait"}">${done?"READY":"PENDING"}</span>
+  </div>`;
  });
-
- const render=(id,list)=>{
-  const el=document.getElementById(id);
-  list.forEach(i=>{
-   const done=i.s==="Completed";
-   el.innerHTML+=`
-   <div class="task-tile ${done?"ready":""}">
-    <span>${i.t}</span>
-    <span class="badge ${done?"b-ready":"b-wait"}">${done?"READY":"PENDING"}</span>
-   </div>`;
-  });
- };
- render("list-d",store.daily);
- render("list-w",store.weekly);
+};
+render("list-d",store.daily);
+render("list-w",store.weekly);
 }
 
-/* PARALLAX */
 document.addEventListener("mousemove",e=>{
  document.querySelectorAll(".card").forEach(c=>{
   const r=c.getBoundingClientRect();
-  const x=(e.clientX-r.left)/r.width*100;
-  const y=(e.clientY-r.top)/r.height*100;
-  c.style.setProperty("--x",x+"%");
-  c.style.setProperty("--y",y+"%");
+  c.style.setProperty("--x",((e.clientX-r.left)/r.width*100)+"%");
+  c.style.setProperty("--y",((e.clientY-r.top)/r.height*100)+"%");
  });
 });
 
