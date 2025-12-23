@@ -31,12 +31,6 @@ button{padding:10px 22px;border:none;border-radius:50px;font-weight:700;cursor:p
 .clock-card{display:flex;align-items:center;gap:25px;padding:20px 50px;border-radius:70px;background:var(--panel);border:1px solid var(--border);box-shadow:0 20px 40px rgba(0,0,0,.5)}
 #time{font-size:2.6rem;font-weight:800;letter-spacing:3px}
 #date{font-size:.8rem;color:var(--amber)}
-.hourglass{width:40px;height:60px;position:relative;animation:idle 4s infinite ease-in-out}
-.hourglass::before,.hourglass::after{content:'';position:absolute;left:0;right:0;margin:auto;width:40px;height:30px;border:3px solid var(--amber);border-radius:20px 20px 5px 5px}
-.hourglass::after{top:30px;transform:rotate(180deg)}
-.sand{position:absolute;width:8px;height:8px;background:var(--amber);border-radius:50%;left:16px;top:26px}
-@keyframes flip{0%{transform:rotate(0)}100%{transform:rotate(180deg)}}
-@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .main{padding:20px;display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 1fr;gap:20px}
 .card{background:var(--panel);border:1px solid var(--border);border-radius:36px;padding:20px;overflow:hidden}
 h3{font-size:.75rem;letter-spacing:2px;color:#888}
@@ -64,7 +58,7 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888}
 
 <div class="clock">
  <div class="clock-card">
-  <div class="hourglass" id="hg"><div class="sand"></div></div>
+  <div id="hourglass" class="canvas3d"></div>
   <div>
    <div id="time">00:00:00</div>
    <div id="date">LOADING…</div>
@@ -90,19 +84,13 @@ h3{font-size:.75rem;letter-spacing:2px;color:#888}
 </div>
 </div>
 
-<!-- Three.js + OrbitControls classic global build -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+<script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js";
+import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/controls/OrbitControls.js";
 
-<script>
 // BUTTONS
-function toggleTheme(){
-  document.body.dataset.theme=document.body.dataset.theme==="dark"?"light":"dark";
-}
-function toggleFS(){
-  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
-  else document.exitFullscreen();
-}
+window.toggleTheme = () => document.body.dataset.theme = document.body.dataset.theme==="dark"?"light":"dark";
+window.toggleFS = () => { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };
 
 // DATA
 const weekly=[6901,5447,4524,2068,1100];
@@ -121,19 +109,51 @@ tasks.forEach(x=>{
  tb.innerHTML+=`<div class="task ${x.s==="Completed"?"done":""}"><span>${x.t}</span><span class="badge ${x.s==="Completed"?"ok":"wait"}">${x.s==="Completed"?"READY":"PENDING"}</span></div>`;
 });
 
-// CLOCK + HOURGLASS
+// CLOCK + CLEPSIDRA 3D
+const timeEl=document.getElementById("time");
+const dateEl=document.getElementById("date");
+const hgEl=document.getElementById("hourglass");
+
 let lastMin=null;
 setInterval(()=>{
  const d=new Date();
- document.getElementById("time").innerText=d.toLocaleTimeString("en-GB",{hour12:false});
- document.getElementById("date").innerText=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+ timeEl.innerText=d.toLocaleTimeString("en-GB",{hour12:false});
+ dateEl.innerText=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
  if(d.getMinutes()!==lastMin){
-  const hg=document.getElementById("hg");
-  hg.style.animation="flip 1s ease-in-out";
-  setTimeout(()=>hg.style.animation="idle 4s infinite",1000);
   lastMin=d.getMinutes();
+  // Animate clepsidra rotation
+  hgEl.rotation.y += Math.PI; 
  }
 },1000);
+
+// CLEPSIDRA 3D
+(function(){
+ const scene=new THREE.Scene();
+ const cam=new THREE.PerspectiveCamera(50, hgEl.clientWidth/hgEl.clientHeight, .1, 20);
+ cam.position.set(0,2,4);
+ const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+ renderer.setSize(hgEl.clientWidth,hgEl.clientHeight);
+ hgEl.appendChild(renderer.domElement);
+
+ const material=new THREE.MeshStandardMaterial({color:0xffb703,metalness:.7,roughness:.2});
+ const geomTop=new THREE.ConeGeometry(.4,1,32);
+ const geomBot=new THREE.ConeGeometry(.4,1,32);
+ geomBot.rotateX(Math.PI);
+
+ const top=new THREE.Mesh(geomTop,material);
+ const bot=new THREE.Mesh(geomBot,material);
+ top.position.y=0.5; bot.position.y=-0.5;
+ scene.add(top,bot);
+
+ scene.add(new THREE.AmbientLight(0xffffff,.5));
+ const l=new THREE.PointLight(0xffb703,1.5); l.position.set(5,5,5); scene.add(l);
+
+ function anim(){
+  requestAnimationFrame(anim);
+  renderer.render(scene,cam);
+ }
+ anim();
+})();
 
 // WEEKLY 3D WATERFALL + PARTICLES
 (function(){
@@ -145,9 +165,7 @@ setInterval(()=>{
  renderer.setSize(el.clientWidth,el.clientHeight); el.appendChild(renderer.domElement);
 
  scene.add(new THREE.AmbientLight(0xffffff,.4));
- const light=new THREE.DirectionalLight(0x4fd1c5,1.2);
- light.position.set(5,12,10);
- scene.add(light);
+ const light=new THREE.DirectionalLight(0x4fd1c5,1.2); light.position.set(5,12,10); scene.add(light);
 
  const max=Math.max(...weekly);
  const bars=[];
@@ -174,7 +192,7 @@ setInterval(()=>{
  const particles=new THREE.Points(pgeo,pmaterial);
  scene.add(particles);
 
- const controls=new THREE.OrbitControls(cam,renderer.domElement);
+ const controls=new OrbitControls(cam,renderer.domElement);
  controls.enableDamping=true;
  controls.enableZoom=false;
 
@@ -220,6 +238,5 @@ setInterval(()=>{
  anim();
 })();
 </script>
-
 </body>
 </html>
