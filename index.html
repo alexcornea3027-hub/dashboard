@@ -1,312 +1,370 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>STOCK TEAM VCB | 3D AURA</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #040608;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
-            --mint: #00f2ff;
-            --rose: #ff758c;
-            --gold: #ffcc33;
-            --font: 'Outfit', sans-serif;
-        }
+<meta charset="UTF-8">
+<title>STOCK TEAM VCB | COMMAND CENTER</title>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-        body {
-            font-family: var(--font);
-            background: var(--bg);
-            background-image: radial-gradient(circle at 20% 30%, #111827 0%, transparent 40%),
-                              radial-gradient(circle at 80% 70%, #0f172a 0%, transparent 40%);
-            color: #fff;
-            height: 100vh;
-            padding: 2vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 
-        /* TOP BAR */
-        .top-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 6vh;
-            margin-bottom: 2vh;
-            padding: 0 10px;
-        }
-        .logo { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; }
-        .logo span { color: var(--gold); }
-        
-        .fs-btn {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            color: #fff;
-            padding: 10px 25px;
-            border-radius: 50px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: 0.3s;
-            font-weight: 600;
-        }
-        .fs-btn:hover { background: #fff; color: #000; transform: scale(1.05); }
+<style>
+:root{
+ --bg:#05060a;
+ --panel:rgba(255,255,255,.045);
+ --border:rgba(255,255,255,.12);
 
-        /* CENTER CLOCK 3D */
-        .hero-clock {
-            height: 14vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            perspective: 1000px;
-            margin-bottom: 2vh;
-        }
-        .clock-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--border);
-            padding: 10px 60px;
-            border-radius: 100px;
-            text-align: center;
-            transform: rotateX(15deg);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            animation: float 6s infinite ease-in-out;
-        }
-        #time { font-size: 3.5rem; font-weight: 800; line-height: 1; letter-spacing: 4px; }
-        #date { color: var(--gold); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; }
+ --amber:#ffb703;
+ --copper:#ff7a3d;
+ --cyan:#4fd1c5;
+ --red:#ff5d5d;
 
-        /* GRID LAYOUT */
-        main {
-            flex: 1;
-            display: grid;
-            grid-template-rows: 22vh 28vh 1fr;
-            gap: 2vh;
-            min-height: 0;
-        }
-        .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vh; }
-        .row-mix { display: grid; grid-template-columns: 1fr 2fr; gap: 2vh; }
+ --glow-cyan:0 0 40px rgba(79,209,197,.45);
+ --glow-amber:0 0 40px rgba(255,183,3,.45);
+ --font:'Outfit',sans-serif;
+}
 
-        /* 3D CARDS */
-        .card {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 20px;
-            position: relative;
-            backdrop-filter: blur(20px);
-            transition: transform 0.4s ease, border-color 0.4s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .card:hover { 
-            transform: translateY(-5px) perspective(1000px) rotateX(2deg); 
-            border-color: rgba(255,255,255,0.3);
-        }
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+ font-family:var(--font);
+ height:100vh;
+ overflow:hidden;
+ color:#fff;
+ background:
+  radial-gradient(circle at 30% 25%,#1c1f2b 0%,transparent 45%),
+  radial-gradient(circle at 80% 70%,#131521 0%,transparent 45%),
+  var(--bg);
+ padding:2vh;
+ display:flex;
+ flex-direction:column;
+}
 
-        .card-label { font-size: 0.75rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1.5px; }
-        .card-val { font-size: 2.8rem; font-weight: 800; margin: 5px 0; }
+/* TOP */
+.top-nav{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:2vh;
+}
+.logo{
+ font-size:1.7rem;
+ font-weight:800;
+}
+.logo span{color:var(--amber)}
+.fs-btn{
+ background:linear-gradient(135deg,var(--amber),var(--copper));
+ border:none;
+ padding:12px 32px;
+ border-radius:50px;
+ font-weight:800;
+ cursor:pointer;
+ box-shadow:0 20px 50px rgba(255,183,3,.5);
+ transition:.4s;
+}
+.fs-btn:hover{
+ transform:translateY(-3px) scale(1.06);
+}
 
-        /* CHART ELEMENTS */
-        .donut-box {
-            position: absolute;
-            right: 20px;
-            width: 95px;
-            height: 95px;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
-        }
+/* CLOCK */
+.hero-clock{
+ height:14vh;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ perspective:1400px;
+}
+.clock-card{
+ background:var(--panel);
+ border:1px solid var(--border);
+ padding:18px 80px;
+ border-radius:140px;
+ text-align:center;
+ transform-style:preserve-3d;
+ box-shadow:0 40px 120px rgba(0,0,0,.9);
+ animation:float 6s infinite ease-in-out;
+}
+#time{
+ font-size:3.8rem;
+ font-weight:800;
+ letter-spacing:5px;
+}
+#date{
+ font-size:.85rem;
+ color:var(--amber);
+ letter-spacing:2px;
+}
+@keyframes float{
+ 0%,100%{transform:translateY(0) rotateX(18deg)}
+ 50%{transform:translateY(-14px) rotateX(18deg)}
+}
 
-        /* LISTS */
-        .list-wrap { flex: 1; overflow-y: auto; margin-top: 15px; padding-right: 8px; }
-        .list-wrap::-webkit-scrollbar { width: 4px; }
-        .list-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+/* GRID */
+main{
+ flex:1;
+ display:grid;
+ grid-template-rows:22vh 28vh 1fr;
+ gap:2vh;
+}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:2vh}
+.row-mix{display:grid;grid-template-columns:1fr 2fr;gap:2vh}
 
-        .task-tile {
-            background: rgba(255,255,255,0.02);
-            padding: 14px 20px;
-            border-radius: 18px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid transparent;
-            transition: 0.3s;
-        }
-        .task-tile.ready { 
-            background: linear-gradient(90deg, rgba(0,242,255,0.05), transparent);
-            border-left: 4px solid var(--mint);
-        }
-        .badge {
-            font-size: 0.6rem;
-            font-weight: 800;
-            padding: 5px 15px;
-            border-radius: 50px;
-            letter-spacing: 1px;
-        }
-        .b-ready { background: var(--mint); color: #000; box-shadow: 0 0 20px rgba(0,242,255,0.3); }
-        .b-wait { background: rgba(255,255,255,0.05); color: #666; }
+/* CARD */
+.card{
+ background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.015));
+ border:1px solid var(--border);
+ border-radius:36px;
+ padding:24px;
+ position:relative;
+ transform-style:preserve-3d;
+ box-shadow:
+  inset 0 1px 0 rgba(255,255,255,.12),
+  0 40px 100px rgba(0,0,0,.85);
+ transition:.25s;
+}
+.card::after{
+ content:'';
+ position:absolute;
+ inset:0;
+ border-radius:inherit;
+ background:radial-gradient(circle at var(--x,50%) var(--y,50%),rgba(255,255,255,.15),transparent 45%);
+ opacity:.15;
+ pointer-events:none;
+}
+.card:hover{
+ transform:translateY(-8px);
+}
 
-        @keyframes float {
-            0%, 100% { transform: rotateX(15deg) translateY(0); }
-            50% { transform: rotateX(15deg) translateY(-10px); }
-        }
+/* TEXT */
+.card-label{
+ font-size:.7rem;
+ letter-spacing:1.8px;
+ color:#aaa;
+ text-transform:uppercase;
+}
+.card-val{
+ font-size:3.2rem;
+ font-weight:800;
+ margin:6px 0;
+}
 
-    </style>
+/* DONUT */
+.donut-box{
+ position:absolute;
+ right:18px;
+ top:50%;
+ transform:translateY(-50%);
+ width:110px;
+ height:110px;
+ filter:drop-shadow(0 20px 40px rgba(0,0,0,.8));
+}
+
+/* LIST */
+.list-wrap{margin-top:18px;overflow-y:auto}
+.task-tile{
+ background:rgba(255,255,255,.04);
+ padding:16px 22px;
+ border-radius:20px;
+ margin-bottom:10px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ transition:.3s;
+}
+.task-tile.ready{
+ background:linear-gradient(90deg,rgba(79,209,197,.2),transparent);
+ border-left:4px solid var(--cyan);
+}
+.badge{
+ font-size:.6rem;
+ font-weight:800;
+ padding:6px 16px;
+ border-radius:50px;
+}
+.b-ready{background:var(--cyan);color:#000;box-shadow:var(--glow-cyan)}
+.b-wait{background:rgba(255,255,255,.1);color:#777}
+</style>
 </head>
+
 <body>
 
-    <nav class="top-nav">
-        <div class="logo">STOCK TEAM <span>| VCB</span></div>
-        <button class="fs-btn" onclick="toggleFS()">FULLSCREEN</button>
-    </nav>
+<nav class="top-nav">
+ <div class="logo">STOCK TEAM <span>| VCB</span></div>
+ <button class="fs-btn" onclick="toggleFS()">FULLSCREEN</button>
+</nav>
 
-    <div class="hero-clock">
-        <div class="clock-card">
-            <div id="time">00:00:00</div>
-            <div id="date">LOADING TERMINAL...</div>
-        </div>
-    </div>
+<div class="hero-clock">
+ <div class="clock-card">
+  <div id="time">00:00:00</div>
+  <div id="date">LOADING...</div>
+ </div>
+</div>
 
-    <main>
-        <div class="row">
-            <div class="card">
-                <span class="card-label">Counting Progress</span>
-                <span class="card-val" id="v1" style="color: var(--mint);">0</span>
-                <div class="donut-box"><canvas id="c1"></canvas></div>
-                <span style="font-size: 0.7rem; color: #555;">Target: 1,193 Locations</span>
-            </div>
-            <div class="card">
-                <span class="card-label">Daily Operations</span>
-                <span class="card-val" id="v2" style="color: var(--rose);">0/0</span>
-                <div class="donut-box"><canvas id="c2"></canvas></div>
-                <span style="font-size: 0.7rem; color: #555;">Today's Checklist</span>
-            </div>
-            <div class="card">
-                <span class="card-label">Weekly Strategic</span>
-                <span class="card-val" id="v3" style="color: var(--gold);">0/0</span>
-                <div class="donut-box"><canvas id="c3"></canvas></div>
-                <span style="font-size: 0.7rem; color: #555;">Compliance Goals</span>
-            </div>
-        </div>
+<main>
 
-        <div class="row-mix">
-            <div class="card">
-                <span class="card-label" style="color: var(--mint);">Productivity Area Map</span>
-                <div style="flex:1; margin-top:10px;"><canvas id="bar-chart"></canvas></div>
-            </div>
-            <div class="card">
-                <span class="card-label" style="color: var(--gold);">Global Performance Trend</span>
-                <div style="flex:1; margin-top:10px;"><canvas id="line-chart"></canvas></div>
-            </div>
-        </div>
+<div class="row">
+ <div class="card">
+  <span class="card-label">Counting Progress</span>
+  <span class="card-val" style="color:var(--cyan)" id="v1">0</span>
+  <div class="donut-box"><canvas id="c1"></canvas></div>
+  <span style="font-size:.7rem;color:#666">Target: 1,193 Locations</span>
+ </div>
 
-        <div class="row">
-            <div class="card" style="grid-column: span 2;">
-                <span class="card-label">Operation Live Feed</span>
-                <div class="list-wrap" id="list-d"></div>
-            </div>
-            <div class="card">
-                <span class="card-label">Weekly Checklist</span>
-                <div class="list-wrap" id="list-w"></div>
-            </div>
-        </div>
-    </main>
+ <div class="card">
+  <span class="card-label">Daily Operations</span>
+  <span class="card-val" style="color:var(--red)" id="v2">0/0</span>
+  <div class="donut-box"><canvas id="c2"></canvas></div>
+ </div>
 
-    <script>
-        const store = {
-            counting: [
-                {area: "MPR", qty: 146}, {area: "PB1", qty: 43}, {area: "PB2", qty: 79}, {area: "PB3", qty: 77},
-                {area: "PB4", qty: 16}, {area: "PBSRES", qty: 51}, {area: "MP", qty: 256}, {area: "MIX", qty: 330},
-                {area: "MS", qty: 215}, {area: "MSX", qty: 287}, {area: "FM", qty: 23}, {area: "HP", qty: 5}
-            ],
-            daily: [
-                {t: "Aged stock report 7AM", s: "Completed"}, {t: "Aged stock report 3PM", s: "Not started"},
-                {t: "Returns Adjustments", s: "Not started"}, {t: "PI First Count", s: "Not started"},
-                {t: "SLA Master Sync", s: "Not started"}, {t: "High Value Audit", s: "Not started"}
-            ],
-            weekly: [
-                {t: "Monthly Shrinkage", s: "Completed"}, {t: "Strategic ORM", s: "Not started"}, {t: "SIS Data Report", s: "Not started"}
-            ],
-            history: [
-                {w: "W30", q: 6901}, {w: "W31", q: 5447}, {w: "W32", q: 4524}, {w: "W33", q: 2068}, {w: "W34", q: 1100}
-            ]
-        };
+ <div class="card">
+  <span class="card-label">Weekly Strategic</span>
+  <span class="card-val" style="color:var(--amber)" id="v3">0/0</span>
+  <div class="donut-box"><canvas id="c3"></canvas></div>
+ </div>
+</div>
 
-        function toggleFS() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-            else document.exitFullscreen();
-        }
+<div class="row-mix">
+ <div class="card">
+  <span class="card-label" style="color:var(--cyan)">Productivity Area Map</span>
+  <div style="flex:1;margin-top:10px"><canvas id="bar-chart"></canvas></div>
+ </div>
+ <div class="card">
+  <span class="card-label" style="color:var(--amber)">Global Performance Trend</span>
+  <div style="flex:1;margin-top:10px"><canvas id="line-chart"></canvas></div>
+ </div>
+</div>
 
-        function init() {
-            // CLOCK
-            setInterval(() => {
-                const n = new Date();
-                document.getElementById('time').innerText = n.toLocaleTimeString('en-GB', {hour12:false});
-                document.getElementById('date').innerText = n.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'});
-            }, 1000);
+<div class="row">
+ <div class="card" style="grid-column:span 2">
+  <span class="card-label">Operation Live Feed</span>
+  <div class="list-wrap" id="list-d"></div>
+ </div>
+ <div class="card">
+  <span class="card-label">Weekly Checklist</span>
+  <div class="list-wrap" id="list-w"></div>
+ </div>
+</div>
 
-            const dSum = store.counting.reduce((a, b) => a + b.qty, 0);
-            document.getElementById('v1').innerText = dSum.toLocaleString();
-            
-            const dd = store.daily.filter(x => x.s === "Completed").length;
-            document.getElementById('v2').innerText = `${dd}/${store.daily.length}`;
-            
-            const wd = store.weekly.filter(x => x.s === "Completed").length;
-            document.getElementById('v3').innerText = `${wd}/${store.weekly.length}`;
+</main>
 
-            // CHARTS WOW
-            const donut = (id, val, target, col) => {
-                new Chart(document.getElementById(id), {
-                    type: 'doughnut',
-                    data: { datasets: [{ data: [val, Math.max(0, target-val)], backgroundColor: [col, 'rgba(255,255,255,0.05)'], borderWidth: 0 }] },
-                    options: { cutout: '82%', plugins: { tooltip: false }, animation: { duration: 2500, animateRotate: true } }
-                });
-            };
-            donut('c1', dSum, 1193, '#00f2ff');
-            donut('c2', dd, store.daily.length, '#ff758c');
-            donut('c3', wd, store.weekly.length, '#ffcc33');
+<script>
+/* DATA (unchanged) */
+const store={
+ counting:[
+ {area:"MPR",qty:146},{area:"PB1",qty:43},{area:"PB2",qty:79},
+ {area:"PB3",qty:77},{area:"PB4",qty:16},{area:"PBSRES",qty:51},
+ {area:"MP",qty:256},{area:"MIX",qty:330},{area:"MS",qty:215},
+ {area:"MSX",qty:287},{area:"FM",qty:23},{area:"HP",qty:5}
+ ],
+ daily:[
+ {t:"Aged stock report 7AM",s:"Completed"},
+ {t:"Aged stock report 3PM",s:"Not started"},
+ {t:"Returns Adjustments",s:"Not started"},
+ {t:"PI First Count",s:"Not started"},
+ {t:"SLA Master Sync",s:"Not started"},
+ {t:"High Value Audit",s:"Not started"}
+ ],
+ weekly:[
+ {t:"Monthly Shrinkage",s:"Completed"},
+ {t:"Strategic ORM",s:"Not started"},
+ {t:"SIS Data Report",s:"Not started"}
+ ],
+ history:[
+ {w:"W30",q:6901},{w:"W31",q:5447},
+ {w:"W32",q:4524},{w:"W33",q:2068},{w:"W34",q:1100}
+ ]
+};
 
-            // BAR
-            new Chart(document.getElementById('bar-chart'), {
-                type: 'bar',
-                data: {
-                    labels: store.counting.map(x => x.area),
-                    datasets: [{ data: store.counting.map(x => x.qty), backgroundColor: '#00f2ff', borderRadius: 10 }]
-                },
-                options: { maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#444', font: {size: 9} } } } }
-            });
+/* FULLSCREEN */
+function toggleFS(){
+ !document.fullscreenElement?
+ document.documentElement.requestFullscreen():
+ document.exitFullscreen();
+}
 
-            // LINE
-            new Chart(document.getElementById('line-chart'), {
-                type: 'line',
-                data: {
-                    labels: store.history.map(x => x.w),
-                    datasets: [{ data: store.history.map(x => x.q), borderColor: '#ffcc33', tension: 0.4, fill: true, backgroundColor: 'rgba(255, 204, 51, 0.05)', pointRadius: 3 }]
-                },
-                options: { maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#444' } } } }
-            });
+/* INIT */
+function init(){
+ setInterval(()=>{
+  const n=new Date();
+  time.innerText=n.toLocaleTimeString("en-GB",{hour12:false});
+  date.innerText=n.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+ },1000);
 
-            // FEEDS
-            const render = (id, list) => {
-                const el = document.getElementById(id);
-                list.forEach(item => {
-                    const done = item.s === "Completed";
-                    el.innerHTML += `
-                        <div class="task-tile ${done ? 'ready' : ''}">
-                            <span style="font-size: 0.9rem; font-weight: 400;">${item.t}</span>
-                            <span class="badge ${done ? 'b-ready' : 'b-wait'}">${done ? 'READY' : 'PENDING'}</span>
-                        </div>
-                    `;
-                });
-            };
-            render('list-d', store.daily);
-            render('list-w', store.weekly);
-        }
+ const sum=store.counting.reduce((a,b)=>a+b.qty,0);
+ v1.innerText=sum.toLocaleString();
+ const d=store.daily.filter(x=>x.s==="Completed").length;
+ v2.innerText=`${d}/${store.daily.length}`;
+ const w=store.weekly.filter(x=>x.s==="Completed").length;
+ v3.innerText=`${w}/${store.weekly.length}`;
 
-        window.onload = init;
-    </script>
+ const donut=(id,val,total,color)=>{
+  new Chart(document.getElementById(id),{
+   type:"doughnut",
+   data:{datasets:[{
+    data:[val,total-val],
+    backgroundColor:[color,"rgba(255,255,255,.05)"],
+    borderWidth:0
+   }]},
+   options:{
+    cutout:"78%",
+    plugins:{tooltip:false},
+    animation:{duration:2400,easing:"easeOutQuart"}
+   }
+  });
+ };
+
+ donut("c1",sum,1193,"#4fd1c5");
+ donut("c2",d,store.daily.length,"#ff5d5d");
+ donut("c3",w,store.weekly.length,"#ffb703");
+
+ new Chart(bar-chart,{
+  type:"bar",
+  data:{labels:store.counting.map(x=>x.area),
+   datasets:[{data:store.counting.map(x=>x.qty),
+   backgroundColor:"#4fd1c5",borderRadius:14}]},
+  options:{maintainAspectRatio:false,plugins:{legend:false},
+   animation:{duration:2200,easing:"easeOutQuart"},
+   scales:{y:{display:false},x:{ticks:{color:"#777"},grid:{display:false}}}}
+ });
+
+ new Chart(line-chart,{
+  type:"line",
+  data:{labels:store.history.map(x=>x.w),
+   datasets:[{data:store.history.map(x=>x.q),
+   borderColor:"#ffb703",
+   backgroundColor:"rgba(255,183,3,.18)",
+   fill:true,tension:.45,pointRadius:4}]},
+  options:{maintainAspectRatio:false,plugins:{legend:false},
+   animation:{duration:2400,easing:"easeOutQuart"},
+   scales:{y:{display:false},x:{ticks:{color:"#777"},grid:{display:false}}}}
+ });
+
+ const render=(id,list)=>{
+  const el=document.getElementById(id);
+  list.forEach(i=>{
+   const done=i.s==="Completed";
+   el.innerHTML+=`
+   <div class="task-tile ${done?"ready":""}">
+    <span>${i.t}</span>
+    <span class="badge ${done?"b-ready":"b-wait"}">${done?"READY":"PENDING"}</span>
+   </div>`;
+  });
+ };
+ render("list-d",store.daily);
+ render("list-w",store.weekly);
+}
+
+/* PARALLAX */
+document.addEventListener("mousemove",e=>{
+ document.querySelectorAll(".card").forEach(c=>{
+  const r=c.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width*100;
+  const y=(e.clientY-r.top)/r.height*100;
+  c.style.setProperty("--x",x+"%");
+  c.style.setProperty("--y",y+"%");
+ });
+});
+
+window.onload=init;
+</script>
+
 </body>
 </html>
