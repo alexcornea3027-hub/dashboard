@@ -1,38 +1,270 @@
-{
+
   "metadata": {
-    "target": 1193,
-    "timestamp": "2025-12-24T10:00:30.856Z"
+    "target": 0.855490360435876,
+    "timestamp": "2025-12-24T10:12:44.730Z"
   },
   "counting": [
-    { "area": "MPR", "qty": 27 },
-    { "area": "PB1", "qty": 28 },
-    { "area": "PB2", "qty": 29 },
-    { "area": "PB3", "qty": 30 },
-    { "area": "PB4", "qty": 31 },
-    { "area": "PBSRES", "qty": 32 },
-    { "area": "MP", "qty": 33 },
-    { "area": "MIX", "qty": 34 },
-    { "area": "MS", "qty": 35 },
-    { "area": "MSX", "qty": 36 },
-    { "area": "FM", "qty": 37 },
-    { "area": "HP", "qty": 38 }
+    {
+      "area": "MPR",
+      "qty": 127
+    },
+    {
+      "area": "PB1",
+      "qty": 38
+    },
+    {
+      "area": "PB2",
+      "qty": 15
+    },
+    {
+      "area": "PB3",
+      "qty": 0
+    },
+    {
+      "area": "PB4",
+      "qty": 0
+    },
+    {
+      "area": "PBSRES",
+      "qty": 45
+    },
+    {
+      "area": "MP",
+      "qty": 221
+    },
+    {
+      "area": "MIX",
+      "qty": 136
+    },
+    {
+      "area": "MS",
+      "qty": 61
+    },
+    {
+      "area": "MSX",
+      "qty": 249
+    },
+    {
+      "area": "FM",
+      "qty": 20
+    },
+    {
+      "area": "HP",
+      "qty": 5
+    }
   ],
   "dailyTasks": [
-    { "name": "ADJUSTMENTS (Returns)", "status": "Not started" },
-    { "name": "ADJUSTMENTS (Standard)", "status": "Not started" },
-    { "name": "Aged stock report 7AM", "status": "Completed" },
-    { "name": "Aged stock report 3PM", "status": "Not started" },
-    { "name": "Blackwells", "status": "Not started" }
+    {
+      "name": "46015",
+      "status": "ADJUSTMENTS (Returns)"
+    },
+    {
+      "name": "46015",
+      "status": "ADJUSTMENTS (Standard)"
+    },
+    {
+      "name": "46015",
+      "status": "Aged stock report 7AM"
+    },
+    {
+      "name": "46015",
+      "status": "Aged stock report 3PM"
+    },
+    {
+      "name": "46015",
+      "status": "Blackwells"
+    },
+    {
+      "name": "46015",
+      "status": "AGED STOCK REPORT 6 AM"
+    },
+    {
+      "name": "46015",
+      "status": "Available inventory status in Prob-Res pots 3PM"
+    },
+    {
+      "name": "46015",
+      "status": "Available inventory status in Prob-Res pots 6AM"
+    },
+    {
+      "name": "46015",
+      "status": "EMPTY BIN CHECKS"
+    },
+    {
+      "name": "46015",
+      "status": "Internet returns"
+    },
+    {
+      "name": "46015",
+      "status": "Inventory Status (DATA STUDIO)"
+    },
+    {
+      "name": "46015",
+      "status": "LOCATIONS IN ERROR"
+    },
+    {
+      "name": "46015",
+      "status": "Manual Despatch Adjustment"
+    },
+    {
+      "name": "46015",
+      "status": "Manual location checks"
+    },
+    {
+      "name": "46015",
+      "status": "Mixing violations (multiple ISBN)"
+    },
+    {
+      "name": "46015",
+      "status": "MLC Tracker update"
+    },
+    {
+      "name": "46015",
+      "status": "Supplier Overs Report"
+    },
+    {
+      "name": "46015",
+      "status": "SIS afternoon report"
+    },
+    {
+      "name": "46015",
+      "status": "PI 1st count"
+    },
+    {
+      "name": "46015",
+      "status": "PI 2nd count"
+    },
+    {
+      "name": "46015",
+      "status": "PI assign"
+    },
+    {
+      "name": "46015",
+      "status": "PI Investigation"
+    },
+    {
+      "name": "46015",
+      "status": "PI Master file update (Cycle)"
+    },
+    {
+      "name": "46015",
+      "status": "POD"
+    },
+    {
+      "name": "46015",
+      "status": "PI set up"
+    },
+    {
+      "name": "46015",
+      "status": "SHRINKAGE RECONCILATION DAILY"
+    },
+    {
+      "name": "46015",
+      "status": "SLA update"
+    },
+    {
+      "name": "46015",
+      "status": "Stock left on RDTs check"
+    }
   ],
   "weeklyTasks": [
-    { "name": "(Weekly) SLA", "status": "Not started" },
-    { "name": "(Weekly) SIS report", "status": "Not started" },
-    { "name": "(once a month) Shrinkage for Period", "status": "Completed" }
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    },
+    {
+      "name": "Weekly",
+      "status": ""
+    }
   ],
   "history": [
-    { "week": "127", "total": 5103 },
-    { "week": "38", "total": 6457 },
-    { "week": "15", "total": 7494 },
-    { "week": "45", "total": 4524 }
+    {
+      "week": "27",
+      "total": 5103
+    },
+    {
+      "week": "28",
+      "total": 6457
+    },
+    {
+      "week": "29",
+      "total": 7494
+    },
+    {
+      "week": "30",
+      "total": 6901
+    },
+    {
+      "week": "31",
+      "total": 5447
+    },
+    {
+      "week": "32",
+      "total": 4524
+    },
+    {
+      "week": "33",
+      "total": 2068
+    },
+    {
+      "week": "34",
+      "total": 0
+    },
+    {
+      "week": "35",
+      "total": 0
+    },
+    {
+      "week": "36",
+      "total": 0
+    },
+    {
+      "week": "37",
+      "total": 0
+    },
+    {
+      "week": "38",
+      "total": 0
+    }
   ]
 }
