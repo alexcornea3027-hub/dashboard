@@ -2,11 +2,9 @@
 <html lang="ro">
 <head>
 <meta charset="utf-8" />
-<title>VCB StockTeam Dashboard — Updated</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<title>VCB StockTeam — Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{
   --bg: #fff7ed;
@@ -17,174 +15,162 @@
   --ok: #16a34a;
   --pending: #f59e0b;
   --danger: #ef4444;
-  --glass-size: 56px;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(120deg,var(--bg),#ffe7d6);color:var(--text);overflow:hidden}
-
-/* Header */
-.header{
-  display:flex;align-items:center;justify-content:space-between;padding:18px 28px;
-}
-.header h1{margin:0;font-size:1.4rem}
-.header .actions{display:flex;gap:10px;align-items:center}
-.button{border:none;padding:8px 14px;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-weight:600}
-
-/* Layout: left main + right sidebar */
-.container{display:grid;grid-template-columns:1.45fr .75fr;gap:22px;padding:18px 22px;height:calc(100vh - 76px)}
-.card{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,0.07);display:flex;flex-direction:column}
-
-/* Left column content */
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px}
+.header h1{margin:0;font-size:1.25rem}
+.button{border:none;padding:8px 12px;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700}
+.container{display:grid;grid-template-columns:1.45fr .75fr;gap:20px;padding:12px 20px;height:calc(100vh - 64px)}
+.card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,0.07);display:flex;flex-direction:column}
 .top-clock{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.clock-box{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
-.big-clock{font-size:2.6rem;font-weight:800;line-height:1}
+.clock-box{display:flex;flex-direction:column;gap:6px}
+.big-clock{font-size:2.5rem;font-weight:800;line-height:1}
 .small-date{font-size:0.95rem;opacity:0.85}
-.hourglass-wrap{width:var(--glass-size);height:var(--glass-size);display:flex;align-items:center;justify-content:center}
-.hourglass{width:var(--glass-size);height:var(--glass-size);display:block;transition:transform .9s ease}
+.hourglass-wrap{width:56px;height:56px;display:flex;align-items:center;justify-content:center}
+.hourglass{width:56px;height:56px;display:block;transition:transform .9s ease}
 .hourglass.animate{animation:flip 900ms ease}
-@keyframes flip{
-  0%{transform:rotate(0) scale(1)}
-  50%{transform:rotate(180deg) scale(1.06)}
-  100%{transform:rotate(360deg) scale(1)}
-}
+@keyframes flip{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.04)}100%{transform:rotate(360deg) scale(1)}}
 
-/* Charts grid - fixed heights so page never needs to scroll */
-.charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:14px}
+/* charts grid & sizes */
+.charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:12px}
 .canvas-fixed{height:220px}
-.fullwidth-chart{height:200px;margin-top:14px}
-.history-chart{height:150px;margin-top:14px}
+.fullwidth-chart{height:200px;margin-top:12px}
+.history-chart{height:150px;margin-top:12px}
 
-/* Right column - metadata and lists */
+/* sidebar */
 .sidebar .meta{display:flex;justify-content:space-between;padding:8px 0;font-weight:700}
-.counts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.count-row{display:flex;justify-content:space-between;font-weight:600}
-
-/* Tasks lists: these are the only scrollable parts */
+.counts{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.count-row{display:flex;justify-content:space-between;font-weight:700;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,0.06)}
 .tasks{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .tasks .list{overflow:auto;padding-right:6px}
 .list .task{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.04);background:rgba(255,255,255,0.6);margin-bottom:6px}
-.badge{padding:6px 10px;border-radius:999px;font-size:0.75rem;font-weight:700;color:#fff}
+.badge{padding:6px 10px;border-radius:999px;font-size:0.78rem;font-weight:800;color:#fff}
 .completed{background:var(--ok)}
 .pending{background:var(--pending)}
 .under{background:var(--danger)}
 
-/* Progress / daily count vs target */
-.progress-wrap{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+/* progress */
+.progress-wrap{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .progress-bar{height:14px;background:rgba(0,0,0,0.06);border-radius:999px;overflow:hidden}
 .progress-bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
-.progress-labels{display:flex;justify-content:space-between;font-weight:700}
+.progress-labels{display:flex;justify-content:space-between;font-weight:800}
 
-/* Make sure canvas responsive */
+/* canvas sizing */
 canvas{width:100% !important;height:100% !important}
 
-/* Small screens layout wrap */
-@media (max-width:900px){
-  .container{grid-template-columns:1fr;grid-auto-rows:min-content;overflow:auto;padding-bottom:24px}
+/* only lists scroll */
+.container > div, .card{overflow:hidden}
+
+/* responsive */
+@media (max-width:980px){
+  .container{grid-template-columns:1fr;overflow:auto;height:auto;padding-bottom:40px}
   html,body{overflow:auto}
 }
 </style>
 </head>
 <body>
-
-<div class="header">
-  <h1>VCB StockTeam Dashboard</h1>
-  <div class="actions">
-    <button class="button" onclick="toggleFull()">Fullscreen</button>
-  </div>
-</div>
-
-<div class="container">
-  <!-- LEFT -->
-  <div style="display:flex;flex-direction:column;gap:12px">
-    <div class="card top-clock">
-      <div class="clock-box">
-        <div class="big-clock" id="clock">--:--:--</div>
-        <div class="small-date" id="date">--</div>
-        <div class="small-date" id="tz">Local time</div>
-      </div>
-      <div class="hourglass-wrap">
-        <!-- Inline SVG hourglass (no external file) -->
-        <svg id="hourglass" class="hourglass" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-          <g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 2h12" />
-            <path d="M6 22h12" />
-            <path d="M8 2s4.5 6 4 8-4 8-4 8"/>
-            <path d="M16 22s-4.5-6-4-8 4-8 4-8"/>
-            <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-          </g>
-        </svg>
-      </div>
+  <div class="header">
+    <h1>VCB StockTeam Dashboard</h1>
+    <div>
+      <button class="button" onclick="toggleFull()">Fullscreen</button>
     </div>
+  </div>
 
-    <div class="card">
-      <h3 style="margin:0 0 8px 0">Daily completion vs Target</h3>
-      <div class="progress-wrap">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-weight:800">Today total: <span id="dailyTotal">0</span></div>
-          <div style="font-weight:800">Target: <span id="targetDisplay">1193</span></div>
+  <div class="container">
+    <!-- LEFT -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card top-clock">
+        <div class="clock-box">
+          <div class="big-clock" id="clock">--:--:--</div>
+          <div class="small-date" id="date">—</div>
+          <div class="small-date" id="tz">—</div>
         </div>
-        <div class="progress-bar"><i id="progressFill" style="width:0%"></i></div>
-        <div class="progress-labels"><div id="pctLabel">0%</div><div id="statusLabel">Under target</div></div>
+        <div class="hourglass-wrap" title="hourglass">
+          <svg id="hourglass" class="hourglass" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2h12"/>
+              <path d="M6 22h12"/>
+              <path d="M8 2s4.5 6 4 8-4 8-4 8"/>
+              <path d="M16 22s-4.5-6-4-8 4-8 4-8"/>
+              <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+            </g>
+          </svg>
+        </div>
       </div>
 
-      <div style="margin-top:12px">
-        <h4 style="margin:8px 0">Daily breakdown (by area)</h4>
-        <div id="countsList" class="counts"></div>
+      <div class="card">
+        <h3 style="margin:0 0 10px 0">Daily — total vs Target</h3>
+        <div class="progress-wrap">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:800">Today: <span id="dailyTotal">0</span></div>
+            <div style="font-weight:800">Target: <span id="targetDisplay">1193</span></div>
+          </div>
+          <div class="progress-bar"><i id="progressFill" style="width:0%"></i></div>
+          <div class="progress-labels"><div id="pctLabel">0%</div><div id="statusLabel">Under target</div></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <h4 style="margin:8px 0">Breakdown (by area)</h4>
+          <div id="countsList" class="counts"></div>
+        </div>
+      </div>
+
+      <div class="card charts-grid">
+        <div>
+          <h3 style="margin:0 0 8px 0">Daily Tasks Completion</h3>
+          <div class="canvas-fixed"><canvas id="dailyChart"></canvas></div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 8px 0">Weekly Tasks Completion</h3>
+          <div class="canvas-fixed"><canvas id="weeklyChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card fullwidth-chart">
+        <h3 style="margin:0 0 8px 0">Inventory by Area</h3>
+        <canvas id="inventoryChart" style="height:100%"></canvas>
+      </div>
+
+      <div class="card history-chart">
+        <h3 style="margin:0 0 8px 0">Weekly History (totals)</h3>
+        <canvas id="historyChart" style="height:100%"></canvas>
       </div>
     </div>
 
-    <div class="card charts-grid">
-      <div>
-        <h3 style="margin:0 0 8px 0">Daily Tasks Completion</h3>
-        <div class="canvas-fixed"><canvas id="dailyChart"></canvas></div>
+    <!-- RIGHT -->
+    <div class="sidebar" style="display:flex;flex-direction:column;gap:12px">
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Metadata</h3>
+        <div class="meta"><span>Target</span><span id="metaTarget">1193</span></div>
+        <div class="meta"><span>Timestamp</span><span id="timestamp">-</span></div>
       </div>
-      <div>
-        <h3 style="margin:0 0 8px 0">Weekly Tasks Completion</h3>
-        <div class="canvas-fixed"><canvas id="weeklyChart"></canvas></div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">Counts</h3>
+        <div id="counts" class="counts"></div>
       </div>
-    </div>
 
-    <div class="card fullwidth-chart">
-      <h3 style="margin:0 0 8px 0">Inventory by Area</h3>
-      <canvas id="inventoryChart" style="height:100%"></canvas>
-    </div>
+      <div class="card tasks">
+        <h3 style="margin:0 0 8px 0">Daily Tasks</h3>
+        <div id="dailyTasks" class="list" style="max-height:220px"></div>
+      </div>
 
-    <div class="card history-chart">
-      <h3 style="margin:0 0 8px 0">Weekly History (totals)</h3>
-      <canvas id="historyChart" style="height:100%"></canvas>
+      <div class="card tasks">
+        <h3 style="margin:0 0 8px 0">Weekly Tasks</h3>
+        <div id="weeklyTasks" class="list" style="max-height:220px"></div>
+      </div>
     </div>
   </div>
-
-  <!-- RIGHT -->
-  <div class="sidebar" style="display:flex;flex-direction:column;gap:12px">
-    <div class="card">
-      <h3 style="margin:0 0 8px 0">Metadata</h3>
-      <div class="meta"><span>Target</span><span id="metaTarget">1193</span></div>
-      <div class="meta"><span>Timestamp</span><span id="timestamp">-</span></div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin:0 0 8px 0">Counts</h3>
-      <div id="counts" class="counts"></div>
-    </div>
-
-    <div class="card tasks">
-      <h3 style="margin:0 0 8px 0">Daily Tasks</h3>
-      <div id="dailyTasks" class="list" style="max-height:220px"></div>
-    </div>
-
-    <div class="card tasks">
-      <h3 style="margin:0 0 8px 0">Weekly Tasks</h3>
-      <div id="weeklyTasks" class="list" style="max-height:220px"></div>
-    </div>
-  </div>
-</div>
 
 <script>
-/* Fullscreen */
-function toggleFull(){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+/* ---------- Fullscreen utility ---------- */
+function toggleFull(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
 
-/* Clock + hourglass animation on minute change */
+/* ---------- Clock + hourglass animation ---------- */
 let lastMinute = null;
 function updateClock(){
   const now = new Date();
@@ -192,16 +178,13 @@ function updateClock(){
   const mm = String(now.getMinutes()).padStart(2,'0');
   const ss = String(now.getSeconds()).padStart(2,'0');
   document.getElementById('clock').textContent = `${hh}:${mm}:${ss}`;
-  document.getElementById('date').textContent = now.toLocaleDateString(undefined, {weekday:'long', year:'numeric', month:'short', day:'numeric'});
+  document.getElementById('date').textContent = now.toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'short', day:'numeric' });
   document.getElementById('tz').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
 
-  // animate hourglass when minute changes
-  if(lastMinute === null) lastMinute = now.getMinutes();
-  const currentMinute = now.getMinutes();
-  if(currentMinute !== lastMinute){
-    lastMinute = currentMinute;
+  if (lastMinute === null) lastMinute = now.getMinutes();
+  if (now.getMinutes() !== lastMinute) {
+    lastMinute = now.getMinutes();
     const hg = document.getElementById('hourglass');
-    // trigger animation by reflow + class toggle
     hg.classList.remove('animate');
     void hg.offsetWidth;
     hg.classList.add('animate');
@@ -210,95 +193,154 @@ function updateClock(){
 setInterval(updateClock, 1000);
 updateClock();
 
-/* Load data and render charts */
+/* ---------- Data loader ---------- */
 async function loadData(){
-  // try to fetch data/dashboard.json ; if it fails we fall back to demo data
-  let data;
-  try{
-    const res = await fetch('data/dashboard.json');
-    if(!res.ok) throw new Error('no data');
+  let data = null;
+  try {
+    const res = await fetch('data/dashboard.json', {cache: "no-store"});
+    if (!res.ok) throw new Error('no file');
     data = await res.json();
-  }catch(e){
-    // demo / fallback data so dashboard still looks perfect
+  } catch (e) {
+    // fallback sample (the JSON you pasted) — used for testing if data/dashboard.json missing
     data = {
-      metadata:{target:1193,timestamp:new Date().toISOString()},
-      counting:[{area:'A1',qty:450},{area:'A2',qty:380},{area:'A3',qty:220},{area:'A4',qty:90}],
-      dailyTasks:[{name:'Verificare A1',status:'Completed'},{name:'Verificare A2',status:'Pending'},{name:'Raport',status:'Completed'}],
-      weeklyTasks:[{name:'Audit sapt 1',status:'Completed'},{name:'Inventar',status:'Pending'}],
-      history:[{week:'W42',total:1100},{week:'W43',total:1250},{week:'W44',total:980},{week:'W45',total:1190}]
+      "metadata": { "target": 1193, "timestamp": (new Date()).toISOString() },
+      "counting": [
+        { "area": "MPR", "qty": 27 },{ "area": "PB1", "qty": 28 },{ "area": "PB2", "qty": 29 },
+        { "area": "PB3", "qty": 30 },{ "area": "PB4", "qty": 31 },{ "area": "PBSRES", "qty": 32 },
+        { "area": "MP", "qty": 33 },{ "area": "MIX", "qty": 34 },{ "area": "MS", "qty": 35 },
+        { "area": "MSX", "qty": 36 },{ "area": "FM", "qty": 37 },{ "area": "HP", "qty": 38 }
+      ],
+      "dailyTasks": [
+        { "name": "ADJUSTMENTS (Returns)", "status": "Not started" },
+        { "name": "ADJUSTMENTS (Standard)", "status": "Not started" },
+        { "name": "Aged stock report 7AM", "status": "Completed" },
+        { "name": "Aged stock report 3PM", "status": "Not started" }
+      ],
+      "weeklyTasks": [
+        { "name": "(Weekly) SLA", "status": "Not started" },
+        { "name": "(Weekly) SIS report", "status": "Not started" },
+        { "name": "(once a month) Shrinkage for Period", "status": "Completed" }
+      ],
+      "history": [
+        { "week": "127", "total": 5103 },{ "week": "38", "total": 6457 },{ "week": "15", "total": 7494 }
+      ]
     };
+    console.warn('Using fallback demo data because data/dashboard.json could not be fetched.');
   }
 
   // metadata
-  const target = Number(data.metadata && data.metadata.target) || 1193;
+  const target = (data && data.metadata && Number(data.metadata.target)) ? Number(data.metadata.target) : 1193;
   document.getElementById('metaTarget').textContent = target;
-  document.getElementById('targetDisplay').textContent = target;
   document.getElementById('timestamp').textContent = data.metadata && data.metadata.timestamp ? data.metadata.timestamp : '-';
+  document.getElementById('targetDisplay').textContent = target;
 
-  // counts (list)
-  const countsEl = document.getElementById('counts'); countsEl.innerHTML='';
-  data.counting.forEach(c=>{
-    const d = document.createElement('div'); d.className='count-row'; d.innerHTML=`<span>${c.area}</span><span>${c.qty}</span>`; countsEl.appendChild(d);
+  // counts list
+  const countsEl = document.getElementById('counts');
+  countsEl.innerHTML = '';
+  (data.counting || []).forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'count-row';
+    d.innerHTML = `<span>${c.area}</span><span>${c.qty}</span>`;
+    countsEl.appendChild(d);
   });
 
-  // daily total sum of all areas (user requested: cumulate all areas)
-  const dailyTotal = data.counting.reduce((s,i)=>s + (Number(i.qty)||0),0);
+  // daily total vs target
+  const dailyTotal = (data.counting || []).reduce((s, it) => s + (Number(it.qty) || 0), 0);
   document.getElementById('dailyTotal').textContent = dailyTotal;
-
-  // progress vs target
-  const pct = Math.round((dailyTotal / target) * 100);
-  const pctSafe = Math.max(0, Math.min(200, pct)); // clamp for visual
-  document.getElementById('progressFill').style.width = pctSafe + '%';
+  const pct = Math.round((dailyTotal / (target || 1)) * 100);
+  const pctClamp = Math.max(0, Math.min(200, pct));
+  document.getElementById('progressFill').style.width = pctClamp + '%';
   document.getElementById('pctLabel').textContent = (pct >= 0 ? pct : 0) + '%';
   const statusLabel = document.getElementById('statusLabel');
-  if(dailyTotal >= target){ statusLabel.textContent = 'Completed'; statusLabel.style.color = 'var(--ok)'; }
-  else{ statusLabel.textContent = 'Under target'; statusLabel.style.color = 'var(--pending)'; }
+  if (dailyTotal >= target) {
+    statusLabel.textContent = 'Completed';
+    statusLabel.style.color = 'var(--ok)';
+  } else {
+    statusLabel.textContent = 'Under target';
+    statusLabel.style.color = 'var(--pending)';
+  }
 
-  // countsList (detailed)
-  const countsList = document.getElementById('countsList'); countsList.innerHTML='';
-  data.counting.forEach(c=>{
-    const r = document.createElement('div'); r.className='count-row'; r.innerHTML=`<span>${c.area}</span><span>${c.qty}</span>`; countsList.appendChild(r);
+  // counts breakdown (detailed)
+  const countsList = document.getElementById('countsList');
+  countsList.innerHTML = '';
+  (data.counting || []).forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'count-row';
+    row.innerHTML = `<span>${c.area}</span><span>${c.qty}</span>`;
+    countsList.appendChild(row);
   });
 
-  // render tasks (only these lists scroll)
-  const renderTasks = (el, tasks)=>{
-    el.innerHTML='';
-    tasks.forEach(t=>{
-      const sclass = t.status.toLowerCase().includes('completed') ? 'completed' : (t.status.toLowerCase().includes('under') ? 'under' : 'pending');
-      const div = document.createElement('div'); div.className='task';
-      div.innerHTML = `<span>${t.name}</span><span class="badge ${sclass}">${t.status}</span>`;
+  // render tasks lists
+  const renderTasks = (elId, list) => {
+    const el = document.getElementById(elId);
+    el.innerHTML = '';
+    (list || []).forEach(t => {
+      const s = (String(t.status || '').toLowerCase().includes('completed') || String(t.status || '').toLowerCase().includes('done')) ? 'completed' : 'pending';
+      const div = document.createElement('div');
+      div.className = 'task';
+      const badge = `<span class="badge ${s}">${t.status || ''}</span>`;
+      div.innerHTML = `<span style="flex:1;padding-right:8px">${t.name}</span><span>${badge}</span>`;
       el.appendChild(div);
     });
   };
-  renderTasks(document.getElementById('dailyTasks'), data.dailyTasks || []);
-  renderTasks(document.getElementById('weeklyTasks'), data.weeklyTasks || []);
 
-  // small counts summary (right column counts area)
-  const countsSummary = document.getElementById('counts'); countsSummary.innerHTML='';
-  data.counting.forEach(c=>{ const r=document.createElement('div'); r.className='count-row'; r.innerHTML=`<span>${c.area}</span><span>${c.qty}</span>`; countsSummary.appendChild(r); });
+  renderTasks('dailyTasks', data.dailyTasks || []);
+  renderTasks('weeklyTasks', data.weeklyTasks || []);
 
   // charts
-  const countStatus = list => [ list.filter(t=>t.status.toLowerCase().includes('completed')).length, list.filter(t=>!t.status.toLowerCase().includes('completed')).length ];
+  const countStatus = (list) => {
+    const completed = (list || []).filter(t => String(t.status || '').toLowerCase().includes('completed') || String(t.status || '').toLowerCase().includes('done')).length;
+    const pending = (list || []).length - completed;
+    return [completed, pending];
+  };
 
-  new Chart(document.getElementById('dailyChart'),{
-    type:'doughnut', data:{labels:['Completed','Pending'], datasets:[{data:countStatus(data.dailyTasks || []), backgroundColor:[getComputedStyle(document.documentElement).getPropertyValue('--ok').trim() || '#16a34a', getComputedStyle(document.documentElement).getPropertyValue('--pending').trim() || '#f59e0b']} ]}, options:{animation:{animateRotate:true}, plugins:{legend:{position:'bottom'}}}
+  // Daily doughnut
+  const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+  if (window._dailyChart instanceof Chart) window._dailyChart.destroy();
+  window._dailyChart = new Chart(dailyCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Completed','Pending'],
+      datasets:[{ data: countStatus(data.dailyTasks || []), backgroundColor: ['#16a34a', '#f59e0b'] }]
+    },
+    options: { plugins:{legend:{position:'bottom'}} }
   });
 
-  new Chart(document.getElementById('weeklyChart'),{
-    type:'doughnut', data:{labels:['Completed','Pending'], datasets:[{data:countStatus(data.weeklyTasks || []), backgroundColor:[getComputedStyle(document.documentElement).getPropertyValue('--ok').trim() || '#16a34a', getComputedStyle(document.documentElement).getPropertyValue('--pending').trim() || '#f59e0b']} ]}, options:{plugins:{legend:{position:'bottom'}}}
+  // Weekly doughnut
+  const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+  if (window._weeklyChart instanceof Chart) window._weeklyChart.destroy();
+  window._weeklyChart = new Chart(weeklyCtx, {
+    type: 'doughnut',
+    data: { labels:['Completed','Pending'], datasets:[{ data: countStatus(data.weeklyTasks || []), backgroundColor:['#16a34a','#f59e0b'] }] },
+    options:{ plugins:{legend:{position:'bottom'}} }
   });
 
-  new Chart(document.getElementById('inventoryChart'),{
-    type:'bar', data:{labels:data.counting.map(c=>c.area), datasets:[{data:data.counting.map(c=>c.qty), backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--accent2').trim() || '#ffb347'}]}, options:{animation:{duration:1200}, plugins:{legend:{display:false}}}
+  // Inventory bar
+  const invCtx = document.getElementById('inventoryChart').getContext('2d');
+  if (window._invChart instanceof Chart) window._invChart.destroy();
+  window._invChart = new Chart(invCtx, {
+    type:'bar',
+    data:{
+      labels: (data.counting || []).map(c=>c.area),
+      datasets:[{ label:'Qty', data:(data.counting || []).map(c=>c.qty), backgroundColor: (function(){ return (function(){ return Array.from({length:(data.counting||[]).length}, ()=>getComputedStyle(document.documentElement).getPropertyValue('--accent2')||'#ffb347'); })() })() }]
+    },
+    options:{animation:{duration:900}, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}
   });
 
-  new Chart(document.getElementById('historyChart'),{
-    type:'line', data:{labels:data.history.map(h=>h.week), datasets:[{label:'Total', data:data.history.map(h=>h.total), borderColor:getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ff7a18', tension:0.35, fill:false}]}, options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:false}}}
+  // History line
+  const histCtx = document.getElementById('historyChart').getContext('2d');
+  if (window._histChart instanceof Chart) window._histChart.destroy();
+  window._histChart = new Chart(histCtx, {
+    type:'line',
+    data:{
+      labels: (data.history || []).map(h=>h.week),
+      datasets:[{ label:'Total', data:(data.history || []).map(h=>h.total), borderColor:getComputedStyle(document.documentElement).getPropertyValue('--accent')||'#ff7a18', tension:0.35, fill:false }]
+    },
+    options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:false}}}
   });
 }
 
 loadData();
 </script>
-
 </body>
 </html>
