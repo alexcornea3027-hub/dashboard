@@ -1,4 +1,4 @@
-fetch("data.json")
+fetch("data/dashboard.json")
   .then(r => r.json())
   .then(data => initDashboard(data));
 
