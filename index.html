@@ -1,428 +1,287 @@
-<!doctype html>
-<html lang="ro">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>VCB StockTeam — Dashboard (Advanced)</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<meta charset="UTF-8" />
+<title>VCB PI Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 :root{
-  --bg: #fff7ed;
-  --card: rgba(255,255,255,0.92);
-  --accent: #ff7a18;
-  --accent2: #ffb347;
-  --text: #1f2937;
-  --ok: #16a34a;
-  --pending: #f59e0b;
-  --danger: #ef4444;
-  --muted: rgba(31,41,55,0.45);
-  --glass-size: 72px;
+  --bg:#fff7ed;
+  --card:rgba(255,255,255,0.85);
+  --accent:#ff7a18;
+  --ok:#16a34a;
+  --warn:#f59e0b;
+  --bad:#dc2626;
+  --text:#1f2937;
 }
+
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(120deg,var(--bg),#ffe7d6);color:var(--text);overflow:hidden}
-.header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px}
-.header h1{margin:0;font-size:1.2rem}
-.button{border:none;padding:8px 12px;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700}
-.container{display:grid;grid-template-columns:1.5fr .7fr;gap:18px;padding:12px 18px;height:calc(100vh - 68px)}
-.card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 12px 30px rgba(0,0,0,0.06);display:flex;flex-direction:column;overflow:hidden}
-.top-clock{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.clock-box{display:flex;flex-direction:column;gap:4px}
-.big-clock{font-size:2.6rem;font-weight:800;line-height:1;text-align:center}
-.small-date{font-size:0.95rem;opacity:0.9;text-align:center}
-.hourglass-wrap{width:var(--glass-size);height:var(--glass-size);display:flex;align-items:center;justify-content:center}
 
-/* hourglass pour effect */
-.hourglass{width:var(--glass-size);height:var(--glass-size);display:block}
-.hg-sand-top{fill:#f5c27a; transition:height 900ms ease, y 900ms ease}
-.hg-sand-bottom{fill:#f5c27a; transition:height 900ms ease, y 900ms ease}
-.hg-drop{fill:#f5c27a; transition:transform 900ms ease;}
-
-/* charts area */
-.charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:12px}
-.canvas-fixed{height:220px}
-.fullwidth-chart{height:200px;margin-top:12px}
-.history-row{display:flex;gap:12px;align-items:center;margin-top:12px}
-
-/* sidebar */
-.sidebar .meta{display:flex;justify-content:space-between;padding:8px 0;font-weight:700}
-.counts{display:flex;flex-direction:column;gap:8px;margin-top:6px}
-.count-row{display:flex;justify-content:space-between;font-weight:700;padding:8px 0;border-bottom:1px dashed rgba(0,0,0,0.06)}
-.tasks{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.tasks .list{overflow:auto;padding-right:6px}
-.list .task{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.45));margin-bottom:8px}
-.badge{padding:6px 10px;border-radius:999px;font-size:0.78rem;font-weight:800;color:#fff}
-.completed{background:var(--ok)}
-.pending{background:var(--pending)}
-.under{background:var(--danger)}
-
-/* progress */
-.progress-wrap{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.progress-bar{height:16px;background:linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02));border-radius:999px;overflow:hidden}
-.progress-bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;box-shadow:0 6px 18px rgba(255,122,24,0.12);transition:width 900ms cubic-bezier(.22,.9,.28,1)}
-.progress-labels{display:flex;justify-content:space-between;font-weight:800}
-
-/* weekly scoreboard */
-.week-score{display:flex;gap:8px;align-items:center}
-.week-score .bar{height:14px;border-radius:999px;background:#eee;flex:1;overflow:hidden}
-.week-score .bar > i{height:100%;display:block;border-radius:999px}
-
-/* responsive behaviour */
-@media (max-width:980px){
-  .container{grid-template-columns:1fr;overflow:auto;height:auto;padding-bottom:40px}
-  html,body{overflow:auto}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Arial,sans-serif;
+  background:linear-gradient(120deg,#fff7ed,#ffe7d6);
+  color:var(--text);
+  height:100vh;
+  overflow:hidden;
 }
+
+/* ===== HEADER ===== */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 26px;
+}
+
+h1{margin:0;font-size:1.6rem}
+
+.clock{
+  font-size:2.2rem;
+  font-weight:800;
+}
+.date{font-size:.9rem;opacity:.8;text-align:right}
+.hourglass{
+  font-size:1.8rem;
+  display:inline-block;
+  transition:transform .8s ease;
+}
+
+/* ===== LAYOUT ===== */
+.dashboard{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:18px;
+  padding:18px;
+  height:calc(100vh - 70px);
+}
+
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 15px 30px rgba(0,0,0,.08);
+}
+
+/* ===== LEFT ===== */
+.left{
+  display:grid;
+  grid-template-rows:auto auto 1fr;
+  gap:16px;
+}
+
+/* Daily progress */
+.progressWrap{
+  display:flex;
+  align-items:center;
+  gap:24px;
+}
+
+.progressCircle{
+  width:160px;
+  height:160px;
+}
+
+/* Charts */
+.charts{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+canvas{width:100%!important;height:240px!important}
+
+/* ===== RIGHT ===== */
+.right{
+  display:grid;
+  grid-template-rows:auto 1fr 1fr;
+  gap:16px;
+}
+
+.taskList{
+  overflow-y:auto;
+  max-height:100%;
+}
+
+.task{
+  display:flex;
+  justify-content:space-between;
+  padding:6px 0;
+  border-bottom:1px dashed rgba(0,0,0,.1);
+  font-size:.9rem;
+}
+
+.badge{
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:.7rem;
+  font-weight:700;
+  color:white;
+}
+
+.completed{background:var(--ok)}
+.pending{background:var(--warn)}
 </style>
 </head>
+
 <body>
-  <div class="header">
-    <h1>VCB StockTeam Dashboard</h1>
-    <div style="display:flex;gap:10px;align-items:center">
-      <select id="sourceSelect" style="padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
-        <option value="counting">Today = sum(counting.qty)</option>
-        <option value="history_latest">Today = history (latest week)</option>
-        <option value="history_sum">Today = sum(history.total)</option>
-      </select>
-      <button class="button" onclick="toggleFull()">Fullscreen</button>
+
+<header>
+  <h1>VCB Physical Inventory Dashboard</h1>
+  <div>
+    <div class="clock" id="clock"></div>
+    <div class="date" id="date"></div>
+    <div class="hourglass" id="hg">⏳</div>
+  </div>
+</header>
+
+<div class="dashboard">
+
+  <!-- LEFT -->
+  <div class="left">
+
+    <!-- DAILY -->
+    <div class="card">
+      <h3>Daily Progress</h3>
+      <div class="progressWrap">
+        <canvas id="dailyProgress" class="progressCircle"></canvas>
+        <div>
+          <div><b>Total counted:</b> <span id="dailyTotal"></span></div>
+          <div><b>Daily target:</b> <span id="dailyTarget"></span></div>
+          <div><b>Completion:</b> <span id="dailyPct"></span>%</div>
+        </div>
+      </div>
     </div>
+
+    <!-- AREA + WEEK -->
+    <div class="charts">
+      <div class="card">
+        <h3>Daily Count by Area</h3>
+        <canvas id="areaChart"></canvas>
+      </div>
+      <div class="card">
+        <h3>Weekly History</h3>
+        <canvas id="weeklyChart"></canvas>
+      </div>
+    </div>
+
   </div>
 
-  <div class="container">
-    <!-- LEFT -->
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div class="card top-clock" style="align-items:center">
-        <div class="clock-box" style="flex:1">
-          <div class="big-clock" id="clock">--:--:--</div>
-          <div class="small-date" id="date">—</div>
-          <div class="small-date" id="tz">—</div>
-        </div>
-        <div class="hourglass-wrap">
-          <!-- Improved SVG hourglass with top/bottom sand + drop -->
-          <svg id="hourglass" class="hourglass" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-            <defs>
-              <clipPath id="clipTop"><rect id="topMask" x="15" y="18" width="70" height="18"/></clipPath>
-              <clipPath id="clipBottom"><rect id="botMask" x="15" y="66" width="70" height="18"/></clipPath>
-            </defs>
-            <g stroke="#caa07a" stroke-width="2" fill="none">
-              <rect x="10" y="6" width="80" height="12" rx="3" />
-              <rect x="10" y="82" width="80" height="12" rx="3" />
-              <path d="M30 18 C45 40, 45 60, 30 82" />
-              <path d="M70 18 C55 40, 55 60, 70 82" />
-            </g>
-            <!-- top sand (clipped) -->
-            <g clip-path="url(#clipTop)"><rect class="hg-sand-top" x="15" y="18" width="70" height="18"/></g>
-            <!-- bottom sand (clipped) -->
-            <g clip-path="url(#clipBottom)"><rect class="hg-sand-bottom" x="15" y="66" width="70" height="18"/></g>
-            <!-- drop -->
-            <circle id="hgDrop" class="hg-drop" cx="50" cy="45" r="2" style="opacity:0"/>
-          </svg>
-        </div>
-      </div>
+  <!-- RIGHT -->
+  <div class="right">
 
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <h3 style="margin:0">Daily — total vs Target</h3>
-          <div style="font-weight:700" id="sourceLabel">Source: counting</div>
-        </div>
-
-        <div class="progress-wrap">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="font-weight:800">Today: <span id="dailyTotal">0</span></div>
-            <div style="font-weight:800">Target: <span id="targetDisplay">1193</span></div>
-          </div>
-          <div class="progress-bar"><i id="progressFill"></i></div>
-          <div class="progress-labels"><div id="pctLabel">0%</div><div id="statusLabel">Under target</div></div>
-        </div>
-
-        <div style="margin-top:12px">
-          <h4 style="margin:8px 0">Breakdown (by area)</h4>
-          <div id="countsList" class="counts" style="max-height:160px; overflow:auto;"></div>
-        </div>
-      </div>
-
-      <div class="card charts-grid">
-        <div>
-          <h3 style="margin:0 0 8px 0">Daily Tasks Completion</h3>
-          <div class="canvas-fixed"><canvas id="dailyChart"></canvas></div>
-        </div>
-        <div>
-          <h3 style="margin:0 0 8px 0">Weekly Tasks Completion</h3>
-          <div class="canvas-fixed"><canvas id="weeklyChart"></canvas></div>
-        </div>
-      </div>
-
-      <div class="card fullwidth-chart">
-        <h3 style="margin:0 0 8px 0">Inventory by Area</h3>
-        <canvas id="inventoryChart" style="height:100%"></canvas>
-      </div>
-
-      <div class="card history-chart">
-        <h3 style="margin:0 0 8px 0">Weekly History (totals)</h3>
-        <canvas id="historyChart" style="height:100%"></canvas>
-
-        <div style="margin-top:12px">
-          <h4 style="margin:6px 0">Weekly Scoreboard (percent of target)</h4>
-          <div id="weeklyScoreboard" style="display:flex;flex-direction:column;gap:8px;max-height:110px;overflow:auto"></div>
-        </div>
-      </div>
+    <div class="card">
+      <h3>Daily Tasks</h3>
+      <div class="taskList" id="dailyTasks"></div>
     </div>
 
-    <!-- RIGHT -->
-    <div class="sidebar" style="display:flex;flex-direction:column;gap:12px">
-      <div class="card">
-        <h3 style="margin:0 0 8px 0">Metadata</h3>
-        <div class="meta"><span>Target</span><span id="metaTarget">1193</span></div>
-        <div class="meta"><span>Timestamp</span><span id="timestamp">-</span></div>
-      </div>
-
-      <div class="card">
-        <h3 style="margin:0 0 8px 0">Counts</h3>
-        <div id="counts" class="counts" style="max-height:260px;overflow:auto"></div>
-      </div>
-
-      <div class="card tasks">
-        <h3 style="margin:0 0 8px 0">Daily Tasks</h3>
-        <div id="dailyTasks" class="list" style="max-height:220px"></div>
-      </div>
-
-      <div class="card tasks">
-        <h3 style="margin:0 0 8px 0">Weekly Tasks</h3>
-        <div id="weeklyTasks" class="list" style="max-height:220px"></div>
-      </div>
+    <div class="card">
+      <h3>Weekly Tasks</h3>
+      <div class="taskList" id="weeklyTasks"></div>
     </div>
+
   </div>
+
+</div>
 
 <script>
-/* ---------- Fullscreen ---------- */
-function toggleFull(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
-
-/* ---------- Clock + hourglass pour animation ---------- */
-let lastMinute = null;
-function animateHourglassPour(){
-  const topMask = document.getElementById('topMask');
-  const botMask = document.getElementById('botMask');
-  const drop = document.getElementById('hgDrop');
-
-  if (!topMask || !botMask || !drop) return;
-  // quick pour animation: top decreases, bot increases, drop visible
-  topMask.setAttribute('height', '6'); topMask.setAttribute('y','30');
-  botMask.setAttribute('height', '30'); botMask.setAttribute('y','54');
-  drop.style.opacity = '1';
-  drop.setAttribute('cy','45');
-  // reset after 900ms
-  setTimeout(()=> {
-    topMask.setAttribute('height','18'); topMask.setAttribute('y','18');
-    botMask.setAttribute('height','18'); botMask.setAttribute('y','66');
-    drop.style.opacity = '0';
-  }, 900);
+/* ===== CLOCK ===== */
+function tick(){
+  const now=new Date();
+  clock.textContent=now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  date.textContent=now.toLocaleDateString();
+  hg.style.transform='rotate(360deg)';
 }
+setInterval(tick,60000);tick();
 
-function updateClock(){
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2,'0');
-  const mm = String(now.getMinutes()).padStart(2,'0');
-  const ss = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('clock').textContent = `${hh}:${mm}:${ss}`;
-  document.getElementById('date').textContent = now.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'short',day:'numeric'});
-  document.getElementById('tz').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+/* ===== LOAD DATA ===== */
+fetch('data/dashboard.json')
+.then(r=>r.json())
+.then(data=>{
 
-  if (lastMinute===null) lastMinute = now.getMinutes();
-  if (now.getMinutes() !== lastMinute) {
-    lastMinute = now.getMinutes();
-    animateHourglassPour();
-  }
-}
-setInterval(updateClock,1000);
-updateClock();
+  /* DAILY PROGRESS */
+  const total=data.dailyCounting.total;
+  const target=data.metadata.dailyTarget;
+  const pct=Math.min((total/target)*100,100);
 
-/* ---------- Data loader & rendering ---------- */
-let _data = null;
-async function fetchData(){
-  try {
-    const res = await fetch('data/dashboard.json', {cache:'no-store'});
-    if (!res.ok) throw new Error('no file');
-    const json = await res.json();
-    return json;
-  } catch(e) {
-    console.warn("Using fallback data (demo).", e);
-    // minimal fallback (kept small)
-    return {
-      metadata:{target:1193,timestamp:new Date().toISOString()},
-      counting:[{area:"A1",qty:50},{area:"A2",qty:40}],
-      dailyTasks:[{name:"Aged stock report 7AM",status:"Completed"},{name:"Aged stock report 3PM",status:"Not started"}],
-      weeklyTasks:[{name:"(Weekly) SLA",status:"Not started"}],
-      history:[{week:"W50",total:1200},{week:"W51",total:1320}]
-    };
-  }
-}
+  dailyTotal.textContent=total;
+  dailyTarget.textContent=target;
+  dailyPct.textContent=pct.toFixed(1);
 
-function renderCounts(counting){
-  const container = document.getElementById('counts');
-  container.innerHTML = '';
-  counting.forEach(c => {
-    const el = document.createElement('div');
-    el.className = 'count-row';
-    el.innerHTML = `<span>${c.area}</span><span>${c.qty}</span>`;
-    container.appendChild(el);
-  });
-  // also breakdown list
-  const countsList = document.getElementById('countsList'); countsList.innerHTML = '';
-  counting.forEach(c => {
-    const r = document.createElement('div'); r.className='count-row'; r.innerHTML = `<span>${c.area}</span><span>${c.qty}</span>`;
-    countsList.appendChild(r);
-  });
-}
+  const color=pct>=100?'#16a34a':pct>=80?'#f59e0b':'#dc2626';
 
-function renderTasks(elId,list){
-  const el = document.getElementById(elId); el.innerHTML = '';
-  (list||[]).forEach(t=>{
-    const status = String(t.status || '').toLowerCase();
-    const sclass = (status.includes('completed') || status.includes('done')) ? 'completed' : (status.includes('not')||status.includes('pending') ? 'pending' : 'pending');
-    const div = document.createElement('div'); div.className='task';
-    div.innerHTML = `<div style="flex:1;padding-right:8px">${t.name}</div><div><span class="badge ${sclass}">${t.status}</span></div>`;
-    el.appendChild(div);
-  });
-}
-
-/* Chart helpers: gradient & shadow for a pseudo-3D */
-function makeBarGradient(ctx, height, colorStart, colorEnd){
-  const g = ctx.createLinearGradient(0, 0, 0, height);
-  g.addColorStop(0, colorStart);
-  g.addColorStop(1, colorEnd);
-  return g;
-}
-
-/* Render charts (destroy previous if exists) */
-function renderCharts(data){
-  // daily/weekly doughnuts
-  const dailyStats = (data.dailyTasks||[]).reduce((acc,t)=> acc + ((String(t.status||'').toLowerCase().includes('completed')||String(t.status||'').toLowerCase().includes('done'))?1:0),0);
-  const dailyTotalTasks = (data.dailyTasks || []).length;
-  const weeklyStats = (data.weeklyTasks||[]).reduce((acc,t)=> acc + ((String(t.status||'').toLowerCase().includes('completed')||String(t.status||'').toLowerCase().includes('done'))?1:0),0);
-  const weeklyTotalTasks = (data.weeklyTasks || []).length;
-
-  // daily chart
-  const dctx = document.getElementById('dailyChart').getContext('2d');
-  if (window._dailyChart instanceof Chart) window._dailyChart.destroy();
-  window._dailyChart = new Chart(dctx, {
+  new Chart(dailyProgress,{
     type:'doughnut',
-    data:{labels:['Completed','Pending'], datasets:[{data:[dailyStats, Math.max(0,dailyTotalTasks-dailyStats)], backgroundColor:['#16a34a','#f59e0b'], hoverOffset:12}]},
-    options:{animation:{duration:900, easing:'easeOutQuart'}, plugins:{legend:{position:'bottom'}}}
+    data:{
+      datasets:[{
+        data:[pct,100-pct],
+        backgroundColor:[color,'#eee'],
+        borderWidth:0
+      }]
+    },
+    options:{
+      cutout:'75%',
+      plugins:{legend:{display:false}},
+      animation:{animateRotate:true}
+    }
   });
 
-  // weekly chart
-  const wctx = document.getElementById('weeklyChart').getContext('2d');
-  if (window._weeklyChart instanceof Chart) window._weeklyChart.destroy();
-  window._weeklyChart = new Chart(wctx, {
-    type:'doughnut',
-    data:{labels:['Completed','Pending'], datasets:[{data:[weeklyStats, Math.max(0,weeklyTotalTasks-weeklyStats)], backgroundColor:['#16a34a','#f59e0b'], hoverOffset:12}]},
-    options:{animation:{duration:900, easing:'easeOutQuart'}, plugins:{legend:{position:'bottom'}}}
-  });
-
-  // inventory bar
-  const invCtx = document.getElementById('inventoryChart').getContext('2d');
-  if (window._invChart instanceof Chart) window._invChart.destroy();
-  const labels = (data.counting||[]).map(c=>c.area);
-  const values = (data.counting||[]).map(c=>c.qty);
-  // gradient
-  const barGradient = makeBarGradient(invCtx, 300, 'rgba(255,138,101,1)', 'rgba(255,181,71,0.9)');
-  window._invChart = new Chart(invCtx, {
+  /* AREA CHART */
+  new Chart(areaChart,{
     type:'bar',
-    data:{labels, datasets:[{ label:'Qty', data: values, backgroundColor: labels.map(()=>barGradient), borderRadius:8, barThickness:18 }]},
-    options:{animation:{duration:900,easing:'easeOutQuad'}, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}
+    data:{
+      labels:data.dailyCounting.byArea.map(a=>a.area),
+      datasets:[{
+        data:data.dailyCounting.byArea.map(a=>a.qty),
+        backgroundColor:'#ff8a65'
+      }]
+    },
+    options:{
+      animation:{duration:1500},
+      plugins:{legend:{display:false}}
+    }
   });
 
-  // history line
-  const histCtx = document.getElementById('historyChart').getContext('2d');
-  if (window._histChart instanceof Chart) window._histChart.destroy();
-  const hlabels = (data.history||[]).map(h=>h.week);
-  const hvals = (data.history||[]).map(h=>h.total);
-  window._histChart = new Chart(histCtx, {
+  /* WEEKLY */
+  new Chart(weeklyChart,{
     type:'line',
-    data:{labels:hlabels, datasets:[{label:'Total', data:hvals, borderColor:getComputedStyle(document.documentElement).getPropertyValue('--accent')||'#ff7a18', backgroundColor:'rgba(255,122,24,0.06)', tension:0.35, fill:true, pointRadius:4 }]},
-    options:{animation:{duration:1000,easing:'easeOutQuart'}, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:false}}}
+    data:{
+      labels:data.weeklyHistory.map(w=>w.week),
+      datasets:[{
+        data:data.weeklyHistory.map(w=>w.total),
+        borderColor:'#ff7a18',
+        tension:.4,
+        fill:false
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{x:{ticks:{autoSkip:false}}}
+    }
   });
-}
 
-/* Weekly scoreboard: percent of target per week */
-function renderWeeklyScoreboard(history, target){
-  const container = document.getElementById('weeklyScoreboard');
-  container.innerHTML = '';
-  (history||[]).slice().reverse().forEach(h=>{
-    const pct = Math.round((Number(h.total) / (target||1)) * 100);
-    const row = document.createElement('div'); row.className='week-score';
-    const label = document.createElement('div'); label.style.width='70px'; label.style.fontWeight='700'; label.textContent = h.week;
-    const barWrap = document.createElement('div'); barWrap.className='bar';
-    const fill = document.createElement('i');
-    fill.style.width = Math.max(0, Math.min(200, pct)) + '%';
-    // color logic
-    if (pct >= 100) fill.style.background = 'linear-gradient(90deg,var(--ok), #5eead4)';
-    else if (pct >= 50) fill.style.background = 'linear-gradient(90deg,var(--accent),var(--accent2))';
-    else fill.style.background = 'linear-gradient(90deg,var(--pending), #ffdd99)';
-    barWrap.appendChild(fill);
-    const rightLabel = document.createElement('div'); rightLabel.style.width='56px'; rightLabel.style.textAlign='right'; rightLabel.style.fontWeight='800'; rightLabel.textContent = pct + '%';
-    row.appendChild(label); row.appendChild(barWrap); row.appendChild(rightLabel);
-    container.appendChild(row);
-  });
-}
-
-/* Update Today total from selected source */
-function updateDailyTotalFromSource(data){
-  const sel = document.getElementById('sourceSelect');
-  const src = sel.value;
-  document.getElementById('sourceLabel').textContent = `Source: ${sel.options[sel.selectedIndex].text}`;
-  let dailyTotal = 0;
-  if (src === 'counting') {
-    dailyTotal = (data.counting || []).reduce((s,i) => s + (Number(i.qty)||0), 0);
-  } else if (src === 'history_latest') {
-    const h = (data.history||[])[0];
-    dailyTotal = h ? Number(h.total)||0 : 0;
-  } else if (src === 'history_sum') {
-    dailyTotal = (data.history || []).reduce((s,i) => s + (Number(i.total)||0), 0);
-  }
-  // also display raw sum of counting for transparency
-  document.getElementById('dailyTotal').textContent = dailyTotal;
-  // progress UI
-  const target = Number(data.metadata && data.metadata.target) || 1193;
-  document.getElementById('targetDisplay').textContent = target;
-  const pct = Math.round((dailyTotal / (target||1)) * 100);
-  document.getElementById('pctLabel').textContent = (pct >= 0 ? pct : 0) + '%';
-  document.getElementById('progressFill').style.width = Math.max(0, Math.min(200, pct)) + '%';
-  const statusLabel = document.getElementById('statusLabel');
-  if (dailyTotal >= target) { statusLabel.textContent = 'Completed'; statusLabel.style.color = 'var(--ok)'; }
-  else { statusLabel.textContent = 'Under target'; statusLabel.style.color = 'var(--pending)'; }
-}
-
-/* ---------- Main load & init ---------- */
-async function loadAndRender(){
-  _data = await fetchData();
-  // ensure history sorted latest first if possible
-  if (_data.history && Array.isArray(_data.history)) {
-    _data.history.sort((a,b)=> {
-      // if week numeric string -> sort by numeric descending, else keep original order
-      const na = Number(String(a.week).replace(/\D/g,'')); const nb = Number(String(b.week).replace(/\D/g,''));
-      return (isNaN(nb) ? 0 : nb) - (isNaN(na) ? 0 : na);
+  /* TASKS */
+  const renderTasks=(el,list)=>{
+    el.innerHTML='';
+    list.forEach(t=>{
+      const s=t.status.toLowerCase().includes('completed')?'completed':'pending';
+      const d=document.createElement('div');
+      d.className='task';
+      d.innerHTML=`<span>${t.task}</span><span class="badge ${s}">${t.status}</span>`;
+      el.appendChild(d);
     });
-  }
-  // render elements
-  document.getElementById('metaTarget').textContent = (_data.metadata && _data.metadata.target) ? _data.metadata.target : 1193;
-  document.getElementById('timestamp').textContent = (_data.metadata && _data.metadata.timestamp) ? _data.metadata.timestamp : '-';
+  };
 
-  renderCounts(_data.counting || []);
-  renderTasks('dailyTasks', _data.dailyTasks || []);
-  renderTasks('weeklyTasks', _data.weeklyTasks || []);
-  renderCharts(_data);
-  renderWeeklyScoreboard(_data.history || [], Number(_data.metadata && _data.metadata.target) || 1193);
+  renderTasks(dailyTasks,data.dailyTasks);
+  renderTasks(weeklyTasks,data.weeklyTasks||[]);
 
-  // initial source-based total
-  updateDailyTotalFromSource(_data);
-}
-
-// event: change source dropdown
-document.addEventListener('DOMContentLoaded', ()=> {
-  document.getElementById('sourceSelect').addEventListener('change', ()=> {
-    if (_data) updateDailyTotalFromSource(_data);
-  });
-  loadAndRender();
-});
+})
+.catch(e=>console.warn('Fallback demo',e));
 </script>
+
 </body>
 </html>
