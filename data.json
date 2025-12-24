@@ -1,0 +1,572 @@
+{
+  "metadata": {
+    "dailyTarget": 1193,
+    "date": "2025-12-24"
+  },
+  "dailyCounting": {
+    "total": 917,
+    "byArea": [
+      {
+        "area": "MPR",
+        "qty": 127
+      },
+      {
+        "area": "PB1",
+        "qty": 38
+      },
+      {
+        "area": "PB2",
+        "qty": 15
+      },
+      {
+        "area": "PB3",
+        "qty": 0
+      },
+      {
+        "area": "PB4",
+        "qty": 0
+      },
+      {
+        "area": "PBSRES",
+        "qty": 45
+      },
+      {
+        "area": "MP",
+        "qty": 221
+      },
+      {
+        "area": "MIX",
+        "qty": 136
+      },
+      {
+        "area": "MS",
+        "qty": 61
+      },
+      {
+        "area": "MSX",
+        "qty": 249
+      },
+      {
+        "area": "FM",
+        "qty": 20
+      },
+      {
+        "area": "HP",
+        "qty": 5
+      }
+    ]
+  },
+  "dailyTasks": [
+    {
+      "task": "ADJUSTMENTS (Returns)",
+      "status": "Not started"
+    },
+    {
+      "task": "ADJUSTMENTS (Standard)",
+      "status": "Not started"
+    },
+    {
+      "task": "Aged stock report 7AM",
+      "status": "Completed"
+    },
+    {
+      "task": "Aged stock report 3PM",
+      "status": "Not started"
+    },
+    {
+      "task": "Blackwells",
+      "status": "Not started"
+    },
+    {
+      "task": "AGED STOCK REPORT 6 AM",
+      "status": "Not started"
+    },
+    {
+      "task": "Available inventory status in Prob-Res pots 3PM",
+      "status": "Not started"
+    },
+    {
+      "task": "Available inventory status in Prob-Res pots 6AM",
+      "status": "Not started"
+    },
+    {
+      "task": "EMPTY BIN CHECKS",
+      "status": "Not started"
+    },
+    {
+      "task": "Internet returns",
+      "status": "Not started"
+    },
+    {
+      "task": "Inventory Status (DATA STUDIO)",
+      "status": "Not started"
+    },
+    {
+      "task": "LOCATIONS IN ERROR",
+      "status": "Not started"
+    },
+    {
+      "task": "Manual Despatch Adjustment",
+      "status": "Not started"
+    },
+    {
+      "task": "Manual location checks",
+      "status": "Not started"
+    },
+    {
+      "task": "Mixing violations (multiple ISBN)",
+      "status": "Not started"
+    },
+    {
+      "task": "MLC Tracker update",
+      "status": "Not started"
+    },
+    {
+      "task": "Supplier Overs Report",
+      "status": "Not started"
+    },
+    {
+      "task": "SIS afternoon report",
+      "status": "Not started"
+    },
+    {
+      "task": "PI 1st count",
+      "status": "Not started"
+    },
+    {
+      "task": "PI 2nd count",
+      "status": "Not started"
+    },
+    {
+      "task": "PI assign",
+      "status": "Not started"
+    },
+    {
+      "task": "PI Investigation",
+      "status": "Not started"
+    },
+    {
+      "task": "PI Master file update (Cycle)",
+      "status": "Not started"
+    },
+    {
+      "task": "POD",
+      "status": "Not started"
+    },
+    {
+      "task": "PI set up",
+      "status": "Not started"
+    },
+    {
+      "task": "SHRINKAGE RECONCILATION DAILY",
+      "status": "Not started"
+    },
+    {
+      "task": "SLA update",
+      "status": "Not started"
+    },
+    {
+      "task": "Stock left on RDTs check",
+      "status": "Not started"
+    }
+  ],
+  "weeklyTasks": [],
+  "weeklyHistory": [
+    {
+      "week": "W27",
+      "total": 5103
+    },
+    {
+      "week": "W28",
+      "total": 6457
+    },
+    {
+      "week": "W29",
+      "total": 7494
+    },
+    {
+      "week": "W30",
+      "total": 6901
+    },
+    {
+      "week": "W31",
+      "total": 5447
+    },
+    {
+      "week": "W32",
+      "total": 4524
+    },
+    {
+      "week": "W33",
+      "total": 2068
+    },
+    {
+      "week": "W34",
+      "total": 0
+    },
+    {
+      "week": "W35",
+      "total": 0
+    },
+    {
+      "week": "W36",
+      "total": 0
+    },
+    {
+      "week": "W37",
+      "total": 0
+    },
+    {
+      "week": "W38",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    }
+  ]
+}
