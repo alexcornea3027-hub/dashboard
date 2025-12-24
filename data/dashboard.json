@@ -1,269 +1,571 @@
 {
   "metadata": {
-    "target": 0.855490360435876,
-    "timestamp": "2025-12-24T10:12:44.730Z"
+    "dailyTarget": 1193,
+    "date": "2025-12-24"
   },
-  "counting": [
-    {
-      "area": "MPR",
-      "qty": 127
-    },
-    {
-      "area": "PB1",
-      "qty": 38
-    },
-    {
-      "area": "PB2",
-      "qty": 15
-    },
-    {
-      "area": "PB3",
-      "qty": 0
-    },
-    {
-      "area": "PB4",
-      "qty": 0
-    },
-    {
-      "area": "PBSRES",
-      "qty": 45
-    },
-    {
-      "area": "MP",
-      "qty": 221
-    },
-    {
-      "area": "MIX",
-      "qty": 136
-    },
-    {
-      "area": "MS",
-      "qty": 61
-    },
-    {
-      "area": "MSX",
-      "qty": 249
-    },
-    {
-      "area": "FM",
-      "qty": 20
-    },
-    {
-      "area": "HP",
-      "qty": 5
-    }
-  ],
+  "dailyCounting": {
+    "total": 917,
+    "byArea": [
+      {
+        "area": "MPR",
+        "qty": 127
+      },
+      {
+        "area": "PB1",
+        "qty": 38
+      },
+      {
+        "area": "PB2",
+        "qty": 15
+      },
+      {
+        "area": "PB3",
+        "qty": 0
+      },
+      {
+        "area": "PB4",
+        "qty": 0
+      },
+      {
+        "area": "PBSRES",
+        "qty": 45
+      },
+      {
+        "area": "MP",
+        "qty": 221
+      },
+      {
+        "area": "MIX",
+        "qty": 136
+      },
+      {
+        "area": "MS",
+        "qty": 61
+      },
+      {
+        "area": "MSX",
+        "qty": 249
+      },
+      {
+        "area": "FM",
+        "qty": 20
+      },
+      {
+        "area": "HP",
+        "qty": 5
+      }
+    ]
+  },
   "dailyTasks": [
     {
-      "name": "46015",
-      "status": "ADJUSTMENTS (Returns)"
+      "task": "ADJUSTMENTS (Returns)",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "ADJUSTMENTS (Standard)"
+      "task": "ADJUSTMENTS (Standard)",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Aged stock report 7AM"
+      "task": "Aged stock report 7AM",
+      "status": "Completed"
     },
     {
-      "name": "46015",
-      "status": "Aged stock report 3PM"
+      "task": "Aged stock report 3PM",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Blackwells"
+      "task": "Blackwells",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "AGED STOCK REPORT 6 AM"
+      "task": "AGED STOCK REPORT 6 AM",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Available inventory status in Prob-Res pots 3PM"
+      "task": "Available inventory status in Prob-Res pots 3PM",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Available inventory status in Prob-Res pots 6AM"
+      "task": "Available inventory status in Prob-Res pots 6AM",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "EMPTY BIN CHECKS"
+      "task": "EMPTY BIN CHECKS",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Internet returns"
+      "task": "Internet returns",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Inventory Status (DATA STUDIO)"
+      "task": "Inventory Status (DATA STUDIO)",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "LOCATIONS IN ERROR"
+      "task": "LOCATIONS IN ERROR",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Manual Despatch Adjustment"
+      "task": "Manual Despatch Adjustment",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Manual location checks"
+      "task": "Manual location checks",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Mixing violations (multiple ISBN)"
+      "task": "Mixing violations (multiple ISBN)",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "MLC Tracker update"
+      "task": "MLC Tracker update",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Supplier Overs Report"
+      "task": "Supplier Overs Report",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "SIS afternoon report"
+      "task": "SIS afternoon report",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "PI 1st count"
+      "task": "PI 1st count",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "PI 2nd count"
+      "task": "PI 2nd count",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "PI assign"
+      "task": "PI assign",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "PI Investigation"
+      "task": "PI Investigation",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "PI Master file update (Cycle)"
+      "task": "PI Master file update (Cycle)",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "POD"
+      "task": "POD",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "PI set up"
+      "task": "PI set up",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "SHRINKAGE RECONCILATION DAILY"
+      "task": "SHRINKAGE RECONCILATION DAILY",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "SLA update"
+      "task": "SLA update",
+      "status": "Not started"
     },
     {
-      "name": "46015",
-      "status": "Stock left on RDTs check"
+      "task": "Stock left on RDTs check",
+      "status": "Not started"
     }
   ],
-  "weeklyTasks": [
+  "weeklyTasks": [],
+  "weeklyHistory": [
     {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    },
-    {
-      "name": "Weekly",
-      "status": ""
-    }
-  ],
-  "history": [
-    {
-      "week": "27",
+      "week": "W27",
       "total": 5103
     },
     {
-      "week": "28",
+      "week": "W28",
       "total": 6457
     },
     {
-      "week": "29",
+      "week": "W29",
       "total": 7494
     },
     {
-      "week": "30",
+      "week": "W30",
       "total": 6901
     },
     {
-      "week": "31",
+      "week": "W31",
       "total": 5447
     },
     {
-      "week": "32",
+      "week": "W32",
       "total": 4524
     },
     {
-      "week": "33",
+      "week": "W33",
       "total": 2068
     },
     {
-      "week": "34",
+      "week": "W34",
       "total": 0
     },
     {
-      "week": "35",
+      "week": "W35",
       "total": 0
     },
     {
-      "week": "36",
+      "week": "W36",
       "total": 0
     },
     {
-      "week": "37",
+      "week": "W37",
       "total": 0
     },
     {
-      "week": "38",
+      "week": "W38",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
+      "total": 0
+    },
+    {
+      "week": "W",
       "total": 0
     }
   ]
