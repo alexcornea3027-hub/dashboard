@@ -1,287 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>VCB PI Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-:root{
-  --bg:#fff7ed;
-  --card:rgba(255,255,255,0.85);
-  --accent:#ff7a18;
-  --ok:#16a34a;
-  --warn:#f59e0b;
-  --bad:#dc2626;
-  --text:#1f2937;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Inter,system-ui,Arial,sans-serif;
-  background:linear-gradient(120deg,#fff7ed,#ffe7d6);
-  color:var(--text);
-  height:100vh;
-  overflow:hidden;
-}
-
-/* ===== HEADER ===== */
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 26px;
-}
-
-h1{margin:0;font-size:1.6rem}
-
-.clock{
-  font-size:2.2rem;
-  font-weight:800;
-}
-.date{font-size:.9rem;opacity:.8;text-align:right}
-.hourglass{
-  font-size:1.8rem;
-  display:inline-block;
-  transition:transform .8s ease;
-}
-
-/* ===== LAYOUT ===== */
-.dashboard{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:18px;
-  padding:18px;
-  height:calc(100vh - 70px);
-}
-
-.card{
-  background:var(--card);
-  border-radius:16px;
-  padding:16px;
-  box-shadow:0 15px 30px rgba(0,0,0,.08);
-}
-
-/* ===== LEFT ===== */
-.left{
-  display:grid;
-  grid-template-rows:auto auto 1fr;
-  gap:16px;
-}
-
-/* Daily progress */
-.progressWrap{
-  display:flex;
-  align-items:center;
-  gap:24px;
-}
-
-.progressCircle{
-  width:160px;
-  height:160px;
-}
-
-/* Charts */
-.charts{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}
-
-canvas{width:100%!important;height:240px!important}
-
-/* ===== RIGHT ===== */
-.right{
-  display:grid;
-  grid-template-rows:auto 1fr 1fr;
-  gap:16px;
-}
-
-.taskList{
-  overflow-y:auto;
-  max-height:100%;
-}
-
-.task{
-  display:flex;
-  justify-content:space-between;
-  padding:6px 0;
-  border-bottom:1px dashed rgba(0,0,0,.1);
-  font-size:.9rem;
-}
-
-.badge{
-  padding:4px 10px;
-  border-radius:999px;
-  font-size:.7rem;
-  font-weight:700;
-  color:white;
-}
-
-.completed{background:var(--ok)}
-.pending{background:var(--warn)}
-</style>
+  <meta charset="UTF-8" />
+  <title>StockTeam VCB</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
 <header>
-  <h1>VCB Physical Inventory Dashboard</h1>
-  <div>
-    <div class="clock" id="clock"></div>
-    <div class="date" id="date"></div>
-    <div class="hourglass" id="hg">⏳</div>
-  </div>
+  <h1>📦 StockTeam VCB</h1>
+  <div id="clock"></div>
 </header>
 
-<div class="dashboard">
+<main class="grid">
 
-  <!-- LEFT -->
-  <div class="left">
+  <section class="card big">
+    <h2>Daily Progress</h2>
+    <canvas id="dailyProgress"></canvas>
+  </section>
 
-    <!-- DAILY -->
-    <div class="card">
-      <h3>Daily Progress</h3>
-      <div class="progressWrap">
-        <canvas id="dailyProgress" class="progressCircle"></canvas>
-        <div>
-          <div><b>Total counted:</b> <span id="dailyTotal"></span></div>
-          <div><b>Daily target:</b> <span id="dailyTarget"></span></div>
-          <div><b>Completion:</b> <span id="dailyPct"></span>%</div>
-        </div>
-      </div>
-    </div>
+  <section class="card">
+    <h2>Daily Counting by Area</h2>
+    <canvas id="areaChart"></canvas>
+  </section>
 
-    <!-- AREA + WEEK -->
-    <div class="charts">
-      <div class="card">
-        <h3>Daily Count by Area</h3>
-        <canvas id="areaChart"></canvas>
-      </div>
-      <div class="card">
-        <h3>Weekly History</h3>
-        <canvas id="weeklyChart"></canvas>
-      </div>
-    </div>
+  <section class="card">
+    <h2>Weekly History</h2>
+    <canvas id="weeklyChart"></canvas>
+  </section>
 
-  </div>
+  <section class="card">
+    <h2>Daily Tasks</h2>
+    <canvas id="dailyTasksChart"></canvas>
+    <ul id="dailyTasksList"></ul>
+  </section>
 
-  <!-- RIGHT -->
-  <div class="right">
+  <section class="card">
+    <h2>Weekly Tasks</h2>
+    <canvas id="weeklyTasksChart"></canvas>
+    <ul id="weeklyTasksList"></ul>
+  </section>
 
-    <div class="card">
-      <h3>Daily Tasks</h3>
-      <div class="taskList" id="dailyTasks"></div>
-    </div>
+</main>
 
-    <div class="card">
-      <h3>Weekly Tasks</h3>
-      <div class="taskList" id="weeklyTasks"></div>
-    </div>
-
-  </div>
-
-</div>
-
-<script>
-/* ===== CLOCK ===== */
-function tick(){
-  const now=new Date();
-  clock.textContent=now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  date.textContent=now.toLocaleDateString();
-  hg.style.transform='rotate(360deg)';
-}
-setInterval(tick,60000);tick();
-
-/* ===== LOAD DATA ===== */
-fetch('data/dashboard.json')
-.then(r=>r.json())
-.then(data=>{
-
-  /* DAILY PROGRESS */
-  const total=data.dailyCounting.total;
-  const target=data.metadata.dailyTarget;
-  const pct=Math.min((total/target)*100,100);
-
-  dailyTotal.textContent=total;
-  dailyTarget.textContent=target;
-  dailyPct.textContent=pct.toFixed(1);
-
-  const color=pct>=100?'#16a34a':pct>=80?'#f59e0b':'#dc2626';
-
-  new Chart(dailyProgress,{
-    type:'doughnut',
-    data:{
-      datasets:[{
-        data:[pct,100-pct],
-        backgroundColor:[color,'#eee'],
-        borderWidth:0
-      }]
-    },
-    options:{
-      cutout:'75%',
-      plugins:{legend:{display:false}},
-      animation:{animateRotate:true}
-    }
-  });
-
-  /* AREA CHART */
-  new Chart(areaChart,{
-    type:'bar',
-    data:{
-      labels:data.dailyCounting.byArea.map(a=>a.area),
-      datasets:[{
-        data:data.dailyCounting.byArea.map(a=>a.qty),
-        backgroundColor:'#ff8a65'
-      }]
-    },
-    options:{
-      animation:{duration:1500},
-      plugins:{legend:{display:false}}
-    }
-  });
-
-  /* WEEKLY */
-  new Chart(weeklyChart,{
-    type:'line',
-    data:{
-      labels:data.weeklyHistory.map(w=>w.week),
-      datasets:[{
-        data:data.weeklyHistory.map(w=>w.total),
-        borderColor:'#ff7a18',
-        tension:.4,
-        fill:false
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      scales:{x:{ticks:{autoSkip:false}}}
-    }
-  });
-
-  /* TASKS */
-  const renderTasks=(el,list)=>{
-    el.innerHTML='';
-    list.forEach(t=>{
-      const s=t.status.toLowerCase().includes('completed')?'completed':'pending';
-      const d=document.createElement('div');
-      d.className='task';
-      d.innerHTML=`<span>${t.task}</span><span class="badge ${s}">${t.status}</span>`;
-      el.appendChild(d);
-    });
-  };
-
-  renderTasks(dailyTasks,data.dailyTasks);
-  renderTasks(weeklyTasks,data.weeklyTasks||[]);
-
-})
-.catch(e=>console.warn('Fallback demo',e));
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
