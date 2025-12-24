@@ -1,77 +1,250 @@
-{
-  "metadata": {
-    "target": 1193,
-    "timestamp": "13:13:04"
+"{
+  ""metadata"": {
+    ""target"": 1193,
+    ""timestamp"": ""2025-12-24T10:00:30.856Z""
   },
-  "counting": [
-    { "area": "Area", "qty": 0 },
-    { "area": "MPR", "qty": 14622 },
-    { "area": "PB1", "qty": 4329 },
-    { "area": "PB2", "qty": 795 },
-    { "area": "PB3", "qty": 772 },
-    { "area": "PB4", "qty": 164 },
-    { "area": "PBSRES", "qty": 5197 },
-    { "area": "MP", "qty": 25612 },
-    { "area": "MIX", "qty": 33087 },
-    { "area": "MS", "qty": 21512 },
-    { "area": "MSX", "qty": 28798 },
-    { "area": "FM", "qty": 2308 },
-    { "area": "HP", "qty": 561 },
-    { "area": "Total:", "qty": 137369 }
+  ""counting"": [
+    {
+      ""area"": ""MPR"",
+      ""qty"": 27
+    },
+    {
+      ""area"": ""PB1"",
+      ""qty"": 28
+    },
+    {
+      ""area"": ""PB2"",
+      ""qty"": 29
+    },
+    {
+      ""area"": ""PB3"",
+      ""qty"": 30
+    },
+    {
+      ""area"": ""PB4"",
+      ""qty"": 31
+    },
+    {
+      ""area"": ""PBSRES"",
+      ""qty"": 32
+    },
+    {
+      ""area"": ""MP"",
+      ""qty"": 33
+    },
+    {
+      ""area"": ""MIX"",
+      ""qty"": 34
+    },
+    {
+      ""area"": ""MS"",
+      ""qty"": 35
+    },
+    {
+      ""area"": ""MSX"",
+      ""qty"": 36
+    },
+    {
+      ""area"": ""FM"",
+      ""qty"": 37
+    },
+    {
+      ""area"": ""HP"",
+      ""qty"": 38
+    }
   ],
-  "dailyTasks": [
-    { "name": "ADJUSTMENTS (Returns)", "status": "Not started" },
-    { "name": "ADJUSTMENTS (Standard)", "status": "Not started" },
-    { "name": "Aged stock report 7AM", "status": "Completed" },
-    { "name": "Aged stock report 3PM", "status": "Not started" },
-    { "name": "Blackwells", "status": "Not started" },
-    { "name": "AGED STOCK REPORT 6 AM", "status": "Not started" },
-    { "name": "Available inventory status in Prob-Res pots 3PM", "status": "Not started" },
-    { "name": "Available inventory status in Prob-Res pots 6AM", "status": "Not started" },
-    { "name": "EMPTY BIN CHECKS", "status": "Not started" },
-    { "name": "Internet returns", "status": "Not started" },
-    { "name": "Inventory Status (DATA STUDIO)", "status": "Not started" },
-    { "name": "LOCATIONS IN ERROR", "status": "Not started" },
-    { "name": "Manual Despatch Adjustment", "status": "Not started" },
-    { "name": "Manual location checks", "status": "Not started" },
-    { "name": "Mixing violations (multiple ISBN)", "status": "Not started" },
-    { "name": "MLC Tracker update", "status": "Not started" },
-    { "name": "Supplier Overs Report", "status": "Not started" },
-    { "name": "SIS afternoon report", "status": "Not started" },
-    { "name": "PI 1st count", "status": "Not started" },
-    { "name": "PI 2nd count", "status": "Not started" },
-    { "name": "PI assign", "status": "Not started" },
-    { "name": "PI Investigation", "status": "Not started" },
-    { "name": "PI Master file update (Cycle)", "status": "Not started" },
-    { "name": "POD", "status": "Not started" },
-    { "name": "PI set up", "status": "Not started" },
-    { "name": "SHRINKAGE RECONCILATION DAILY", "status": "Not started" },
-    { "name": "SLA update", "status": "Not started" },
-    { "name": "Stock left on RDTs check", "status": "Not started" }
+  ""dailyTasks"": [
+    {
+      ""name"": ""ADJUSTMENTS (Returns)"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""ADJUSTMENTS (Standard)"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Aged stock report 7AM"",
+      ""status"": ""Completed""
+    },
+    {
+      ""name"": ""Aged stock report 3PM"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Blackwells"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""AGED STOCK REPORT 6 AM"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Available inventory status in Prob-Res pots 3PM"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Available inventory status in Prob-Res pots 6AM"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""EMPTY BIN CHECKS"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Internet returns"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Inventory Status (DATA STUDIO)"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""LOCATIONS IN ERROR"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Manual Despatch Adjustment"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Manual location checks"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Mixing violations (multiple ISBN)"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""MLC Tracker update"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Supplier Overs Report"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""SIS afternoon report"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""PI 1st count"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""PI 2nd count"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""PI assign"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""PI Investigation"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""PI Master file update (Cycle)"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""POD"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""PI set up"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""SHRINKAGE RECONCILATION DAILY"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""SLA update"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""Stock left on RDTs check"",
+      ""status"": ""Not started""
+    }
   ],
-  "weeklyTasks": [
-    { "name": "(Weekly) SLA", "status": "Not started" },
-    { "name": "(Weekly) SIS report", "status": "Not started" },
-    { "name": "(Weekly) Shrinkage", "status": "Not started" },
-    { "name": "(Weekly) ORM", "status": "Not started" },
-    { "name": "(Tuesday) RP split pack", "status": "Not started" },
-    { "name": "(Thursday) RP split pack", "status": "Not started" },
-    { "name": "(Weekly) Price checker update", "status": "Not started" },
-    { "name": "(Weekly) AGED STOCK REPORT 12 PM Friday", "status": "Not started" },
-    { "name": "(once a month) Shrinkage for Period", "status": "Completed" },
-    { "name": "(Once a month) MLC on FM", "status": "Not started" },
-    { "name": "(Weekly) Shrinkage to Database", "status": "Not started" },
-    { "name": "(Weekly) Returns locations checks", "status": "Not started" }
+  ""weeklyTasks"": [
+    {
+      ""name"": ""(Weekly) SLA"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""(Weekly) SIS report"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""(Weekly) Shrinkage"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""(Weekly) ORM"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""(Tuesday) RP split pack"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""(Thursday) RP split pack"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""(Weekly) Price checker update"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""(Weekly) AGED STOCK REPORT 12 PM Friday"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""(once a month) Shrinkage for Period"",
+      ""status"": ""Completed""
+    },
+    {
+      ""name"": ""(Once a month) MLC on FM"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""(Weekly) Shrinkage to Database"",
+      ""status"": ""Not started""
+    },
+    {
+      ""name"": ""(Weekly) Returns locations checks"",
+      ""status"": ""Not started""
+    }
   ],
-  "history": [
-    { "week": "W46", "total": 0 },
-    { "week": "W47", "total": 0 },
-    { "week": "W48", "total": 0 },
-    { "week": "W49", "total": 0 },
-    { "week": "W50", "total": 0 },
-    { "week": "W51", "total": 0 },
-    { "week": "W52", "total": 0 },
-    { "week": "W01", "total": 0 },
-    { "week": "W02", "total": 0 }
+  ""history"": [
+    {
+      ""week"": ""127"",
+      ""total"": 5103
+    },
+    {
+      ""week"": ""38"",
+      ""total"": 6457
+    },
+    {
+      ""week"": ""15"",
+      ""total"": 7494
+    },
+    {
+      ""week"": ""0"",
+      ""total"": 6901
+    },
+    {
+      ""week"": ""0"",
+      ""total"": 5447
+    },
+    {
+      ""week"": ""45"",
+      ""total"": 4524
+    },
+    {
+      ""week"": ""221"",
+      ""total"": 2068
+    }
   ]
-}
+}"
